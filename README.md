@@ -1,75 +1,91 @@
-# React + TypeScript + Vite
+# 🧭 Campus Compass
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **An open-source digital campus guide built by students, for students.**
 
-Currently, two official plugins are available:
+Campus Compass aims to make navigating university campuses simple, intuitive, and accessible. Starting with **MIT Bengaluru**, the project provides an interactive campus map, building information, and location-aware features designed to help students and visitors explore the campus with confidence.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+This project is currently under active development.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Vision
 
-## Expanding the ESLint configuration
+Campus Compass is more than a map. It is a digital campus companion that helps students discover buildings, facilities, services, and eventually provides smart navigation, indoor maps, events, and other campus utilities.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## ✨ Planned Features
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Version 1
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* Interactive campus map
+* Building labels
+* Building search
+* Categories (Academic, Hostels, Food, Sports, Parking, etc.)
+* Mobile-friendly interface
+* User location (GPS)
 
-```
+### Version 2
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+* Detailed building profiles
+* Photos and descriptions
+* Departments and facilities
+* Accessibility information
+* Contact information
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Version 3
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* Walking navigation
+* Route planning
+* Turn-by-turn directions
 
-```
+### Future Ideas
+
+* Indoor maps
+* Event locations
+* Shuttle tracking
+* Emergency locations
+* Friend location sharing (opt-in)
+* Community contributions
+
+---
+
+## 🛠️ Tech Stack
+
+> To be finalized.
+
+Planned technologies include:
+
+* React
+* TypeScript
+* Vite
+* Tailwind CSS
+* MapLibre GL JS
+* FastAPI
+* PostgreSQL + PostGIS
+
+---
+
+## 🤝 Contributing
+
+Community contributions will be welcomed once the initial project foundation is complete.
+
+Documentation and contribution guidelines will be added in future updates.
+
+---
+
+## 📌 Project Status
+
+🚧 Early development
+
+The project is currently in the planning and design phase.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+Made with ❤️ by students, for students.
