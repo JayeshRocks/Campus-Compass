@@ -42,12 +42,12 @@ export default function MapView({
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
       style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-      center: [77.6101, 13.1189], // Center around MIT Bengaluru
-      zoom: 16,
+      center: [77.59218, 13.12341], // Center around MAHE Bengaluru
+      zoom: 16.5,
       dragRotate: false,
       maxBounds: [
-        [77.6000, 13.1120], // Southwest coordinates [lng, lat]
-        [77.6200, 13.1260]  // Northeast coordinates [lng, lat]
+        [77.5850, 13.1160], // Southwest coordinates [lng, lat]
+        [77.6000, 13.1300]  // Northeast coordinates [lng, lat]
       ],
     });
 
@@ -78,8 +78,8 @@ export default function MapView({
   const handleZoomOut = () => map?.zoomOut();
   const handleResetCompass = () => {
     map?.flyTo({
-      center: [77.6101, 13.1189],
-      zoom: 16,
+      center: [77.59218, 13.12341],
+      zoom: 16.5,
       bearing: 0,
       pitch: 0,
       duration: 1000,
@@ -109,7 +109,7 @@ export default function MapView({
       {map && (
         <>
           {/* Geolocation blue dot coordinates */}
-          <UserLocation map={map} latitude={13.1200} longitude={77.6090} />
+          <UserLocation map={map} latitude={13.1230} longitude={77.5910} />
 
           {/* Dynamically looped building markers */}
           {buildings.map((building) => (
