@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "./components/layout/Header";
 import Sidebar from "./components/sidebar/Sidebar";
 import MapView from "./components/map/MapView";
-import { type Building, type CategoryType, mockBuildings } from "./data/mockData";
+import { type Building, type CategoryType, buildings } from "./data/buildings";
 
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -13,7 +13,7 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Filter buildings dynamically based on category, search, and quick filters
-  const filteredBuildings = mockBuildings.filter((building) => {
+  const filteredBuildings = buildings.filter((building) => {
     // 1. Category Filter
     if (activeCategory !== "all" && building.category !== activeCategory) {
       return false;

@@ -1,5 +1,11 @@
-import { useState, useEffect } from "react";
-import type { Building, CategoryType } from "../../data/mockData";
+import { useEffect, useRef, useState } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import type { Building, CategoryType } from "../../data/buildings";
+import MapControls from "./MapControls";
+import UserLocation from "./UserLocation";
+import BuildingMarker from "./BuildingMarker";
+import BuildingPopup from "./BuildingPopup";
 
 interface MapViewProps {
   buildings: Building[];
@@ -17,7 +23,7 @@ const categoryChips = [
   { id: "labs", label: "Labs", icon: "science" },
 ] as const;
 
-function MapView({
+export default function MapView({
   buildings,
   selectedBuilding,
   onSelectBuilding,
@@ -25,124 +31,103 @@ function MapView({
   onCategoryChange,
   isSidebarOpen,
 }: MapViewProps) {
-  const [zoom, setZoom] = useState(1);
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const [isLocating, setIsLocating] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const [map, setMap] = useState<maplibregl.Map | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Handle Locate Me animation
-  const handleLocateMe = () => {
-    setIsLocating(true);
-    // Reset view center
-    setPanOffset({ x: 0, y: 0 });
-    setZoom(1.1);
-    setTimeout(() => {
-      setIsLocating(false);
-    }, 1500);
-  };
+  // Initialize MapLibre Map
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
 
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.1, 2));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.1, 0.5));
-  const resetCompass = () => {
-    setZoom(1);
-    setPanOffset({ x: 0, y: 0 });
-  };
+    const mapInstance = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+      center: [77.6101, 13.1189], // Center around MIT Bengaluru
+      zoom: 16,
+      dragRotate: false,
+    });
 
-  // Drag to pan behavior
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // Only pan on left click on the background canvas
-    if (e.button !== 0) return;
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
-  };
+    mapInstance.dragRotate.disable();
+    mapInstance.touchZoomRotate.disableRotation();
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    setPanOffset({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
+    mapInstance.on("load", () => {
+      setMap(mapInstance);
+      // Force trigger initial resize to fit the viewport properly
+      mapInstance.resize();
+    });
+
+    return () => {
+      mapInstance.remove();
+    };
+  }, []);
+
+  // Handle panel and sidebar resize events
+  useEffect(() => {
+    if (!map) return;
+    const timer = setTimeout(() => {
+      map.resize();
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [isSidebarOpen, selectedBuilding, map]);
+
+  const handleZoomIn = () => map?.zoomIn();
+  const handleZoomOut = () => map?.zoomOut();
+  const handleResetCompass = () => {
+    map?.flyTo({
+      center: [77.6101, 13.1189],
+      zoom: 16,
+      bearing: 0,
+      pitch: 0,
+      duration: 1000,
     });
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
+  const handleLocateMe = () => {
+    setToastMessage("Locate Me feature coming soon!");
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
-  useEffect(() => {
-    const handleMouseUpGlobal = () => setIsDragging(false);
-    window.addEventListener("mouseup", handleMouseUpGlobal);
-    return () => window.removeEventListener("mouseup", handleMouseUpGlobal);
-  }, []);
-
-  // Compute adaptive layout bounds
-  const chipsLeft = isSidebarOpen ? "md:left-[320px]" : "md:left-[24px]";
+  // Compute adaptive layout bounds for category chips
+  const chipsLeft = isSidebarOpen ? "md:left-[300px]" : "md:left-[24px]";
   const chipsRight = selectedBuilding ? "md:right-[400px]" : "md:right-[24px]";
 
   return (
-    <div
-      className="absolute inset-0 overflow-hidden cursor-grab active:cursor-grabbing select-none"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-    >
-      {/* Map Canvas (Base Layer with panning & zoom scale) */}
-      <div
-        className="absolute inset-0 map-bg z-0 transition-transform duration-100 ease-out"
-        style={{
-          transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
-          transformOrigin: "center center",
-        }}
-        data-location="MIT Bengaluru"
-      >
-        {/* Mock Map Features (buildings) */}
-        {buildings.map((building) => {
-          const isSelected = selectedBuilding?.id === building.id;
-          return (
-            <div
+    <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
+      {/* Live Map Canvas container */}
+      <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
+
+      {/* Render subcomponents when map instance is ready */}
+      {map && (
+        <>
+          {/* Geolocation blue dot coordinates */}
+          <UserLocation map={map} latitude={13.1200} longitude={77.6090} />
+
+          {/* Dynamically looped building markers */}
+          {buildings.map((building) => (
+            <BuildingMarker
               key={building.id}
-              onClick={(e) => {
-                e.stopPropagation(); // Avoid triggering background click
-                onSelectBuilding(building);
+              map={map}
+              building={building}
+              onClick={() => onSelectBuilding(building)}
+              isSelected={selectedBuilding?.id === building.id}
+            />
+          ))}
+
+          {/* Building detail Popups on Map */}
+          {selectedBuilding && (
+            <BuildingPopup
+              map={map}
+              building={selectedBuilding}
+              onClose={() => onSelectBuilding(null)}
+              onViewDetails={() => {
+                // Clicking "View Details" focus or handles slide card visibility
               }}
-              style={{ top: building.top, left: building.left }}
-              className={`absolute w-64 h-40 bg-surface-container-low/30 hover:bg-surface-container-high/40 cursor-pointer ghost-border rounded-xl flex flex-col items-center justify-center transform ${
-                building.rotation
-              } transition-all duration-200 p-4 text-center ${
-                isSelected
-                  ? "ring-2 ring-primary border-primary bg-surface-container-high/60 shadow-[0_0_20px_rgba(37,99,235,0.4)]"
-                  : ""
-              }`}
-            >
-              <span className="text-on-surface font-label-md text-label-md font-bold mb-2 block">
-                {building.name}
-              </span>
-              <p className="text-xs text-on-surface-variant line-clamp-2 mb-2 leading-tight">
-                {building.description}
-              </p>
-              <div className="flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${building.busyColor}`}></span>
-                <span className="text-[10px] font-label-sm text-on-surface-variant">
-                  {building.busyStatus}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+            />
+          )}
+        </>
+      )}
 
-        {/* User Location Marker */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-          <div
-            className={`absolute w-24 h-24 bg-primary/20 rounded-full ${
-              isLocating ? "animate-ping" : "animate-pulse"
-            }`}
-          ></div>
-          <div className="absolute w-12 h-12 bg-primary/30 rounded-full"></div>
-          <div className="relative w-4 h-4 bg-primary border-2 border-surface rounded-full shadow-[0_0_15px_rgba(37,99,235,0.8)]"></div>
-        </div>
-      </div>
-
-      {/* Filter Chips (Adaptive positioning below Header) */}
+      {/* Category Chips Layer */}
       <div
         className={`fixed top-[80px] left-4 right-4 ${chipsLeft} ${chipsRight} z-[80] flex gap-2 overflow-x-auto no-scrollbar py-2 px-4 pointer-events-auto transition-all duration-300`}
       >
@@ -165,6 +150,14 @@ function MapView({
         })}
       </div>
 
+      {/* Map Controls */}
+      <MapControls
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onResetCompass={handleResetCompass}
+        onLocateMe={handleLocateMe}
+      />
+
       {/* Slide-in Building Info Card */}
       <aside
         className={`fixed right-4 md:right-[24px] top-[140px] md:top-[88px] w-[calc(100vw-32px)] md:w-[360px] bg-surface-container-lowest/90 backdrop-blur-xl ghost-border rounded-2xl shadow-2xl z-[85] overflow-hidden flex flex-col transition-all duration-300 transform ${
@@ -173,7 +166,6 @@ function MapView({
       >
         {selectedBuilding && (
           <>
-            {/* Header Image */}
             <div className="h-48 w-full relative">
               <img
                 alt={selectedBuilding.name}
@@ -234,47 +226,13 @@ function MapView({
         )}
       </aside>
 
-      {/* Floating Map Controls */}
-      <div className="fixed bottom-[24px] right-[24px] z-[80] flex flex-col gap-3">
-        {/* Compass */}
-        <button
-          onClick={resetCompass}
-          className="w-12 h-12 glass-panel rounded-full shadow-lg ghost-border flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95"
-          title="Reset Map View"
-        >
-          <span className="material-symbols-outlined transform -rotate-45 text-primary">explore</span>
-        </button>
-        {/* Zoom Controls */}
-        <div className="glass-panel rounded-full shadow-lg ghost-border flex flex-col overflow-hidden">
-          <button
-            onClick={handleZoomIn}
-            className="w-12 h-12 flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors border-b border-outline-variant/30 cursor-pointer"
-          >
-            <span className="material-symbols-outlined">add</span>
-          </button>
-          <button
-            onClick={handleZoomOut}
-            className="w-12 h-12 flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined">remove</span>
-          </button>
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-[88px] left-1/2 transform -translate-x-1/2 bg-surface-bright/95 text-on-surface px-4 py-2 rounded-xl border border-outline-variant/30 shadow-2xl z-[120] text-sm font-body-md animate-fade-in flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary text-[18px]">info</span>
+          {toastMessage}
         </div>
-        {/* Locate Me */}
-        <button
-          onClick={handleLocateMe}
-          className="w-12 h-12 glass-panel rounded-full shadow-lg ghost-border flex items-center justify-center text-primary hover:bg-surface-container-high transition-colors shadow-[0_0_20px_rgba(37,99,235,0.2)] cursor-pointer active:scale-95"
-          title="Locate Me"
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            my_location
-          </span>
-        </button>
-      </div>
+      )}
     </div>
   );
 }
-
-export default MapView;
