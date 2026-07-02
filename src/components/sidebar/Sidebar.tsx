@@ -4,9 +4,6 @@ interface SidebarProps {
   isOpen: boolean;
   activeCategory: CategoryType;
   onCategoryChange: (category: CategoryType) => void;
-  activeFilters: string[];
-  onToggleFilter: (filter: string) => void;
-  onFocusSearch: () => void;
 }
 
 const categories = [
@@ -18,22 +15,10 @@ const categories = [
   { id: "admin", label: "Administration", icon: "admin_panel_settings" },
 ] as const;
 
-const quickFilterOptions = [
-  "Open Now",
-  "Air Conditioned",
-  "24/7",
-  "Accessible",
-  "Study Areas",
-  "Wi-Fi",
-];
-
 function Sidebar({
   isOpen,
   activeCategory,
   onCategoryChange,
-  activeFilters,
-  onToggleFilter,
-  onFocusSearch,
 }: SidebarProps) {
   return (
     <nav
@@ -41,44 +26,8 @@ function Sidebar({
         isOpen ? "translate-x-0 opacity-100" : "-translate-x-[110%] opacity-0 pointer-events-none"
       }`}
     >
-      {/* Top Shortcut Card */}
-      <div className="p-4 border-b border-slate-200 dark:border-outline-variant/20">
-        <div
-          onClick={onFocusSearch}
-          className="bg-white/70 border border-slate-200 dark:bg-surface-container-low/50 dark:border-outline-variant/30 rounded-xl p-3 flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-surface-container-high/50 transition-colors shadow-sm"
-        >
-          <div className="flex items-center gap-2 text-slate-500 dark:text-on-surface-variant">
-            <span className="material-symbols-outlined text-[20px]">search</span>
-            <span className="font-body-md text-sm">Search places...</span>
-          </div>
-          <span className="px-2 py-1 rounded bg-slate-50 border border-slate-200 dark:bg-surface-container-highest/50 dark:border-outline-variant/30 text-[10px] font-label-sm text-slate-500 dark:text-on-surface-variant shadow-sm">
-            Ctrl K
-          </span>
-        </div>
-      </div>
-
-      {/* Quick Filters */}
-      <div className="px-4 py-3 border-b border-slate-200 dark:border-outline-variant/20 flex flex-wrap gap-2">
-        {quickFilterOptions.map((filter) => {
-          const isActive = activeFilters.includes(filter);
-          return (
-            <button
-              key={filter}
-              onClick={() => onToggleFilter(filter)}
-              className={`px-3 py-1 rounded-full border text-xs font-label-md cursor-pointer transition-colors shadow-sm ${
-                isActive
-                  ? "bg-blue-600 text-white border-blue-700 shadow-sm"
-                  : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:bg-transparent dark:border-outline-variant/30 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50"
-              }`}
-            >
-              {filter}
-            </button>
-          );
-        })}
-      </div>
-
       {/* Scrollable Categories */}
-      <div className="flex-1 overflow-y-auto sidebar-scroll py-2 px-2">
+      <div className="flex-1 overflow-y-auto sidebar-scroll py-4 px-2">
         <div className="space-y-1">
           <h3 className="px-3 py-2 text-xs font-label-sm text-slate-500 dark:text-on-surface-variant uppercase tracking-wider">
             Categories
@@ -118,32 +67,6 @@ function Sidebar({
               </button>
             );
           })}
-        </div>
-
-        {/* Saved Places */}
-        <div className="mt-6 space-y-1">
-          <h3 className="px-3 py-2 text-xs font-label-sm text-slate-500 dark:text-on-surface-variant uppercase tracking-wider">
-            Saved Places
-          </h3>
-          <div className="px-3 py-4 border border-dashed border-slate-300 dark:border-outline-variant/30 rounded-lg text-center bg-white/50 dark:bg-surface-container-lowest/30 shadow-sm">
-            <span className="material-symbols-outlined text-slate-400 dark:text-on-surface-variant opacity-50 mb-1">
-              bookmark_border
-            </span>
-            <p className="font-body-md text-xs text-slate-500 dark:text-on-surface-variant">Coming Soon</p>
-          </div>
-        </div>
-
-        {/* Recent Searches */}
-        <div className="mt-6 space-y-1 mb-4">
-          <h3 className="px-3 py-2 text-xs font-label-sm text-slate-500 dark:text-on-surface-variant uppercase tracking-wider">
-            Recent Searches
-          </h3>
-          <div className="px-3 py-4 border border-dashed border-slate-300 dark:border-outline-variant/30 rounded-lg text-center bg-white/50 dark:bg-surface-container-lowest/30 shadow-sm">
-            <span className="material-symbols-outlined text-slate-400 dark:text-on-surface-variant opacity-50 mb-1">
-              history
-            </span>
-            <p className="font-body-md text-xs text-slate-500 dark:text-on-surface-variant">Coming Soon</p>
-          </div>
         </div>
       </div>
 

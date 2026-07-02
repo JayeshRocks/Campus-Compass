@@ -50,8 +50,8 @@ export default function MapView({
       zoom: 16.5,
       dragRotate: false,
       maxBounds: [
-        [77.5850, 13.1160], // Southwest coordinates [lng, lat]
-        [77.6000, 13.1300]  // Northeast coordinates [lng, lat]
+        [77.5800, 13.1120], // Southwest coordinates [lng, lat]
+        [77.6050, 13.1340]  // Northeast coordinates [lng, lat]
       ],
     });
 
@@ -69,7 +69,7 @@ export default function MapView({
     };
   }, []);
 
-  // Handle live theme style swap
+  // Handle live theme style swap & schematic image layer overlay
   useEffect(() => {
     if (!map) return;
     map.setStyle(
@@ -77,6 +77,36 @@ export default function MapView({
         ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
         : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
     );
+
+    const handleStyleLoad = () => {
+      if (!map.getSource("campus-schematic")) {
+        map.addSource("campus-schematic", {
+          type: "image",
+          url: "/schematic.jpg",
+          coordinates: [
+            [77.5875, 13.1265], // Top-Left: [lng, lat]
+            [77.5945, 13.1265], // Top-Right
+            [77.5945, 13.1170], // Bottom-Right
+            [77.5875, 13.1170]  // Bottom-Left
+          ]
+        });
+        
+        map.addLayer({
+          id: "campus-schematic-layer",
+          type: "raster",
+          source: "campus-schematic",
+          paint: {
+            "raster-opacity": 0.90
+          }
+        });
+      }
+    };
+
+    if (map.isStyleLoaded()) {
+      handleStyleLoad();
+    } else {
+      map.once("style.load", handleStyleLoad);
+    }
   }, [isDarkMode, map]);
 
   // Handle panel and sidebar resize events
@@ -152,7 +182,9 @@ export default function MapView({
 
       {/* Category Chips Layer */}
       <div
-        className={`fixed top-[80px] left-4 right-4 ${chipsLeft} ${chipsRight} z-[80] flex gap-2 overflow-x-auto no-scrollbar py-2 px-4 pointer-events-auto transition-all duration-300`}
+        className={`fixed top-[80px] left-4 right-4 ${chipsLeft} ${chipsRight} z-[80] flex gap-2 overflow-x-auto no-scrollbar py-2 px-4 pointer-events-auto transition-all duration-300 ${
+          isSidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
       >
         {categoryChips.map((chip) => {
           const isActive = activeCategory === chip.id;

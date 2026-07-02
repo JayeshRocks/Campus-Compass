@@ -13,11 +13,10 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Filter buildings dynamically based on category, search, and quick filters
+  // Filter buildings dynamically based on category and search
   const filteredBuildings = buildings.filter((building) => {
     // 1. Category Filter
     if (activeCategory !== "all" && building.category !== activeCategory) {
@@ -34,36 +33,6 @@ export default function App() {
       );
       if (!nameMatch && !descMatch && !featureMatch) {
         return false;
-      }
-    }
-
-    // 3. Quick Filters (Active list matching)
-    for (const filter of activeFilters) {
-      if (filter === "Open Now") {
-        if (!building.details.hours.toLowerCase().startsWith("open")) return false;
-      }
-      if (filter === "Air Conditioned") {
-        if (!building.details.features.includes("Air Conditioned")) return false;
-      }
-      if (filter === "24/7") {
-        if (
-          !building.details.features.includes("24/7") &&
-          !building.details.hours.includes("24/7")
-        ) {
-          return false;
-        }
-      }
-      if (filter === "Accessible") {
-        const isAcc =
-          building.details.features.includes("Accessible") ||
-          building.details.floors.toLowerCase().includes("accessible");
-        if (!isAcc) return false;
-      }
-      if (filter === "Study Areas") {
-        if (!building.details.features.includes("Study Areas")) return false;
-      }
-      if (filter === "Wi-Fi") {
-        if (!building.details.features.includes("Wi-Fi")) return false;
       }
     }
 
@@ -86,18 +55,6 @@ export default function App() {
     }
   }, [filteredBuildings, selectedBuilding]);
 
-  // Handle Ctrl+K focusing input in Header
-  const focusSearchInput = () => {
-    const searchInput = document.querySelector("header input") as HTMLInputElement | null;
-    searchInput?.focus();
-  };
-
-  const handleToggleFilter = (filter: string) => {
-    setActiveFilters((prev) =>
-      prev.includes(filter) ? prev.filter((f) => f !== filter) : [...prev, filter]
-    );
-  };
-
   return (
     <>
       <Header
@@ -115,9 +72,6 @@ export default function App() {
             isOpen={isSidebarOpen}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
-            activeFilters={activeFilters}
-            onToggleFilter={handleToggleFilter}
-            onFocusSearch={focusSearchInput}
           />
           <MapView
             buildings={filteredBuildings}
@@ -140,4 +94,3 @@ export default function App() {
     </>
   );
 }
-
