@@ -31,12 +31,12 @@ function Header({
   }, []);
 
   return (
-    <header className="fixed top-0 w-full h-[64px] bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 flex items-center justify-between px-gutter z-[100]">
+    <header className="fixed top-0 w-full h-[64px] bg-white/80 border-b border-slate-200 dark:bg-surface/80 backdrop-blur-md dark:border-b dark:border-outline-variant/20 flex items-center justify-between px-gutter z-[100]">
       {/* Left: Branding & Menu */}
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuToggle}
-          className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/50 transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center animate-fade-in"
+          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50 transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center animate-fade-in"
           title="Toggle Sidebar"
         >
           <span className="material-symbols-outlined">menu</span>
@@ -51,25 +51,25 @@ function Header({
             className="w-6 h-6 object-contain"
             src="https://lh3.googleusercontent.com/aida/AP1WRLs8WWVb6_a4ER09TSCJMmt6TtaWlZ5ghCWOIsUu7bQu_1fl5uL1NLerNr5KJciVtLgaiRoIczHdHo8M7Utca9-nFxw0bj672cB3ZRf7IFSaL-1SqBWzCUJx8FcYlODD6ryMMTcLGS20kh-R_g9n0AH9t744QLBnxfD4Z8WXYhco3Wqy2mpprm37QPd1Cmn2xrfcCWTH228JSTmgVCh9fIYqDZAxfGBOdjzs6vVaNtWFUQLeizDCpg_3GlM"
           />
-          <span className="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Campus Compass</span>
+          <span className="font-headline-md text-headline-md font-bold tracking-tight text-slate-900 dark:text-on-surface">Campus Compass</span>
         </div>
       </div>
 
       {/* Center: Search Bar */}
       <div className="hidden md:flex flex-1 max-w-[600px] mx-gutter relative items-center">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <span className="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+          <span className="material-symbols-outlined text-slate-500 dark:text-on-surface-variant text-[20px]">search</span>
         </div>
         <input
           ref={searchInputRef}
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="block w-full pl-12 pr-20 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-full text-on-surface placeholder-on-surface-variant font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner"
+          className="block w-full pl-12 pr-20 py-2 bg-slate-100/50 border border-slate-200 dark:bg-surface-container-high/50 dark:border-outline-variant/30 rounded-full text-slate-900 dark:text-on-surface placeholder-slate-500 dark:placeholder-on-surface-variant font-body-md text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-sm"
           placeholder="Search buildings, classrooms, facilities..."
         />
         <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-          <span className="px-2 py-0.5 rounded border border-outline-variant/30 bg-surface-container-highest/50 text-[10px] font-label-sm text-on-surface-variant select-none">
+          <span className="px-2 py-0.5 rounded border border-slate-200 bg-white/50 text-[10px] font-label-sm text-slate-500 dark:border-outline-variant/30 dark:bg-surface-container-highest/50 dark:text-on-surface-variant select-none shadow-sm">
             Ctrl + K
           </span>
         </div>
@@ -79,56 +79,56 @@ function Header({
       <div className="flex items-center gap-2">
         <button
           onClick={onThemeToggle}
-          className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/50 transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center"
+          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50 transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center"
           title="Toggle Light/Dark Theme"
         >
-          <span className="material-symbols-outlined">
+          <span className="material-symbols-outlined select-none">
             {isDarkMode ? "light_mode" : "dark_mode"}
           </span>
         </button>
         <div className="relative group">
           <button
-            className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/50 transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center"
+            className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50 transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center"
             title="More Options"
           >
-            <span className="material-symbols-outlined">more_vert</span>
+            <span className="material-symbols-outlined select-none">more_vert</span>
           </button>
-          <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-surface-bright/95 backdrop-blur-md border border-outline-variant/30 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] p-2">
+          <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-white/95 border border-slate-200 dark:bg-surface-bright/95 backdrop-blur-md dark:border-outline-variant/30 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] p-2">
             <button
               onClick={() => onNavigate("team")}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors text-on-surface text-left cursor-pointer"
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors text-slate-700 dark:text-on-surface text-left cursor-pointer"
             >
-              <span className="material-symbols-outlined text-primary">groups</span>
+              <span className="material-symbols-outlined text-blue-600 dark:text-primary">groups</span>
               <span className="font-body-md text-sm">Meet the Team</span>
             </button>
             <a
               href="https://github.com/JayeshRocks/Campus-Compass"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors text-on-surface"
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors text-slate-700 dark:text-on-surface"
             >
-              <span className="material-symbols-outlined text-primary">code</span>
+              <span className="material-symbols-outlined text-blue-600 dark:text-primary">code</span>
               <span className="font-body-md text-sm">GitHub Repository</span>
             </a>
             <button
               onClick={() => onNavigate("about")}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors text-on-surface text-left cursor-pointer"
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors text-slate-700 dark:text-on-surface text-left cursor-pointer"
             >
-              <span className="material-symbols-outlined text-primary">info</span>
+              <span className="material-symbols-outlined text-blue-600 dark:text-primary">info</span>
               <span className="font-body-md text-sm">About</span>
             </button>
             <button
               onClick={() => onNavigate("report-location")}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors text-on-surface text-left cursor-pointer"
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors text-slate-700 dark:text-on-surface text-left cursor-pointer"
             >
-              <span className="material-symbols-outlined text-primary">edit_location_alt</span>
+              <span className="material-symbols-outlined text-blue-600 dark:text-primary">edit_location_alt</span>
               <span className="font-body-md text-sm">Report Incorrect Location</span>
             </button>
             <button
               onClick={() => onNavigate("report-issue")}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors text-on-surface text-left cursor-pointer"
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors text-slate-700 dark:text-on-surface text-left cursor-pointer"
             >
-              <span className="material-symbols-outlined text-primary">report_problem</span>
+              <span className="material-symbols-outlined text-blue-600 dark:text-primary">report_problem</span>
               <span className="font-body-md text-sm">Report Issue</span>
             </button>
           </div>

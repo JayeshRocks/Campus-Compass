@@ -126,6 +126,7 @@ export default function App() {
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
             isSidebarOpen={isSidebarOpen}
+            isDarkMode={isDarkMode}
           />
         </main>
       ) : (
