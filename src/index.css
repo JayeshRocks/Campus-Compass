@@ -55,7 +55,10 @@
   --spacing-stack_gap_md: 1rem;
   --spacing-panel_padding: 1.5rem;
   --spacing-header_height: 64px;
-  --spacing-sidebar_width: 320px;
+  --spacing-sidebar_width: 280px;
+  --spacing-sidebar_width_collapsed: 64px;
+
+  --radius-2xl: 1rem;
 
   --font-body-lg: "Geist", sans-serif;
   --font-headline-md: "Geist", sans-serif;
@@ -89,9 +92,41 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
 }
+
+.map-bg {
+  background-color: #020617; /* Dark slate base for map */
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30, 41, 59, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 41, 59, 0.5) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+.ghost-border {
+  border: 1px solid rgba(30, 41, 59, 1); /* Slate 800 */
+}
+
+.glass-panel {
+  background-color: rgba(15, 23, 42, 0.85); /* Slate 900 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(67, 70, 85, 0.3);
+  border-radius: 4px;
+}
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(67, 70, 85, 0.5);
+}
+
 
 
