@@ -43,10 +43,20 @@ export default function MapView({
 
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: isDarkMode
-        ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-        : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-      center: [77.59218, 13.12341], // Center around MAHE Bengaluru
+      style: {
+        version: 8,
+        sources: {},
+        layers: [
+          {
+            id: "background",
+            type: "background",
+            paint: {
+              "background-color": isDarkMode ? "#020617" : "#f8fafc"
+            }
+          }
+        ]
+      },
+      center: [77.5910, 13.1217], // Center around the projected schematic canvas
       zoom: 16.5,
       dragRotate: false,
       maxBounds: [
@@ -59,6 +69,27 @@ export default function MapView({
     mapInstance.touchZoomRotate.disableRotation();
 
     mapInstance.on("load", () => {
+      // Add raster image source for schematic
+      mapInstance.addSource("campus-schematic", {
+        type: "image",
+        url: "/schematic.jpg",
+        coordinates: [
+          [77.5875, 13.1265], // Top-Left: [lng, lat]
+          [77.5945, 13.1265], // Top-Right
+          [77.5945, 13.1170], // Bottom-Right
+          [77.5875, 13.1170]  // Bottom-Left
+        ]
+      });
+      
+      mapInstance.addLayer({
+        id: "campus-schematic-layer",
+        type: "raster",
+        source: "campus-schematic",
+        paint: {
+          "raster-opacity": 0.95
+        }
+      });
+
       setMap(mapInstance);
       // Force trigger initial resize to fit the viewport properly
       mapInstance.resize();
@@ -69,44 +100,14 @@ export default function MapView({
     };
   }, []);
 
-  // Handle live theme style swap & schematic image layer overlay
+  // Handle live theme background color swaps
   useEffect(() => {
     if (!map) return;
-    map.setStyle(
-      isDarkMode
-        ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-        : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+    map.setPaintProperty(
+      "background",
+      "background-color",
+      isDarkMode ? "#020617" : "#f8fafc"
     );
-
-    const handleStyleLoad = () => {
-      if (!map.getSource("campus-schematic")) {
-        map.addSource("campus-schematic", {
-          type: "image",
-          url: "/schematic.jpg",
-          coordinates: [
-            [77.5875, 13.1265], // Top-Left: [lng, lat]
-            [77.5945, 13.1265], // Top-Right
-            [77.5945, 13.1170], // Bottom-Right
-            [77.5875, 13.1170]  // Bottom-Left
-          ]
-        });
-        
-        map.addLayer({
-          id: "campus-schematic-layer",
-          type: "raster",
-          source: "campus-schematic",
-          paint: {
-            "raster-opacity": 0.90
-          }
-        });
-      }
-    };
-
-    if (map.isStyleLoaded()) {
-      handleStyleLoad();
-    } else {
-      map.once("style.load", handleStyleLoad);
-    }
   }, [isDarkMode, map]);
 
   // Handle panel and sidebar resize events
