@@ -45,6 +45,10 @@ export default function MapView({
       center: [77.6101, 13.1189], // Center around MIT Bengaluru
       zoom: 16,
       dragRotate: false,
+      maxBounds: [
+        [77.6000, 13.1120], // Southwest coordinates [lng, lat]
+        [77.6200, 13.1260]  // Northeast coordinates [lng, lat]
+      ],
     });
 
     mapInstance.dragRotate.disable();
@@ -83,7 +87,12 @@ export default function MapView({
   };
 
   const handleLocateMe = () => {
-    setToastMessage("Locate Me feature coming soon!");
+    setToastMessage("Locate Me: Coming in Version 2!");
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleShowToast = (featureName: string, version: string = "2") => {
+    setToastMessage(`${featureName} coming in Version ${version}!`);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
@@ -212,13 +221,27 @@ export default function MapView({
                   </span>
                 </div>
               </div>
-              <div className="mt-auto pt-4 border-t border-outline-variant/20 flex gap-3">
-                <button className="flex-1 py-2.5 bg-primary text-on-primary font-label-md text-label-md font-semibold rounded-lg shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:bg-primary/90 transition-all flex items-center justify-center gap-2 cursor-pointer">
+              <div className="mt-auto pt-4 border-t border-outline-variant/20 flex gap-2">
+                <button
+                  onClick={() => handleShowToast("Directions", "2")}
+                  className="flex-1 py-2.5 bg-primary text-on-primary font-label-md text-label-md font-semibold rounded-lg shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:bg-primary/90 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
                   <span className="material-symbols-outlined text-[20px]">directions</span>
                   Directions
                 </button>
-                <button className="w-12 py-2.5 glass-panel text-on-surface font-label-md text-label-md rounded-lg ghost-border hover:bg-surface-container-high transition-colors flex items-center justify-center cursor-pointer">
+                <button
+                  onClick={() => handleShowToast("Bookmarks", "2")}
+                  className="w-12 py-2.5 glass-panel text-on-surface font-label-md text-label-md rounded-lg ghost-border hover:bg-surface-container-high transition-colors flex items-center justify-center cursor-pointer"
+                  title="Bookmark"
+                >
                   <span className="material-symbols-outlined text-[20px]">bookmark_border</span>
+                </button>
+                <button
+                  onClick={() => handleShowToast("Sharing", "2")}
+                  className="w-12 py-2.5 glass-panel text-on-surface font-label-md text-label-md rounded-lg ghost-border hover:bg-surface-container-high transition-colors flex items-center justify-center cursor-pointer"
+                  title="Share"
+                >
+                  <span className="material-symbols-outlined text-[20px]">share</span>
                 </button>
               </div>
             </div>

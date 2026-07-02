@@ -1,4 +1,4 @@
-import type { CategoryType } from "../../data/mockData";
+import type { CategoryType } from "../../data/buildings";
 
 interface SidebarProps {
   isOpen: boolean;

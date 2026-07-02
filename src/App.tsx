@@ -3,8 +3,13 @@ import Header from "./components/layout/Header";
 import Sidebar from "./components/sidebar/Sidebar";
 import MapView from "./components/map/MapView";
 import { type Building, type CategoryType, buildings } from "./data/buildings";
+import About from "./pages/About";
+import MeetTeam from "./pages/MeetTeam";
+import ReportIssue from "./pages/ReportIssue";
+import ReportLocation from "./pages/ReportLocation";
 
 export default function App() {
+  const [activePage, setActivePage] = useState<string>("map");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
@@ -101,25 +106,36 @@ export default function App() {
         onSearchChange={setSearchQuery}
         isDarkMode={isDarkMode}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
+        onNavigate={setActivePage}
       />
-      <main className="pt-[64px] relative h-[calc(100vh-64px)] w-full overflow-hidden">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-          activeFilters={activeFilters}
-          onToggleFilter={handleToggleFilter}
-          onFocusSearch={focusSearchInput}
-        />
-        <MapView
-          buildings={filteredBuildings}
-          selectedBuilding={selectedBuilding}
-          onSelectBuilding={setSelectedBuilding}
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-          isSidebarOpen={isSidebarOpen}
-        />
-      </main>
+      
+      {activePage === "map" ? (
+        <main className="pt-[64px] relative h-[calc(100vh-64px)] w-full overflow-hidden">
+          <Sidebar
+            isOpen={isSidebarOpen}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+            activeFilters={activeFilters}
+            onToggleFilter={handleToggleFilter}
+            onFocusSearch={focusSearchInput}
+          />
+          <MapView
+            buildings={filteredBuildings}
+            selectedBuilding={selectedBuilding}
+            onSelectBuilding={setSelectedBuilding}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+            isSidebarOpen={isSidebarOpen}
+          />
+        </main>
+      ) : (
+        <main className="pt-[64px] relative h-[calc(100vh-64px)] w-full overflow-hidden">
+          {activePage === "about" && <About />}
+          {activePage === "team" && <MeetTeam />}
+          {activePage === "report-issue" && <ReportIssue />}
+          {activePage === "report-location" && <ReportLocation />}
+        </main>
+      )}
     </>
   );
 }
