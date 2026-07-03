@@ -13,6 +13,8 @@ const categories = [
   { id: "sports", label: "Sports", icon: "sports_soccer" },
   { id: "labs", label: "Labs", icon: "science" },
   { id: "admin", label: "Administration", icon: "admin_panel_settings" },
+  { id: "parking", label: "Parking", icon: "local_parking" },
+  { id: "security", label: "Security & Gates", icon: "security" },
 ] as const;
 
 function Sidebar({
@@ -50,7 +52,7 @@ function Sidebar({
             return (
               <button
                 key={cat.id}
-                onClick={() => onCategoryChange(cat.id)}
+                onClick={() => onCategoryChange(cat.id as CategoryType)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 cursor-pointer ${
                   isActive
                     ? "bg-blue-100 text-blue-700 dark:bg-primary-container dark:text-on-primary-container"
@@ -71,14 +73,8 @@ function Sidebar({
       </div>
 
       {/* Bottom Footer Section */}
-      <div className="p-4 border-t border-slate-200 dark:border-outline-variant/20 bg-white/50 dark:bg-surface-container-lowest/50">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="font-label-sm text-xs text-slate-700 dark:text-on-surface">Campus Open</span>
-          </div>
-          <span className="font-label-sm text-[10px] text-slate-500 dark:text-on-surface-variant">v2.4.1</span>
-        </div>
+      <div className="p-4 border-t border-slate-200 dark:border-outline-variant/20 bg-white/50 dark:bg-surface-container-lowest/50 flex justify-center">
+        <span className="font-label-sm text-xs font-medium text-slate-500 dark:text-on-surface-variant tracking-widest uppercase">Version 1.0</span>
       </div>
     </nav>
   );

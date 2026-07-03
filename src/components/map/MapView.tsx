@@ -19,9 +19,13 @@ interface MapViewProps {
 
 const categoryChips = [
   { id: "academic", label: "Academic", icon: "school" },
-  { id: "food", label: "Food", icon: "restaurant" },
   { id: "hostels", label: "Hostels", icon: "bed" },
+  { id: "food", label: "Food", icon: "restaurant" },
+  { id: "sports", label: "Sports", icon: "sports_soccer" },
   { id: "labs", label: "Labs", icon: "science" },
+  { id: "admin", label: "Admin", icon: "admin_panel_settings" },
+  { id: "parking", label: "Parking", icon: "local_parking" },
+  { id: "security", label: "Security", icon: "security" },
 ] as const;
 
 export default function MapView({
@@ -36,6 +40,12 @@ export default function MapView({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  
+  const onSelectRef = useRef(onSelectBuilding);
+  useEffect(() => { onSelectRef.current = onSelectBuilding; }, [onSelectBuilding]);
+
+  const buildingsRef = useRef(buildings);
+  useEffect(() => { buildingsRef.current = buildings; }, [buildings]);
 
   // Initialize MapLibre Map
   useEffect(() => {
@@ -43,56 +53,102 @@ export default function MapView({
 
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: {
-        version: 8,
-        sources: {},
-        layers: [
-          {
-            id: "background",
-            type: "background",
-            paint: {
-              "background-color": isDarkMode ? "#020617" : "#f8fafc"
-            }
-          }
-        ]
-      },
-      center: [77.5910, 13.1217], // Center around the projected schematic canvas
-      zoom: 16.5,
+      style: isDarkMode 
+        ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+        : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+      center: [77.5898, 13.1264], // MAHE Bengaluru Center
+      zoom: 15.5,
       dragRotate: false,
-      maxBounds: [
-        [77.5800, 13.1120], // Southwest coordinates [lng, lat]
-        [77.6050, 13.1340]  // Northeast coordinates [lng, lat]
-      ],
     });
 
     mapInstance.dragRotate.disable();
     mapInstance.touchZoomRotate.disableRotation();
 
-    mapInstance.on("load", () => {
-      // Add raster image source for schematic
-      mapInstance.addSource("campus-schematic", {
-        type: "image",
-        url: "/schematic.jpg",
-        coordinates: [
-          [77.5875, 13.1265], // Top-Left: [lng, lat]
-          [77.5945, 13.1265], // Top-Right
-          [77.5945, 13.1170], // Bottom-Right
-          [77.5875, 13.1170]  // Bottom-Left
-        ]
-      });
-      
-      mapInstance.addLayer({
-        id: "campus-schematic-layer",
-        type: "raster",
-        source: "campus-schematic",
-        paint: {
-          "raster-opacity": 0.95
-        }
-      });
+    const addBuildingLayers = () => {
+      if (!mapInstance.getSource("campus-buildings")) {
+        const geojsonFeatures = buildingsRef.current.map(b => ({
+          type: "Feature",
+          properties: { id: b.id, name: b.name, category: b.category },
+          geometry: b.geometry
+        }));
 
+        mapInstance.addSource("campus-buildings", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: geojsonFeatures as any
+          }
+        });
+
+        mapInstance.addLayer({
+          id: "campus-buildings-fill",
+          type: "fill",
+          source: "campus-buildings",
+          paint: {
+            "fill-color": [
+              "match",
+              ["get", "category"],
+              "academic", "#06b6d4", // cyan
+              "hostels", "#f97316", // orange
+              "food", "#eab308",    // yellow
+              "sports", "#22c55e",  // green
+              "admin", "#ec4899",   // pink
+              "parking", "#ef4444", // red
+              "#94a3b8"
+            ],
+            "fill-opacity": 0.25
+          }
+        });
+
+        mapInstance.addLayer({
+          id: "campus-buildings-line",
+          type: "line",
+          source: "campus-buildings",
+          paint: {
+            "line-color": [
+              "match",
+              ["get", "category"],
+              "academic", "#0891b2",
+              "hostels", "#ea580c",
+              "food", "#ca8a04",
+              "sports", "#16a34a",
+              "admin", "#db2777",
+              "parking", "#dc2626",
+              "#64748b"
+            ],
+            "line-width": 1.5
+          }
+        });
+
+        // Click handler for polygons
+        mapInstance.on("click", "campus-buildings-fill", (e) => {
+          if (e.features && e.features[0]) {
+            const id = e.features[0].properties.id;
+            const b = buildingsRef.current.find(x => x.id === id);
+            if (b) onSelectRef.current(b);
+          }
+        });
+
+        // Pointer cursor
+        mapInstance.on("mouseenter", "campus-buildings-fill", () => {
+          mapInstance.getCanvas().style.cursor = "pointer";
+        });
+        mapInstance.on("mouseleave", "campus-buildings-fill", () => {
+          mapInstance.getCanvas().style.cursor = "";
+        });
+      }
+    };
+
+    mapInstance.on("load", () => {
+      addBuildingLayers();
       setMap(mapInstance);
-      // Force trigger initial resize to fit the viewport properly
       mapInstance.resize();
+    });
+
+    mapInstance.on("styledata", () => {
+      if (mapInstance.isStyleLoaded()) {
+        addBuildingLayers();
+      }
     });
 
     return () => {
@@ -100,15 +156,31 @@ export default function MapView({
     };
   }, []);
 
-  // Handle live theme background color swaps
+  // Handle live theme background color swaps by changing style completely
   useEffect(() => {
     if (!map) return;
-    map.setPaintProperty(
-      "background",
-      "background-color",
-      isDarkMode ? "#020617" : "#f8fafc"
-    );
+    const targetStyle = isDarkMode
+        ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+        : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+    map.setStyle(targetStyle);
   }, [isDarkMode, map]);
+
+  // Update GeoJSON when filtered buildings change
+  useEffect(() => {
+    if (!map) return;
+    const source = map.getSource("campus-buildings") as maplibregl.GeoJSONSource;
+    if (source) {
+      const geojsonFeatures = buildings.map(b => ({
+        type: "Feature",
+        properties: { id: b.id, name: b.name, category: b.category },
+        geometry: b.geometry
+      }));
+      source.setData({
+        type: "FeatureCollection",
+        features: geojsonFeatures as any
+      });
+    }
+  }, [buildings, map]);
 
   // Handle panel and sidebar resize events
   useEffect(() => {
@@ -123,8 +195,8 @@ export default function MapView({
   const handleZoomOut = () => map?.zoomOut();
   const handleResetCompass = () => {
     map?.flyTo({
-      center: [77.59218, 13.12341],
-      zoom: 16.5,
+      center: [77.5898, 13.1264],
+      zoom: 15.5,
       bearing: 0,
       pitch: 0,
       duration: 1000,
@@ -154,7 +226,7 @@ export default function MapView({
       {map && (
         <>
           {/* Geolocation blue dot coordinates */}
-          <UserLocation map={map} latitude={13.1230} longitude={77.5910} />
+          <UserLocation map={map} latitude={13.1264} longitude={77.5898} />
 
           {/* Dynamically looped building markers */}
           {buildings.map((building) => (
