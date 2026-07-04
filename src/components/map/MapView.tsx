@@ -40,7 +40,21 @@ export default function MapView({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
+  const watchIdRef = useRef<number | null>(null);
   
+  // Clean up location watch on unmount
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, []);
+
+  const selectedBuildingRef = useRef(selectedBuilding);
+  useEffect(() => { selectedBuildingRef.current = selectedBuilding; }, [selectedBuilding]);
+
   const onSelectRef = useRef(onSelectBuilding);
   useEffect(() => { onSelectRef.current = onSelectBuilding; }, [onSelectBuilding]);
 
@@ -120,6 +134,18 @@ export default function MapView({
           }
         });
 
+        mapInstance.addLayer({
+          id: "campus-buildings-highlight",
+          type: "line",
+          source: "campus-buildings",
+          filter: ["==", "id", selectedBuildingRef.current?.id || ""],
+          paint: {
+            "line-color": "#3b82f6", // Bright solid blue highlight
+            "line-width": 4,
+            "line-opacity": 0.9
+          }
+        });
+
         // Click handler for polygons
         mapInstance.on("click", "campus-buildings-fill", (e) => {
           if (e.features && e.features[0]) {
@@ -165,6 +191,14 @@ export default function MapView({
     map.setStyle(targetStyle);
   }, [isDarkMode, map]);
 
+  // Update Highlight filter when selection changes
+  useEffect(() => {
+    if (!map) return;
+    if (map.getStyle() && map.getLayer("campus-buildings-highlight")) {
+      map.setFilter("campus-buildings-highlight", ["==", "id", selectedBuilding?.id || ""]);
+    }
+  }, [selectedBuilding, map]);
+
   // Update GeoJSON when filtered buildings change
   useEffect(() => {
     if (!map) return;
@@ -204,8 +238,52 @@ export default function MapView({
   };
 
   const handleLocateMe = () => {
-    setToastMessage("Locate Me: Coming in Version 2!");
-    setTimeout(() => setToastMessage(null), 3000);
+    if (!("geolocation" in navigator)) {
+      setToastMessage("Geolocation is not supported by your browser.");
+      setTimeout(() => setToastMessage(null), 3000);
+      return;
+    }
+
+    // If we already have a watch active, just pan to the latest refined location
+    if (watchIdRef.current !== null && userLoc) {
+      map?.flyTo({
+        center: [userLoc.lng, userLoc.lat],
+        zoom: 17,
+        duration: 1000,
+      });
+      return;
+    }
+
+    setToastMessage("Acquiring GPS signal...");
+    let firstLock = true;
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setUserLoc({ lat, lng });
+        
+        // Only jump the camera on the very first location lock
+        if (firstLock) {
+          setToastMessage(null); // Clear loading toast
+          map?.flyTo({
+            center: [lng, lat],
+            zoom: 17,
+            duration: 1500,
+          });
+          firstLock = false;
+        }
+      },
+      () => {
+        setToastMessage("Unable to retrieve your location.");
+        setTimeout(() => setToastMessage(null), 3000);
+      },
+      { 
+        enableHighAccuracy: true, 
+        timeout: 10000, 
+        maximumAge: 0 // Force device to bypass cache and query hardware
+      }
+    );
   };
 
   const handleShowToast = (featureName: string, version: string = "2") => {
@@ -226,7 +304,9 @@ export default function MapView({
       {map && (
         <>
           {/* Geolocation blue dot coordinates */}
-          <UserLocation map={map} latitude={13.1264} longitude={77.5898} />
+          {userLoc && (
+            <UserLocation map={map} latitude={userLoc.lat} longitude={userLoc.lng} />
+          )}
 
           {/* Dynamically looped building markers */}
           {buildings.map((building) => (
