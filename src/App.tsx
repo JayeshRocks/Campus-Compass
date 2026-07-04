@@ -16,6 +16,7 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isSatellite, setIsSatellite] = useState(false);
   const [userRole, setUserRole] = useState<UserRole | null>(
   () => (localStorage.getItem("userRole") as UserRole | null)
 );
@@ -68,6 +69,8 @@ export default function App() {
         onSearchChange={setSearchQuery}
         isDarkMode={isDarkMode}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
+        isSatellite={isSatellite}
+        onSatelliteToggle={() => setIsSatellite(!isSatellite)}
         onNavigate={setActivePage}
       />
       
@@ -86,6 +89,7 @@ export default function App() {
             onCategoryChange={setActiveCategory}
             isSidebarOpen={isSidebarOpen}
             isDarkMode={isDarkMode}
+            isSatellite={isSatellite}
           />
         </main>
       ) : (
