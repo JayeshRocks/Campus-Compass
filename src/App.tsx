@@ -7,6 +7,7 @@ import About from "./pages/About";
 import MeetTeam from "./pages/MeetTeam";
 import ReportIssue from "./pages/ReportIssue";
 import ReportLocation from "./pages/ReportLocation";
+import RoleModal, { type UserRole } from "./components/RoleModal";
 
 export default function App() {
   const [activePage, setActivePage] = useState<string>("map");
@@ -15,6 +16,9 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [userRole, setUserRole] = useState<UserRole | null>(
+  () => (localStorage.getItem("userRole") as UserRole | null)
+);
 
   // Filter buildings dynamically based on category and search
   const filteredBuildings = buildings.filter((building) => {
@@ -57,6 +61,7 @@ export default function App() {
 
   return (
     <>
+    {!userRole && <RoleModal onSelectRole={setUserRole} />}
       <Header
         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         searchQuery={searchQuery}
