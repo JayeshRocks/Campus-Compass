@@ -6,6 +6,8 @@ interface HeaderProps {
   onSearchChange: (val: string) => void;
   isDarkMode: boolean;
   onThemeToggle: () => void;
+  isSatellite: boolean;
+  onSatelliteToggle: () => void;
   onNavigate: (page: string) => void;
 }
 
@@ -15,6 +17,8 @@ function Header({
   onSearchChange,
   isDarkMode,
   onThemeToggle,
+  isSatellite,
+  onSatelliteToggle,
   onNavigate,
 }: HeaderProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -77,6 +81,15 @@ function Header({
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2">
+        <button
+          onClick={onSatelliteToggle}
+          className={`glitch-btn relative p-2 overflow-hidden transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center border-2 border-transparent ${isSatellite ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.5)]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50'}`}
+          title="Toggle Satellite View"
+        >
+          <span className="material-symbols-outlined select-none relative z-10">
+            satellite_alt
+          </span>
+        </button>
         <button
           onClick={onThemeToggle}
           className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50 transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center"

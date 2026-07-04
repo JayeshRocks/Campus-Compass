@@ -15,6 +15,7 @@ interface MapViewProps {
   onCategoryChange: (c: CategoryType) => void;
   isSidebarOpen: boolean;
   isDarkMode: boolean;
+  isSatellite: boolean;
 }
 
 const categoryChips = [
@@ -36,6 +37,7 @@ export default function MapView({
   onCategoryChange,
   isSidebarOpen,
   isDarkMode,
+  isSatellite,
 }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
@@ -65,11 +67,25 @@ export default function MapView({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
+    const initialStyle = isSatellite ? {
+      version: 8,
+      sources: {
+        "esri-satellite": {
+          type: "raster",
+          tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+          tileSize: 256
+        }
+      },
+      layers: [
+        { id: "satellite-layer", type: "raster", source: "esri-satellite", minzoom: 0, maxzoom: 22 }
+      ]
+    } : (isDarkMode 
+      ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+      : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json");
+
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: isDarkMode 
-        ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-        : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+      style: initialStyle as any,
       center: [77.5898, 13.1264], // MAHE Bengaluru Center
       zoom: 15.5,
       dragRotate: false,
@@ -185,11 +201,36 @@ export default function MapView({
   // Handle live theme background color swaps by changing style completely
   useEffect(() => {
     if (!map) return;
-    const targetStyle = isDarkMode
-        ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-        : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+    let targetStyle: any = "";
+    if (isSatellite) {
+       targetStyle = {
+         version: 8,
+         sources: {
+           "esri-satellite": {
+             type: "raster",
+             tiles: [
+               "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+             ],
+             tileSize: 256
+           }
+         },
+         layers: [
+           {
+             id: "satellite-layer",
+             type: "raster",
+             source: "esri-satellite",
+             minzoom: 0,
+             maxzoom: 22
+           }
+         ]
+       };
+    } else {
+       targetStyle = isDarkMode
+         ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+         : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+    }
     map.setStyle(targetStyle);
-  }, [isDarkMode, map]);
+  }, [isDarkMode, isSatellite, map]);
 
   // Update Highlight filter when selection changes
   useEffect(() => {

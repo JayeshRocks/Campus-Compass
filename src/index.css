@@ -227,3 +227,59 @@ html.dark .campus-custom-popup .maplibregl-popup-close-button {
 html.dark .campus-custom-popup .maplibregl-popup-close-button:hover {
   background: rgba(67, 70, 85, 0.3) !important;
 }
+
+/* Glitch Tech Button */
+.glitch-btn {
+  position: relative;
+  overflow: visible;
+}
+.glitch-btn:hover {
+  animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+}
+.glitch-btn::before,
+.glitch-btn::after {
+  content: "satellite_alt";
+  font-family: "Material Symbols Outlined";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.glitch-btn:hover::before {
+  animation: glitch-anim-1 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+  color: #0ff;
+  z-index: -1;
+}
+.glitch-btn:hover::after {
+  animation: glitch-anim-2 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+  color: #f0f;
+  z-index: -2;
+}
+
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); }
+  20% { transform: skew(-10deg); }
+  40% { transform: skew(10deg); }
+  60% { transform: skew(-5deg); }
+  80% { transform: skew(5deg); }
+  100% { transform: skew(0deg); }
+}
+@keyframes glitch-anim-1 {
+  0% { clip-path: inset(20% 0 80% 0); transform: translate(-50%, -50%) translate(-2px, 1px); opacity: 1; }
+  20% { clip-path: inset(60% 0 10% 0); transform: translate(-50%, -50%) translate(2px, -1px); }
+  40% { clip-path: inset(40% 0 50% 0); transform: translate(-50%, -50%) translate(-2px, 2px); }
+  60% { clip-path: inset(80% 0 5% 0); transform: translate(-50%, -50%) translate(2px, -2px); }
+  80% { clip-path: inset(10% 0 70% 0); transform: translate(-50%, -50%) translate(-1px, 1px); }
+  100% { clip-path: inset(30% 0 50% 0); transform: translate(-50%, -50%) translate(1px, -1px); opacity: 1; }
+}
+@keyframes glitch-anim-2 {
+  0% { clip-path: inset(10% 0 60% 0); transform: translate(-50%, -50%) translate(2px, -1px); opacity: 1; }
+  20% { clip-path: inset(30% 0 20% 0); transform: translate(-50%, -50%) translate(-2px, 1px); }
+  40% { clip-path: inset(70% 0 10% 0); transform: translate(-50%, -50%) translate(2px, 2px); }
+  60% { clip-path: inset(20% 0 50% 0); transform: translate(-50%, -50%) translate(-2px, -2px); }
+  80% { clip-path: inset(50% 0 30% 0); transform: translate(-50%, -50%) translate(1px, 1px); }
+  100% { clip-path: inset(5% 0 80% 0); transform: translate(-50%, -50%) translate(-1px, -1px); opacity: 1; }
+}
