@@ -73,7 +73,8 @@ export default function MapView({
         "esri-satellite": {
           type: "raster",
           tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
-          tileSize: 256
+          tileSize: 256,
+          maxzoom: 19
         }
       },
       layers: [
@@ -211,7 +212,8 @@ export default function MapView({
              tiles: [
                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
              ],
-             tileSize: 256
+             tileSize: 256,
+             maxzoom: 19
            }
          },
          layers: [
