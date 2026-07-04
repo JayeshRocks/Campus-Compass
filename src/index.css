@@ -1,1 +1,229 @@
 @import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-on-secondary-fixed-variant: #38485d;
+  --color-inverse-surface: #e1e2ed;
+  --color-on-secondary-fixed: #0b1c30;
+  --color-surface-container-highest: #32343d;
+  --color-secondary-container: #3a4a5f;
+  --color-secondary: #b7c8e1;
+  --color-on-primary-fixed: #00174b;
+  --color-on-tertiary-fixed: #360f00;
+  --color-surface: #11131b;
+  --color-outline: #8d90a0;
+  --color-on-primary-container: #eeefff;
+  --color-primary-container: #2563eb;
+  --color-surface-dim: #11131b;
+  --color-inverse-on-surface: #2e3039;
+  --color-surface-container-lowest: #0c0e16;
+  --color-on-tertiary-container: #ffede6;
+  --color-on-error-container: #ffdad6;
+  --color-inverse-primary: #0053db;
+  --color-on-surface: #e1e2ed;
+  --color-background: #11131b;
+  --color-on-secondary-container: #a9bad3;
+  --color-outline-variant: #434655;
+  --color-tertiary-fixed: #ffdbcd;
+  --color-surface-container-high: #282a32;
+  --color-on-tertiary-fixed-variant: #7d2d00;
+  --color-primary-fixed-dim: #b4c5ff;
+  --color-on-secondary: #213145;
+  --color-tertiary-fixed-dim: #ffb596;
+  --color-surface-variant: #32343d;
+  --color-primary: #b4c5ff;
+  --color-surface-container: #1d1f27;
+  --color-on-error: #690005;
+  --color-tertiary-container: #bc4800;
+  --color-surface-bright: #373942;
+  --color-secondary-fixed-dim: #b7c8e1;
+  --color-error: #ffb4ab;
+  --color-tertiary: #ffb596;
+  --color-on-primary-fixed-variant: #003ea8;
+  --color-on-background: #e1e2ed;
+  --color-error-container: #93000a;
+  --color-secondary-fixed: #d3e4fe;
+  --color-on-surface-variant: #c3c6d7;
+  --color-surface-container-low: #191b23;
+  --color-primary-fixed: #dbe1ff;
+  --color-on-primary: #002a78;
+  --color-surface-tint: #b4c5ff;
+  --color-on-tertiary: #581e00;
+
+  --spacing-stack_gap_sm: 0.5rem;
+  --spacing-stack_gap_lg: 2rem;
+  --spacing-gutter: 24px;
+  --spacing-stack_gap_md: 1rem;
+  --spacing-panel_padding: 1.5rem;
+  --spacing-header_height: 64px;
+  --spacing-sidebar_width: 280px;
+  --spacing-sidebar_width_collapsed: 64px;
+
+  --radius-2xl: 1rem;
+
+  --font-body-lg: "Geist", sans-serif;
+  --font-headline-md: "Geist", sans-serif;
+  --font-headline-lg-mobile: "Geist", sans-serif;
+  --font-headline-lg: "Geist", sans-serif;
+  --font-label-md: "JetBrains Mono", monospace;
+  --font-body-md: "Geist", sans-serif;
+  --font-label-sm: "JetBrains Mono", monospace;
+  --font-display-lg: "Geist", sans-serif;
+
+  --font-size-body-lg: 18px;
+  --font-size-headline-md: 24px;
+  --font-size-headline-lg-mobile: 28px;
+  --font-size-headline-lg: 32px;
+  --font-size-label-md: 14px;
+  --font-size-body-md: 16px;
+  --font-size-label-sm: 12px;
+  --font-size-display-lg: 48px;
+}
+
+/* Light Mode (default) */
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a; /* slate-900 */
+  font-family: var(--font-body-md);
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.map-bg {
+  background-color: #f8fafc; /* Light slate base for map */
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+    linear-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+.ghost-border {
+  border: 1px solid rgba(226, 232, 240, 1); /* Slate 200 */
+}
+
+.glass-panel {
+  background-color: rgba(255, 255, 255, 0.85); /* White */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.5);
+}
+
+/* MapLibre custom popup style (Light default) */
+.campus-custom-popup .maplibregl-popup-content {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+  color: #0f172a !important;
+}
+.campus-custom-popup .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: rgba(255, 255, 255, 0.9) !important;
+}
+.campus-custom-popup .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: rgba(255, 255, 255, 0.9) !important;
+}
+.campus-custom-popup .maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: rgba(255, 255, 255, 0.9) !important;
+}
+.campus-custom-popup .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: rgba(255, 255, 255, 0.9) !important;
+}
+.campus-custom-popup .maplibregl-popup-close-button {
+  color: #64748b !important;
+  font-size: 18px !important;
+  padding: 6px 8px !important;
+  border-radius: 9999px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+.campus-custom-popup .maplibregl-popup-close-button:hover {
+  background: rgba(148, 163, 184, 0.1) !important;
+}
+
+/* Dark Mode Overrides */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #020617;
+  color: var(--color-on-surface);
+}
+
+html.dark .map-bg {
+  background-color: #020617; /* Dark slate base for map */
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30, 41, 59, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 41, 59, 0.5) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+html.dark .ghost-border {
+  border: 1px solid rgba(30, 41, 59, 1); /* Slate 800 */
+}
+
+html.dark .glass-panel {
+  background-color: rgba(15, 23, 42, 0.85); /* Slate 900 */
+  backdrop-filter: blur(16px);
+}
+
+html.dark .sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(67, 70, 85, 0.3);
+}
+html.dark .sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(67, 70, 85, 0.5);
+}
+
+/* MapLibre custom popup dark style override */
+html.dark .campus-custom-popup .maplibregl-popup-content {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(67, 70, 85, 0.3) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+  color: #e1e2ed !important;
+}
+html.dark .campus-custom-popup .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: rgba(15, 23, 42, 0.9) !important;
+}
+html.dark .campus-custom-popup .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: rgba(15, 23, 42, 0.9) !important;
+}
+html.dark .campus-custom-popup .maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: rgba(15, 23, 42, 0.9) !important;
+}
+html.dark .campus-custom-popup .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: rgba(15, 23, 42, 0.9) !important;
+}
+html.dark .campus-custom-popup .maplibregl-popup-close-button {
+  color: #a9bad3 !important;
+}
+html.dark .campus-custom-popup .maplibregl-popup-close-button:hover {
+  background: rgba(67, 70, 85, 0.3) !important;
+}
