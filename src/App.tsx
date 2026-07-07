@@ -3,8 +3,10 @@ import Header from "./components/layout/Header";
 import Sidebar from "./components/sidebar/Sidebar";
 import MapView from "./components/map/MapView";
 import { type Building, type CategoryType, buildings } from "./data/buildings";
+import Home from "./pages/Home";
 import About from "./pages/About";
 import MeetTeam from "./pages/MeetTeam";
+import CampusGuide from "./pages/CampusGuide";
 import ReportIssue from "./pages/ReportIssue";
 import ReportLocation from "./pages/ReportLocation";
 import RoleModal, { type UserRole } from "./components/RoleModal";
@@ -65,8 +67,6 @@ export default function App() {
     {!userRole && <RoleModal onSelectRole={setUserRole} />}
       <Header
         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
         isDarkMode={isDarkMode}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
         isSatellite={isSatellite}
@@ -90,11 +90,15 @@ export default function App() {
             isSidebarOpen={isSidebarOpen}
             isDarkMode={isDarkMode}
             isSatellite={isSatellite}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
         </main>
       ) : (
         <main className="pt-[64px] relative h-[calc(100vh-64px)] w-full overflow-hidden">
+          {activePage === "home" && <Home />}
           {activePage === "about" && <About />}
+          {activePage === "campus-guide" && <CampusGuide />}
           {activePage === "team" && <MeetTeam />}
           {activePage === "report-issue" && <ReportIssue />}
           {activePage === "report-location" && <ReportLocation />}

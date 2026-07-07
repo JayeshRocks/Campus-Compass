@@ -6,6 +6,7 @@ import MapControls from "./MapControls";
 import UserLocation from "./UserLocation";
 import BuildingMarker from "./BuildingMarker";
 import BuildingPopup from "./BuildingPopup";
+import ReportIssueForm from "./ReportIssueForm";
 
 interface MapViewProps {
   buildings: Building[];
@@ -16,6 +17,8 @@ interface MapViewProps {
   isSidebarOpen: boolean;
   isDarkMode: boolean;
   isSatellite: boolean;
+  searchQuery: string;
+  onSearchChange: (val: string) => void;
 }
 
 const categoryChips = [
@@ -38,11 +41,15 @@ export default function MapView({
   isSidebarOpen,
   isDarkMode,
   isSatellite,
+  searchQuery,
+  onSearchChange,
 }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
+  const [showReportIssue, setShowReportIssue] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   
   // Clean up location watch on unmount
@@ -280,20 +287,11 @@ export default function MapView({
     });
   };
 
-  const handleLocateMe = () => {
+  // Auto-request location on component mount
+  useEffect(() => {
     if (!("geolocation" in navigator)) {
       setToastMessage("Geolocation is not supported by your browser.");
       setTimeout(() => setToastMessage(null), 3000);
-      return;
-    }
-
-    // If we already have a watch active, just pan to the latest refined location
-    if (watchIdRef.current !== null && userLoc) {
-      map?.flyTo({
-        center: [userLoc.lng, userLoc.lat],
-        zoom: 17,
-        duration: 1000,
-      });
       return;
     }
 
@@ -307,9 +305,9 @@ export default function MapView({
         setUserLoc({ lat, lng });
         
         // Only jump the camera on the very first location lock
-        if (firstLock) {
+        if (firstLock && map) {
           setToastMessage(null); // Clear loading toast
-          map?.flyTo({
+          map.flyTo({
             center: [lng, lat],
             zoom: 17,
             duration: 1500,
@@ -327,7 +325,7 @@ export default function MapView({
         maximumAge: 0 // Force device to bypass cache and query hardware
       }
     );
-  };
+  }, [map]); // Dependency on map so it can flyTo when ready
 
   const handleShowToast = (featureName: string, version: string = "2") => {
     setToastMessage(`${featureName} coming in Version ${version}!`);
@@ -406,7 +404,7 @@ export default function MapView({
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onResetCompass={handleResetCompass}
-        onLocateMe={handleLocateMe}
+        onReportIssue={() => setShowReportIssue(true)}
       />
 
       {/* Slide-in Building Info Card */}
@@ -497,6 +495,28 @@ export default function MapView({
           <span className="material-symbols-outlined text-primary text-[18px]">info</span>
           {toastMessage}
         </div>
+      )}
+
+      {/* Floating Search Bar */}
+      <div className={`fixed top-[16px] left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-[90] transition-all duration-300 ${isSidebarOpen ? 'md:left-[calc(50%+150px)]' : ''}`}>
+        <div className="relative flex items-center">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <span className="material-symbols-outlined text-slate-500 dark:text-on-surface-variant text-[20px]">search</span>
+          </div>
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="block w-full pl-12 pr-12 py-3 bg-white/90 border border-slate-200 dark:bg-surface-container-lowest/90 dark:border-outline-variant/30 rounded-full text-slate-900 dark:text-on-surface placeholder-slate-500 dark:placeholder-on-surface-variant font-body-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all shadow-lg backdrop-blur-md"
+            placeholder="Search buildings, classrooms, facilities..."
+          />
+        </div>
+      </div>
+
+      {/* Report Issue Floating Modal */}
+      {showReportIssue && (
+        <ReportIssueForm onClose={() => setShowReportIssue(false)} />
       )}
     </div>
   );

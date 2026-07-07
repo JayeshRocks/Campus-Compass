@@ -2,14 +2,14 @@ interface MapControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetCompass: () => void;
-  onLocateMe: () => void;
+  onReportIssue: () => void;
 }
 
 export default function MapControls({
   onZoomIn,
   onZoomOut,
   onResetCompass,
-  onLocateMe,
+  onReportIssue,
 }: MapControlsProps) {
   return (
     <div className="fixed bottom-[24px] right-[24px] z-[80] flex flex-col gap-3">
@@ -38,17 +38,17 @@ export default function MapControls({
           <span className="material-symbols-outlined">remove</span>
         </button>
       </div>
-      {/* Locate Me */}
+      {/* Report Issue */}
       <button
-        onClick={onLocateMe}
-        className="w-12 h-12 glass-panel rounded-full shadow-lg ghost-border flex items-center justify-center text-primary hover:bg-surface-container-high transition-colors shadow-[0_0_20px_rgba(37,99,235,0.2)] cursor-pointer active:scale-95"
-        title="Locate Me"
+        onClick={onReportIssue}
+        className="w-12 h-12 glass-panel rounded-full shadow-lg ghost-border flex items-center justify-center text-red-500 hover:bg-surface-container-high transition-colors shadow-[0_0_20px_rgba(239,68,68,0.2)] cursor-pointer active:scale-95"
+        title="Report an Issue"
       >
         <span
           className="material-symbols-outlined"
           style={{ fontVariationSettings: "'FILL' 1" }}
         >
-          my_location
+          report_problem
         </span>
       </button>
     </div>

@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const Logo = ({ className = '', size = 24 }: { className?: string; size?: number | string }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 

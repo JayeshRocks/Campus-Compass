@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "name": "Team Member 1",
+    "role": "Role Placeholder",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com",
+    "linkedin": "https://linkedin.com",
+    "avatar": "/images/team/placeholder-1.jpg"
+  },
+  {
+    "id": "2",
+    "name": "Team Member 2",
+    "role": "Role Placeholder",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com",
+    "linkedin": "https://linkedin.com",
+    "avatar": "/images/team/placeholder-2.jpg"
+  },
+  {
+    "id": "3",
+    "name": "Team Member 3",
+    "role": "Role Placeholder",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com",
+    "linkedin": "https://linkedin.com",
+    "avatar": "/images/team/placeholder-3.jpg"
+  },
+  {
+    "id": "4",
+    "name": "Team Member 4",
+    "role": "Role Placeholder",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com",
+    "linkedin": "https://linkedin.com",
+    "avatar": "/images/team/placeholder-4.jpg"
+  },
+  {
+    "id": "5",
+    "name": "Team Member 5",
+    "role": "Role Placeholder",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com",
+    "linkedin": "https://linkedin.com",
+    "avatar": "/images/team/placeholder-5.jpg"
+  },
+  {
+    "id": "6",
+    "name": "Team Member 6",
+    "role": "Role Placeholder",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com",
+    "linkedin": "https://linkedin.com",
+    "avatar": "/images/team/placeholder-6.jpg"
+  }
+]
