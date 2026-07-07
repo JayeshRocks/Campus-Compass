@@ -1,4 +1,4 @@
-import { Logo } from "../components/ui/Logo";
+import { useEffect } from "react";
 import teamData from "../data/team.json";
 
 interface Contributor {
@@ -9,89 +9,205 @@ interface Contributor {
   github: string;
   linkedin: string;
   avatar: string;
+  batch: string;
+  batchTitle: string;
 }
 
 export default function MeetTeam() {
   const contributors = teamData as Contributor[];
 
+  // Group contributors by batch
+  const groupedContributors = contributors.reduce((acc, contributor) => {
+    if (!acc[contributor.batch]) {
+      acc[contributor.batch] = {
+        title: contributor.batchTitle,
+        members: [],
+      };
+    }
+    acc[contributor.batch].members.push(contributor);
+    return acc;
+  }, {} as Record<string, { title: string; members: Contributor[] }>);
+
+  // Sort batches descending (e.g. 2027, 2026...) or ascending. Let's do ascending for this context (2026, 2027)
+  const sortedBatches = Object.keys(groupedContributors).sort();
+
+  // We rely purely on CSS animations (fadeInUp) for entry to ensure smooth and glitch-free scrolling.
+  // IntersectionObserver was causing aggressive fading out when scrolling past sections.
+  useEffect(() => {
+    // No-op or handle anything else needed in the future
+  }, []);
+
   return (
-    <div className="min-h-[calc(100vh-64px)] w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
-      <div className="max-w-4xl mx-auto text-center mb-16 animate-fade-in">
-        <div className="flex justify-center mb-6">
-          <Logo className="w-16 h-16 text-blue-600 dark:text-blue-500" />
-        </div>
-        <span className="text-blue-600 dark:text-primary font-label-md text-label-md bg-blue-50 dark:bg-primary/10 px-4 py-1.5 rounded-full border border-blue-200 dark:border-primary/20 animate-fade-in">
+    <div className="h-full w-full bg-[#020617] text-on-surface p-6 md:p-12 overflow-y-auto">
+      <style>{`
+        .team-card {
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          position: relative;
+          overflow: hidden;
+        }
+        .team-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, #2563eb, transparent);
+          transform: scaleX(0);
+          transition: transform 0.4s ease;
+        }
+        .team-card:hover::before {
+          transform: scaleX(1);
+        }
+        .glow-overlay {
+          position: absolute;
+          top: -20%;
+          left: 50%;
+          width: 140%;
+          height: 100%;
+          background: radial-gradient(circle at center, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+          transform: translateX(-50%);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+          pointer-events: none;
+        }
+        .team-card:hover .glow-overlay {
+          opacity: 1;
+        }
+        .sticky-header {
+          position: sticky;
+          top: -1px; /* Sticks to the top of this scrolling container */
+          z-index: 50;
+          transition: all 0.3s ease;
+        }
+        .batch-section {
+          /* Handled by fadeInUp animation */
+        }
+      `}</style>
+
+      {/* Hero Section */}
+      <div className="max-w-4xl mx-auto w-full text-center mb-16 space-y-6 animate-fade-in pt-8">
+        <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-container/10 border border-primary-container/20 text-primary-container font-label-md text-label-md uppercase tracking-widest">
           The Minds Behind It
         </span>
-        <h2 className="font-headline-lg text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-on-surface mt-6 tracking-tight">
+        <h1 className="font-display-lg text-4xl md:text-5xl lg:text-[48px] font-bold text-on-surface">
           Meet the Team
-        </h2>
-        <p className="font-body-lg text-lg text-slate-600 dark:text-on-surface-variant mt-4 max-w-2xl mx-auto">
-          Campus Compass is built by students, for students. Meet the creative and technical forces who designed and engineered the platform.
+        </h1>
+        <p className="font-body-lg text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+          Built by students, for students. Meet the creative and technical forces who designed and engineered the platform, organized by their joining batches.
         </p>
       </div>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {contributors.map((member) => (
-          <div
-            key={member.id}
-            className="group relative bg-white dark:bg-surface-container-lowest/80 backdrop-blur-md border border-slate-200 dark:border-outline-variant/30 rounded-3xl p-8 flex flex-col items-center text-center shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+      {/* Batches */}
+      <div className="max-w-6xl mx-auto flex flex-col items-center pb-24">
+        {sortedBatches.map((batch, batchIndex) => (
+          <section
+            key={batch}
+            className="batch-section max-w-6xl w-full mb-20 relative"
+            style={{ animation: `fadeInUp 0.8s ease forwards ${batchIndex * 0.2}s`, opacity: 0, transform: "translateY(20px)" }}
           >
-            {/* Elegant Background Glow */}
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent dark:from-primary/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-            {/* Avatar */}
-            <div className="relative w-32 h-32 rounded-full mb-6 ring-4 ring-slate-50 dark:ring-surface group-hover:ring-blue-100 dark:group-hover:ring-primary/20 transition-all duration-300">
-              <img
-                src={member.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&size=256`}
-                alt={member.name}
-                className="w-full h-full object-cover rounded-full shadow-inner bg-slate-100 dark:bg-surface-container-high"
-                onError={(e) => {
-                  // Fallback if local image doesn't exist yet
-                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=0D8ABC&color=fff&size=256`;
-                }}
-              />
+            <div className="sticky-header py-6 bg-[#020617]/90 backdrop-blur-md border-b border-blue-500/40 mb-8 flex items-center justify-between">
+              <h2 className="font-headline-lg text-3xl font-bold text-blue-200 flex items-center gap-3 shadow-sm">
+                {batch === "2027" && <span className="material-symbols-outlined text-blue-400">history</span>}
+                {batch}
+              </h2>
+              <span className="font-label-md text-on-surface-variant">{groupedContributors[batch].title}</span>
             </div>
             
-            {/* Name & Role */}
-            <h3 className="font-bold text-2xl text-slate-900 dark:text-on-surface mb-2 relative z-10">{member.name}</h3>
-            <span className="font-medium text-sm text-blue-600 dark:text-primary bg-blue-50 dark:bg-primary/10 px-3 py-1 rounded-full border border-blue-200 dark:border-primary/20 mb-4 inline-block relative z-10">
-              {member.role}
-            </span>
-            
-            {/* Bio */}
-            <p className="font-body-md text-slate-600 dark:text-on-surface-variant flex-1 text-sm leading-relaxed mb-6 relative z-10">
-              {member.bio}
-            </p>
-            
-            {/* Social Links */}
-            <div className="flex items-center gap-3 w-full justify-center pt-6 border-t border-slate-100 dark:border-outline-variant/20 relative z-10">
-              {member.github && (
-                <a
-                  href={member.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white dark:bg-surface-container-high dark:text-on-surface-variant dark:hover:bg-primary dark:hover:text-on-primary transition-colors shadow-sm"
-                  title="GitHub Profile"
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-0">
+              {groupedContributors[batch].members.map((member, index) => (
+                <div
+                  key={member.id}
+                  className="team-card bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant/30 rounded-3xl flex flex-col items-center hover:shadow-2xl hover:-translate-y-2 group"
+                  style={{
+                    animation: `fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards ${index * 0.1 + 0.2}s`,
+                    opacity: 0,
+                    transform: "translateY(20px)",
+                  }}
                 >
-                  <span className="material-symbols-outlined text-[20px] block">code</span>
-                </a>
-              )}
-              {member.linkedin && (
-                <a
-                  href={member.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white dark:bg-surface-container-high dark:text-on-surface-variant dark:hover:bg-blue-500 dark:hover:text-white transition-colors shadow-sm"
-                  title="LinkedIn Profile"
-                >
-                  <span className="material-symbols-outlined text-[20px] block">work</span>
-                </a>
-              )}
+                  <div className="glow-overlay"></div>
+                  <div className="p-8 pb-6 flex flex-col items-center text-center">
+                    <div className="relative mb-6">
+                      <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl group-hover:bg-primary/30 transition-colors"></div>
+                      <div className="w-32 h-32 rounded-full ring-4 ring-primary-container p-1 bg-surface-container relative z-10 overflow-hidden">
+                        <img
+                          src={member.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=2563eb&color=fff&size=256`}
+                          alt={member.name}
+                          className="w-full h-full object-cover rounded-full"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=2563eb&color=fff&size=256`;
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-2xl text-on-surface mb-2 relative z-10">{member.name}</h3>
+                    <span className="bg-primary/10 text-primary-container font-label-sm text-xs px-4 py-1.5 rounded-full mb-4 relative z-10 tracking-wide font-medium">
+                      {member.role}
+                    </span>
+                    <p className="font-body-md text-on-surface-variant leading-relaxed text-sm mb-6 flex-1 relative z-10">
+                      {member.bio}
+                    </p>
+                  </div>
+                  
+                  <div className="w-full mt-auto border-t border-outline-variant/30 p-4 flex justify-center gap-6 relative z-10 bg-surface-container-lowest/50">
+                    {member.github && (
+                      <a
+                        href={member.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 group/link"
+                      >
+                        <span className="material-symbols-outlined text-[20px] group-hover/link:scale-110 transition-transform">
+                          {member.github.includes("dribbble") ? "palette" : member.github.includes("kaggle") ? "analytics" : "terminal"}
+                        </span>
+                        <span className="font-label-sm text-xs font-medium">
+                          {member.github.includes("dribbble") ? "Dribbble" : member.github.includes("kaggle") ? "Kaggle" : "GitHub"}
+                        </span>
+                      </a>
+                    )}
+                    {member.linkedin && (
+                      <a
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 group/link"
+                      >
+                        <span className="material-symbols-outlined text-[20px] group-hover/link:scale-110 transition-transform">hub</span>
+                        <span className="font-label-sm text-xs font-medium">LinkedIn</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
         ))}
+
+        {/* Call to Action */}
+        <div className="mt-12 p-12 bg-surface-container-high/30 rounded-3xl border border-outline-variant/20 max-w-4xl w-full text-center relative overflow-hidden animate-fade-in">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-container/10 blur-[80px] rounded-full -mr-32 -mt-32 pointer-events-none" />
+          <h2 className="font-headline-lg text-3xl font-bold text-on-surface mb-4 relative z-10">Want to join the mission?</h2>
+          <p className="font-body-md text-on-surface-variant mb-8 relative z-10">
+            We're always looking for talented MIT Bengaluru students to help expand our navigation ecosystem.
+          </p>
+          <button className="bg-primary-container text-on-primary-container font-headline-md text-lg px-8 py-3.5 rounded-xl hover:shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:brightness-110 active:scale-95 transition-all relative z-10 font-medium">
+            Apply for Internship
+          </button>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
