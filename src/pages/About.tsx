@@ -1,8 +1,13 @@
+import { Logo } from "../components/ui/Logo";
+
 export default function About() {
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12 animate-fade-in">
+          <div className="flex justify-center mb-6">
+            <Logo className="w-16 h-16 text-blue-600 dark:text-blue-500" />
+          </div>
           <span className="text-blue-600 dark:text-primary font-label-md text-label-md bg-blue-50 dark:bg-primary/10 px-3 py-1 rounded-full border border-blue-200 dark:border-primary/20">
             About Campus Compass
           </span>
