@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Logo } from "../ui/Logo";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -50,11 +51,7 @@ function Header({
           className="flex items-center gap-2 cursor-pointer select-none active:opacity-90 transition-opacity"
           title="Campus Compass Home"
         >
-          <img
-            alt="Logo"
-            className="w-6 h-6 object-contain"
-            src="https://lh3.googleusercontent.com/aida/AP1WRLs8WWVb6_a4ER09TSCJMmt6TtaWlZ5ghCWOIsUu7bQu_1fl5uL1NLerNr5KJciVtLgaiRoIczHdHo8M7Utca9-nFxw0bj672cB3ZRf7IFSaL-1SqBWzCUJx8FcYlODD6ryMMTcLGS20kh-R_g9n0AH9t744QLBnxfD4Z8WXYhco3Wqy2mpprm37QPd1Cmn2xrfcCWTH228JSTmgVCh9fIYqDZAxfGBOdjzs6vVaNtWFUQLeizDCpg_3GlM"
-          />
+          <Logo className="w-8 h-8 text-blue-600 dark:text-blue-500" />
           <span className="font-headline-md text-headline-md font-bold tracking-tight text-slate-900 dark:text-on-surface">Campus Compass</span>
         </div>
       </div>
