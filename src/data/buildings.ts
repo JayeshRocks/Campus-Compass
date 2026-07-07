@@ -2268,8 +2268,8 @@ export const buildings: Building[] = [
     }
   },
   {
-    "id": "melon_mess",
-    "name": "Melon Mess",
+    "id": "blue_dove_mess",
+    "name": "Blue Dove Mess",
     "shortName": "Melon",
     "category": "food",
     "description": "Dining mess hall for students.",
