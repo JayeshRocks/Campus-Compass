@@ -1,6 +1,6 @@
 export default function CampusGuide() {
   return (
-    <div className="min-h-[calc(100vh-64px)] w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
+    <div className="h-full w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
       <div className="max-w-6xl mx-auto space-y-16">
         {/* Campus Contacts Section */}
         <section className="animate-fade-in">

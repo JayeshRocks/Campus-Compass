@@ -17,7 +17,7 @@ const TABS = [
   { id: "map", label: "Map", icon: "map" },
   { id: "campus-guide", label: "Resources", icon: "inventory_2" },
   { id: "team", label: "Team", icon: "groups" },
-  { id: "about", label: "About Us", icon: "info" },
+  { id: "about", label: "About", icon: "info" },
 ];
 
 export default function Header({
@@ -65,21 +65,21 @@ export default function Header({
     <>
       <header className="fixed top-0 w-full h-[64px] bg-white/80 dark:bg-surface/70 backdrop-blur-xl border-b border-slate-200 dark:border-outline-variant/20 shadow-sm flex items-center justify-between px-gutter z-[100]">
         {/* Left: Branding & Menu */}
-        <div className="flex items-center gap-4 min-w-[240px]">
+        <div className="flex items-center gap-2 md:gap-4 min-w-0 md:min-w-[240px]">
           <button
             onClick={onMenuToggle}
-            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant`}
+            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant flex-shrink-0`}
           >
             <span className="material-symbols-outlined transition-transform group-hover:rotate-180" style={{ fontVariationSettings: "'FILL' 0" }}>menu</span>
           </button>
           <div
             onClick={() => onNavigate("map")}
-            className="flex items-center gap-2.5 cursor-pointer group"
+            className="flex items-center gap-2.5 cursor-pointer group min-w-0"
           >
-            <div className="w-9 h-9 rounded-xl bg-blue-600 dark:bg-primary-container flex items-center justify-center text-white dark:text-on-primary-container shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 dark:bg-primary-container flex items-center justify-center text-white dark:text-on-primary-container shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
               <Logo size={20} className="text-white dark:text-on-primary-container" />
             </div>
-            <h1 className="font-headline-md text-[20px] font-bold text-slate-900 dark:text-on-surface hidden lg:block tracking-tight">Campus Compass</h1>
+            <h1 className="font-headline-md text-[20px] font-bold text-slate-900 dark:text-on-surface hidden lg:block tracking-tight truncate">Campus Compass</h1>
           </div>
         </div>
 
@@ -130,7 +130,7 @@ export default function Header({
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3 min-w-[120px] justify-end">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0 md:min-w-[120px] justify-end">
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             disabled={activePage !== "map"}

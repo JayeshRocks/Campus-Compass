@@ -10,7 +10,7 @@ export default function MapControls({
   onResetCompass,
 }: MapControlsProps) {
   return (
-    <div className="fixed bottom-[24px] right-[24px] z-[80] flex flex-col gap-3">
+    <div className="fixed bottom-[100px] md:bottom-[24px] right-[24px] z-[80] flex flex-col gap-3 transition-all duration-300">
       {/* Compass */}
       <button
         onClick={onResetCompass}

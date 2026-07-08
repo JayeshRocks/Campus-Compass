@@ -3,6 +3,7 @@ import type { CategoryType } from "../../data/buildings";
 
 interface SidebarProps {
   isOpen: boolean;
+  onClose?: () => void;
   activeCategory: CategoryType;
   onCategoryChange: (category: CategoryType) => void;
 }
@@ -19,8 +20,9 @@ const ALL_CATEGORIES = [
   { id: "security", label: "Security & Gates", icon: "security" },
 ] as const;
 
-function Sidebar({
+export default function Sidebar({
   isOpen,
+  onClose,
   activeCategory,
   onCategoryChange,
 }: SidebarProps) {
@@ -44,18 +46,24 @@ function Sidebar({
   }, [activeCategory, isOpen]);
 
   return (
-    <nav
-      className={`fixed left-4 top-[80px] h-[calc(100vh-96px)] w-sidebar_width bg-white/80 dark:bg-surface/70 backdrop-blur-xl border border-slate-200 dark:border-outline-variant/20 rounded-2xl flex flex-col z-[90] shadow-2xl transition-all duration-300 overflow-hidden ${
-        isOpen ? "translate-x-0 opacity-100" : "-translate-x-[110%] opacity-0 pointer-events-none"
-      }`}
-    >
+    <>
+      {/* Mobile Backdrop */}
+      <div 
+        className={`md:hidden fixed top-[64px] inset-x-0 bottom-0 bg-slate-900/20 dark:bg-black/40 backdrop-blur-sm z-[90] transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        onClick={onClose}
+      />
+      
+      <nav
+        className={`fixed left-0 md:left-4 top-[64px] md:top-[80px] h-[calc(100vh-64px)] md:h-[calc(100vh-96px)] w-[85vw] max-w-[320px] md:w-sidebar_width bg-white/95 dark:bg-surface/95 md:bg-white/80 md:dark:bg-surface/70 backdrop-blur-2xl border-r md:border border-slate-200 dark:border-outline-variant/20 md:rounded-2xl flex flex-col z-[95] shadow-2xl transition-transform duration-300 overflow-hidden ${
+          isOpen ? "translate-x-0" : "-translate-x-full md:-translate-x-[110%] pointer-events-none"
+        }`}
+      >
       {/* Scrollable Categories */}
       <div className="flex-1 overflow-y-auto sidebar-scroll py-4 px-2">
         <div className="space-y-1 relative">
           <h3 className="px-3 py-2 text-xs font-label-sm text-slate-500 dark:text-on-surface-variant uppercase tracking-wider relative z-10">
             Categories
           </h3>
-
           {/* Active Frosted Glass Indicator */}
           <div 
             className="absolute left-0 right-0 bg-white dark:bg-white/10 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-lg shadow-sm transition-all duration-300 ease-out z-0"
@@ -94,7 +102,7 @@ function Sidebar({
         <span className="font-label-sm text-[9px] text-slate-400 dark:text-on-surface-variant/50 text-center">Made by students for students</span>
       </div>
     </nav>
+    </>
   );
 }
 
-export default Sidebar;
