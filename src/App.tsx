@@ -6,22 +6,32 @@ import { type Building, type CategoryType, buildings } from "./data/buildings";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import MeetTeam from "./pages/MeetTeam";
-import CampusGuide from "./pages/CampusGuide";
 import ReportIssue from "./pages/ReportIssue";
 import ReportLocation from "./pages/ReportLocation";
 import RoleModal, { type UserRole } from "./components/RoleModal";
+import CampusGuide from "./pages/CampusGuide";
 
 export default function App() {
   const [activePage, setActivePage] = useState<string>("map");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem("isSidebarOpen");
+    return saved ? JSON.parse(saved) : true;
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
+    null,
+  );
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isSatellite, setIsSatellite] = useState(false);
+  const [isSatellite, setIsSatellite] = useState(true);
   const [userRole, setUserRole] = useState<UserRole | null>(
-  () => (localStorage.getItem("userRole") as UserRole | null)
-);
+    () => localStorage.getItem("userRole") as UserRole | null,
+  );
+
+  // Sync sidebar state
+  useEffect(() => {
+    localStorage.setItem("isSidebarOpen", JSON.stringify(isSidebarOpen));
+  }, [isSidebarOpen]);
 
   // Filter buildings dynamically based on category and search
   const filteredBuildings = buildings.filter((building) => {
@@ -36,7 +46,7 @@ export default function App() {
       const nameMatch = building.name.toLowerCase().includes(query);
       const descMatch = building.description.toLowerCase().includes(query);
       const featureMatch = building.details.features.some((f) =>
-        f.toLowerCase().includes(query)
+        f.toLowerCase().includes(query),
       );
       if (!nameMatch && !descMatch && !featureMatch) {
         return false;
@@ -57,25 +67,33 @@ export default function App() {
 
   // If the selected building is filtered out, deselect it
   useEffect(() => {
-    if (selectedBuilding && !filteredBuildings.some((b) => b.id === selectedBuilding.id)) {
+    if (
+      selectedBuilding &&
+      !filteredBuildings.some((b) => b.id === selectedBuilding.id)
+    ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedBuilding(null);
     }
   }, [filteredBuildings, selectedBuilding]);
 
   return (
     <>
-    {!userRole && <RoleModal onSelectRole={setUserRole} />}
+      {!userRole && <RoleModal onSelectRole={setUserRole} />}
       <Header
+        activePage={activePage}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         isDarkMode={isDarkMode}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
         isSatellite={isSatellite}
         onSatelliteToggle={() => setIsSatellite(!isSatellite)}
         onNavigate={setActivePage}
+        isSidebarOpen={isSidebarOpen}
       />
-      
+
       {activePage === "map" ? (
-        <main className="pt-[64px] relative h-[calc(100vh-64px)] w-full overflow-hidden">
+        <main className="pt-[64px] relative h-[100vh] w-full overflow-hidden">
           <Sidebar
             isOpen={isSidebarOpen}
             activeCategory={activeCategory}
@@ -90,12 +108,10 @@ export default function App() {
             isSidebarOpen={isSidebarOpen}
             isDarkMode={isDarkMode}
             isSatellite={isSatellite}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
           />
         </main>
       ) : (
-        <main className="pt-[64px] relative h-[calc(100vh-64px)] w-full overflow-hidden">
+        <main className="pt-[64px] relative h-[100vh] w-full overflow-hidden">
           {activePage === "home" && <Home />}
           {activePage === "about" && <About />}
           {activePage === "campus-guide" && <CampusGuide />}

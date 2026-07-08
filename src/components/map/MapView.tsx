@@ -4,6 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Building, CategoryType } from "../../data/buildings";
 import MapControls from "./MapControls";
 import UserLocation from "./UserLocation";
+import FeedbackButton from "./FeedbackButton";
 import BuildingMarker from "./BuildingMarker";
 import BuildingPopup from "./BuildingPopup";
 import ReportIssueForm from "./ReportIssueForm";
@@ -17,8 +18,6 @@ interface MapViewProps {
   isSidebarOpen: boolean;
   isDarkMode: boolean;
   isSatellite: boolean;
-  searchQuery: string;
-  onSearchChange: (val: string) => void;
 }
 
 const categoryChips = [
@@ -41,11 +40,8 @@ export default function MapView({
   isSidebarOpen,
   isDarkMode,
   isSatellite,
-  searchQuery,
-  onSearchChange,
 }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
@@ -93,6 +89,7 @@ export default function MapView({
 
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       style: initialStyle as any,
       center: [77.5898, 13.1264], // MAHE Bengaluru Center
       zoom: 15.5,
@@ -114,6 +111,7 @@ export default function MapView({
           type: "geojson",
           data: {
             type: "FeatureCollection",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             features: geojsonFeatures as any
           }
         });
@@ -204,41 +202,41 @@ export default function MapView({
     return () => {
       mapInstance.remove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle live theme background color swaps by changing style completely
   useEffect(() => {
     if (!map) return;
-    let targetStyle: any = "";
-    if (isSatellite) {
-       targetStyle = {
-         version: 8,
-         sources: {
-           "esri-satellite": {
-             type: "raster",
-             tiles: [
-               "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-             ],
-             tileSize: 256,
-             maxzoom: 19
-           }
-         },
-         layers: [
-           {
-             id: "satellite-layer",
-             type: "raster",
-             source: "esri-satellite",
-             minzoom: 0,
-             maxzoom: 22
-           }
-         ]
-       };
-    } else {
-       targetStyle = isDarkMode
-         ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-         : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
-    }
-    map.setStyle(targetStyle);
+    const targetStyle = isSatellite
+      ? {
+          version: 8,
+          sources: {
+            "esri-satellite": {
+              type: "raster",
+              tiles: [
+                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              ],
+              tileSize: 256,
+              maxzoom: 19
+            }
+          },
+          layers: [
+            {
+              id: "satellite-layer",
+              type: "raster",
+              source: "esri-satellite",
+              minzoom: 0,
+              maxzoom: 22
+            }
+          ]
+        }
+      : isDarkMode
+        ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+        : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    map.setStyle(targetStyle as any);
   }, [isDarkMode, isSatellite, map]);
 
   // Update Highlight filter when selection changes
@@ -261,6 +259,7 @@ export default function MapView({
       }));
       source.setData({
         type: "FeatureCollection",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         features: geojsonFeatures as any
       });
     }
@@ -290,6 +289,7 @@ export default function MapView({
   // Auto-request location on component mount
   useEffect(() => {
     if (!("geolocation" in navigator)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setToastMessage("Geolocation is not supported by your browser.");
       setTimeout(() => setToastMessage(null), 3000);
       return;
@@ -404,8 +404,10 @@ export default function MapView({
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onResetCompass={handleResetCompass}
-        onReportIssue={() => setShowReportIssue(true)}
       />
+      
+      {/* Feedback Button Component */}
+      <FeedbackButton onClick={() => setShowReportIssue(true)} />
 
       {/* Slide-in Building Info Card */}
       <aside
@@ -497,22 +499,6 @@ export default function MapView({
         </div>
       )}
 
-      {/* Floating Search Bar */}
-      <div className={`fixed top-[16px] left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-[90] transition-all duration-300 ${isSidebarOpen ? 'md:left-[calc(50%+150px)]' : ''}`}>
-        <div className="relative flex items-center">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <span className="material-symbols-outlined text-slate-500 dark:text-on-surface-variant text-[20px]">search</span>
-          </div>
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-12 pr-12 py-3 bg-white/90 border border-slate-200 dark:bg-surface-container-lowest/90 dark:border-outline-variant/30 rounded-full text-slate-900 dark:text-on-surface placeholder-slate-500 dark:placeholder-on-surface-variant font-body-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all shadow-lg backdrop-blur-md"
-            placeholder="Search buildings, classrooms, facilities..."
-          />
-        </div>
-      </div>
 
       {/* Report Issue Floating Modal */}
       {showReportIssue && (

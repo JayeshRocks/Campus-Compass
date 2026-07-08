@@ -1,6 +1,10 @@
+import { useState, useRef, useEffect } from "react";
 import { Logo } from "../ui/Logo";
 
 interface HeaderProps {
+  activePage: string;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
   onMenuToggle: () => void;
   isDarkMode: boolean;
   onThemeToggle: () => void;
@@ -9,77 +13,183 @@ interface HeaderProps {
   onNavigate: (page: string) => void;
 }
 
-function Header({
+const TABS = [
+  { id: "map", label: "Map", icon: "map" },
+  { id: "campus-guide", label: "Resources", icon: "inventory_2" },
+  { id: "team", label: "Team", icon: "groups" },
+  { id: "about", label: "About Us", icon: "info" },
+];
+
+export default function Header({
+  activePage,
+  searchQuery,
+  onSearchChange,
   onMenuToggle,
   isDarkMode,
   onThemeToggle,
   isSatellite,
   onSatelliteToggle,
   onNavigate,
-}: HeaderProps) {
+  isSidebarOpen,
+}: HeaderProps & { isSidebarOpen?: boolean }) {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 0 });
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);  useEffect(() => {
+    // Set timeout ensures layout is painted and offsets are accurate
+    const timer = setTimeout(() => {
+      const activeIndex = TABS.findIndex((t) => t.id === activePage);
+      const activeTab = tabsRef.current[activeIndex];
+      if (activeTab) {
+        setIndicatorStyle({
+          left: activeTab.offsetLeft,
+          width: activeTab.offsetWidth,
+        });
+      } else {
+        setIndicatorStyle({ left: -100, width: 0 }); // Hide if off-tab
+      }
+    }, 10);
+    return () => clearTimeout(timer);
+  }, [activePage]);
+
+  // If search query is typed, automatically open the search bar
+  useEffect(() => {
+    if (searchQuery && !isSearchOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsSearchOpen(true);
+    }
+  }, [searchQuery, isSearchOpen]);
+
+  const glassyButtonClass = "p-2 rounded-full border border-slate-200/60 dark:border-white/10 bg-white/40 dark:bg-white/5 backdrop-blur-md shadow-sm transition-all hover:bg-white/80 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md cursor-pointer active:scale-95 flex items-center justify-center group";
+
   return (
-    <header className="fixed top-0 w-full h-[64px] bg-white/80 border-b border-slate-200 dark:bg-surface/80 backdrop-blur-md dark:border-b dark:border-outline-variant/20 flex items-center justify-between px-gutter z-[100]">
-      {/* Left: Branding & Menu */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onMenuToggle}
-          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50 transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center animate-fade-in"
-          title="Toggle Sidebar"
-        >
-          <span className="material-symbols-outlined">menu</span>
-        </button>
-        <div
-          onClick={() => onNavigate("map")}
-          className="flex items-center gap-2 cursor-pointer select-none active:opacity-90 transition-opacity"
-          title="Campus Compass Home"
-        >
-          <Logo className="w-8 h-8 text-blue-600 dark:text-blue-500" />
-          <span className="font-headline-md text-headline-md font-bold tracking-tight text-slate-900 dark:text-on-surface">Campus Compass</span>
-        </div>
-      </div>
-
-      {/* Center: Navigation Links */}
-      <div className="hidden md:flex flex-1 mx-gutter items-center justify-center gap-6">
-        {[
-          { id: "home", label: "Home" },
-          { id: "map", label: "Map" },
-          { id: "campus-guide", label: "Campus Guide" },
-          { id: "team", label: "Meet the Team" },
-        ].map((item) => (
+    <>
+      <header className="fixed top-0 w-full h-[64px] bg-white/80 dark:bg-surface/70 backdrop-blur-xl border-b border-slate-200 dark:border-outline-variant/20 shadow-sm flex items-center justify-between px-gutter z-[100]">
+        {/* Left: Branding & Menu */}
+        <div className="flex items-center gap-4 min-w-[240px]">
           <button
-            key={item.id}
-            onClick={() => onNavigate(item.id)}
-            className="font-label-md text-slate-600 hover:text-blue-600 dark:text-on-surface-variant dark:hover:text-primary transition-colors cursor-pointer relative group"
+            onClick={onMenuToggle}
+            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant`}
           >
-            {item.label}
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 dark:bg-primary transition-all group-hover:w-full"></span>
+            <span className="material-symbols-outlined transition-transform group-hover:rotate-180" style={{ fontVariationSettings: "'FILL' 0" }}>menu</span>
           </button>
-        ))}
-      </div>
+          <div
+            onClick={() => onNavigate("map")}
+            className="flex items-center gap-2.5 cursor-pointer group"
+          >
+            <div className="w-9 h-9 rounded-xl bg-blue-600 dark:bg-primary-container flex items-center justify-center text-white dark:text-on-primary-container shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+              <Logo size={20} className="text-white dark:text-on-primary-container" />
+            </div>
+            <h1 className="font-headline-md text-[20px] font-bold text-slate-900 dark:text-on-surface hidden lg:block tracking-tight">Campus Compass</h1>
+          </div>
+        </div>
 
-      {/* Right: Actions */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onSatelliteToggle}
-          className={`glitch-btn relative p-2 overflow-hidden transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center border-2 border-transparent ${isSatellite ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.5)]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50'}`}
-          title="Toggle Satellite View"
-        >
-          <span className="material-symbols-outlined select-none relative z-10">
-            satellite_alt
-          </span>
-        </button>
-        <button
-          onClick={onThemeToggle}
-          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50 transition-colors rounded-full cursor-pointer active:scale-95 flex items-center justify-center"
-          title="Toggle Light/Dark Theme"
-        >
-          <span className="material-symbols-outlined select-none">
-            {isDarkMode ? "light_mode" : "dark_mode"}
-          </span>
-        </button>
-      </div>
-    </header>
+        {/* Center: Navigation Tabs */}
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 justify-center px-4">
+          <nav className="bg-slate-100/50 dark:bg-surface-container-low/50 backdrop-blur-md p-1 rounded-full border border-slate-200 dark:border-white/10 flex items-center gap-1 relative overflow-hidden" onMouseLeave={() => {
+            const activeIndex = TABS.findIndex((t) => t.id === activePage);
+            const activeTab = tabsRef.current[activeIndex];
+            if (activeTab) {
+              setIndicatorStyle({
+                left: activeTab.offsetLeft,
+                width: activeTab.offsetWidth,
+              });
+            } else {
+              setIndicatorStyle({ left: -100, width: 0 }); // Hide if off-tab
+            }
+          }}>
+            {/* Animated Indicator */}
+            <div 
+              className="absolute h-9 bg-blue-100 dark:bg-surface-container-high/80 backdrop-blur-md rounded-full shadow-sm transition-all duration-300 ease-out z-0"
+              style={{ 
+                left: `${indicatorStyle.left}px`, 
+                width: `${indicatorStyle.width}px`,
+                opacity: indicatorStyle.width > 0 ? 1 : 0
+              }}
+            />
+            {TABS.map((tab, index) => {
+              const isActive = activePage === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  ref={(el) => { tabsRef.current[index] = el; }}
+                  onClick={() => onNavigate(tab.id)}
+                  onMouseEnter={(e) => {
+                    setIndicatorStyle({
+                      left: e.currentTarget.offsetLeft,
+                      width: e.currentTarget.offsetWidth,
+                    });
+                  }}
+                  className="relative z-10 px-5 py-2 mx-1 flex items-center gap-2.5 rounded-full transition-all cursor-pointer active:scale-95 group"
+                >
+                  <span className={`material-symbols-outlined text-[18px] transition-transform ${isActive ? "text-blue-600 dark:text-primary" : "text-slate-500 dark:text-on-surface-variant group-hover:text-blue-600 dark:group-hover:text-primary"}`} style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>{tab.icon}</span>
+                  <span className={`font-label-md text-[13px] tracking-wide transition-colors ${isActive ? "text-slate-900 dark:text-on-surface font-semibold" : "text-slate-500 dark:text-on-surface-variant group-hover:text-slate-900 dark:group-hover:text-on-surface font-medium"}`}>{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-3 min-w-[120px] justify-end">
+          <button
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            disabled={activePage !== "map"}
+            className={`${glassyButtonClass} ${
+              activePage !== "map"
+                ? "opacity-40 cursor-not-allowed text-slate-400 dark:text-on-surface-variant/40"
+                : isSearchOpen
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.2)] border-blue-200 dark:border-blue-500/30"
+                  : "text-slate-600 dark:text-on-surface-variant hover:text-blue-600 dark:hover:text-primary"
+            }`}
+          >
+            <span className={`material-symbols-outlined transition-transform ${activePage === "map" ? "group-hover:scale-110" : ""}`} style={{ fontVariationSettings: "'FILL' 0" }}>search</span>
+          </button>
+          
+          <button
+            onClick={onThemeToggle}
+            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant hover:text-blue-600 dark:hover:text-primary`}
+          >
+            <span className="material-symbols-outlined group-hover:rotate-12 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>
+              {isDarkMode ? "light_mode" : "dark_mode"}
+            </span>
+          </button>
+
+          <button
+            onClick={onSatelliteToggle}
+            className={`glitch-btn relative overflow-hidden ${glassyButtonClass} ${isSatellite ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-500 dark:text-cyan-400 dark:border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:bg-cyan-500/20' : 'text-slate-600 dark:text-on-surface-variant hover:border-blue-500/50 dark:hover:border-primary/50'}`}
+            data-icon="satellite_alt"
+          >
+            <span className={`material-symbols-outlined text-[20px] transition-colors ${isSatellite ? '' : 'group-hover:text-blue-600 dark:group-hover:text-primary'}`} style={{ fontVariationSettings: "'FILL' 1" }}>satellite_alt</span>
+            <div className="absolute inset-0 bg-blue-500/5 dark:bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </button>
+        </div>
+      </header>
+
+      {/* Floating Glassmorphism Search Bar */}
+      {isSearchOpen && activePage === "map" && (
+        <div className={`fixed top-[80px] left-1/2 -translate-x-1/2 z-[85] w-full max-w-lg px-4 animate-slide-down transition-all duration-300 ${isSidebarOpen ? "md:ml-[140px]" : ""}`}>
+          <div className="bg-white/90 dark:bg-surface-container-highest/90 backdrop-blur-2xl border border-slate-200 dark:border-outline-variant/40 rounded-2xl shadow-2xl p-2.5 flex items-center gap-3 transition-shadow hover:shadow-blue-500/10 dark:hover:shadow-primary/10 ring-1 ring-slate-900/5 dark:ring-white/5">
+            <span className="material-symbols-outlined text-slate-400 dark:text-on-surface-variant ml-2">search</span>
+            <input
+              type="text"
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search buildings, rooms, resources..."
+              className="flex-1 bg-transparent border-none outline-none text-slate-900 dark:text-on-surface font-body-md placeholder:text-slate-400 dark:placeholder:text-on-surface-variant/50"
+            />
+            <button
+              onClick={() => {
+                setIsSearchOpen(false);
+                if (!searchQuery) onSearchChange("");
+              }}
+              className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-on-surface-variant transition-colors"
+            >
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
-
-export default Header;

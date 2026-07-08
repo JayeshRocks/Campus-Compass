@@ -26,16 +26,16 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
         setStatus("idle");
         onClose();
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Supabase Error:", err);
       setStatus("error");
-      setErrorMessage(err.message || "Failed to submit feedback.");
+      setErrorMessage(err instanceof Error ? err.message : "Failed to submit feedback.");
       setTimeout(() => setStatus("idle"), 3000);
     }
   };
 
   return (
-    <div className="absolute inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
       <div className="w-full max-w-4xl bg-white dark:bg-surface border border-slate-200 dark:border-outline-variant/30 rounded-3xl shadow-2xl overflow-hidden relative animate-fade-in flex flex-col md:flex-row">
         
         {/* Decorative Background for light/dark */}

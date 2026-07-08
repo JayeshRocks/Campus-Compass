@@ -38,7 +38,7 @@ export default function MeetTeam() {
   }, []);
 
   return (
-    <div className="h-full w-full bg-[#020617] text-on-surface p-6 md:p-12 overflow-y-auto">
+    <div className="h-full w-full bg-[#020617] text-on-surface px-6 md:px-12 pb-6 md:pb-12 overflow-y-auto relative">
       <style>{`
         .team-card {
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -86,7 +86,7 @@ export default function MeetTeam() {
       `}</style>
 
       {/* Hero Section */}
-      <div className="max-w-4xl mx-auto w-full text-center mb-16 space-y-6 animate-fade-in pt-8">
+      <div className="max-w-4xl mx-auto w-full text-center mb-16 space-y-6 animate-fade-in pt-14 md:pt-20">
         <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-container/10 border border-primary-container/20 text-primary-container font-label-md text-label-md uppercase tracking-widest">
           The Minds Behind It
         </span>

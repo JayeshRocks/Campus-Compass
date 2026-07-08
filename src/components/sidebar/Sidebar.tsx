@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 import type { CategoryType } from "../../data/buildings";
 
 interface SidebarProps {
@@ -6,7 +7,8 @@ interface SidebarProps {
   onCategoryChange: (category: CategoryType) => void;
 }
 
-const categories = [
+const ALL_CATEGORIES = [
+  { id: "all", label: "All Places", icon: "explore" },
   { id: "academic", label: "Academic Buildings", icon: "business" },
   { id: "hostels", label: "Hostels", icon: "apartment" },
   { id: "food", label: "Food & Cafeteria", icon: "restaurant" },
@@ -22,50 +24,64 @@ function Sidebar({
   activeCategory,
   onCategoryChange,
 }: SidebarProps) {
+  const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0, opacity: 0 });
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const activeIndex = ALL_CATEGORIES.findIndex((cat) => cat.id === activeCategory);
+      const activeTab = tabsRef.current[activeIndex];
+      if (activeTab) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setIndicatorStyle({
+          top: activeTab.offsetTop,
+          height: activeTab.offsetHeight,
+          opacity: 1,
+        });
+      }
+    }, 10);
+    return () => clearTimeout(timer);
+  }, [activeCategory, isOpen]);
+
   return (
     <nav
-      className={`fixed left-4 top-[80px] h-[calc(100vh-96px)] w-sidebar_width bg-[#f1f5f9]/90 dark:bg-[#0F172A]/90 backdrop-blur-xl border border-slate-200 dark:border-outline-variant/20 rounded-2xl flex flex-col z-[90] shadow-2xl transition-all duration-300 overflow-hidden ${
+      className={`fixed left-4 top-[80px] h-[calc(100vh-96px)] w-sidebar_width bg-white/80 dark:bg-surface/70 backdrop-blur-xl border border-slate-200 dark:border-outline-variant/20 rounded-2xl flex flex-col z-[90] shadow-2xl transition-all duration-300 overflow-hidden ${
         isOpen ? "translate-x-0 opacity-100" : "-translate-x-[110%] opacity-0 pointer-events-none"
       }`}
     >
       {/* Scrollable Categories */}
       <div className="flex-1 overflow-y-auto sidebar-scroll py-4 px-2">
-        <div className="space-y-1">
-          <h3 className="px-3 py-2 text-xs font-label-sm text-slate-500 dark:text-on-surface-variant uppercase tracking-wider">
+        <div className="space-y-1 relative">
+          <h3 className="px-3 py-2 text-xs font-label-sm text-slate-500 dark:text-on-surface-variant uppercase tracking-wider relative z-10">
             Categories
           </h3>
-          {/* Add an "All Categories" option */}
-          <button
-            onClick={() => onCategoryChange("all")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 cursor-pointer ${
-              activeCategory === "all"
-                ? "bg-blue-100 text-blue-700 dark:bg-primary-container dark:text-on-primary-container"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50"
-            }`}
-          >
-            <span className="material-symbols-outlined text-[20px]">explore</span>
-            <span className="font-label-md text-sm">All Places</span>
-          </button>
 
-          {categories.map((cat) => {
+          {/* Active Frosted Glass Indicator */}
+          <div 
+            className="absolute left-0 right-0 bg-white dark:bg-white/10 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-lg shadow-sm transition-all duration-300 ease-out z-0"
+            style={{ top: indicatorStyle.top, height: indicatorStyle.height, opacity: indicatorStyle.opacity }}
+          />
+
+          {ALL_CATEGORIES.map((cat, index) => {
             const isActive = activeCategory === cat.id;
             return (
               <button
                 key={cat.id}
+                ref={(el) => { tabsRef.current[index] = el; }}
                 onClick={() => onCategoryChange(cat.id as CategoryType)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 cursor-pointer ${
-                  isActive
-                    ? "bg-blue-100 text-blue-700 dark:bg-primary-container dark:text-on-primary-container"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-on-surface-variant dark:hover:text-on-surface dark:hover:bg-surface-container-high/50"
+                className={`relative z-10 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group active:scale-95 ${
+                  isActive ? "" : "hover:bg-slate-200/50 dark:hover:bg-white/5"
                 }`}
               >
                 <span
-                  className="material-symbols-outlined text-[20px]"
-                  style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                  className={`material-symbols-outlined text-[20px] transition-transform ${isActive ? "text-blue-600 dark:text-primary" : "text-slate-500 dark:text-on-surface-variant group-hover:text-blue-600 dark:group-hover:text-primary"}`}
+                  style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
                 >
                   {cat.icon}
                 </span>
-                <span className="font-label-md text-sm">{cat.label}</span>
+                <span className={`font-label-md text-sm tracking-wide transition-colors ${isActive ? "text-slate-900 dark:text-on-surface font-semibold" : "text-slate-500 dark:text-on-surface-variant group-hover:text-slate-900 dark:group-hover:text-on-surface font-medium"}`}>
+                  {cat.label}
+                </span>
               </button>
             );
           })}
@@ -73,8 +89,9 @@ function Sidebar({
       </div>
 
       {/* Bottom Footer Section */}
-      <div className="p-4 border-t border-slate-200 dark:border-outline-variant/20 bg-white/50 dark:bg-surface-container-lowest/50 flex justify-center">
-        <span className="font-label-sm text-xs font-medium text-slate-500 dark:text-on-surface-variant tracking-widest uppercase">Version 1.0</span>
+      <div className="p-2.5 border-t border-slate-200/50 dark:border-white/10 bg-white/40 dark:bg-black/20 backdrop-blur-md flex flex-col items-center justify-center gap-0.5">
+        <span className="font-label-sm text-[10px] font-medium text-slate-500 dark:text-on-surface-variant/70 tracking-widest uppercase text-center">© 2026 Campus Compass</span>
+        <span className="font-label-sm text-[9px] text-slate-400 dark:text-on-surface-variant/50 text-center">Made by students for students</span>
       </div>
     </nav>
   );

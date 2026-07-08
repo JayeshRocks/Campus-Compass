@@ -238,7 +238,7 @@ html.dark .campus-custom-popup .maplibregl-popup-close-button:hover {
 }
 .glitch-btn::before,
 .glitch-btn::after {
-  content: "satellite_alt";
+  content: attr(data-icon);
   font-family: "Material Symbols Outlined";
   position: absolute;
   top: 50%;
@@ -283,3 +283,6 @@ html.dark .campus-custom-popup .maplibregl-popup-close-button:hover {
   80% { clip-path: inset(50% 0 30% 0); transform: translate(-50%, -50%) translate(1px, 1px); }
   100% { clip-path: inset(5% 0 80% 0); transform: translate(-50%, -50%) translate(-1px, -1px); opacity: 1; }
 }
+
+@keyframes slide-down { from { opacity: 0; transform: translate(-50%, -20px) scale(0.95); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+.animate-slide-down { animation: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
