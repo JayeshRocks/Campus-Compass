@@ -54,7 +54,7 @@ export default function Sidebar({
       />
       
       <nav
-        className={`liquid-glass fixed left-0 md:left-4 top-0 md:top-[80px] h-[100dvh] md:h-[calc(100vh-96px)] pb-[96px] md:pb-0 pt-[64px] md:pt-0 w-[85vw] max-w-[320px] md:w-sidebar_width md:rounded-2xl flex flex-col z-[95] transition-transform duration-300 overflow-hidden ${
+        className={`liquid-glass fixed left-0 md:left-4 top-[68px] md:top-[80px] h-[calc(100dvh-161px)] md:h-[calc(100dvh-96px)] w-[85vw] max-w-[320px] md:w-sidebar_width rounded-r-2xl md:rounded-2xl flex flex-col z-[95] transition-transform duration-300 overflow-hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full md:-translate-x-[110%] pointer-events-none"
         }`}
       >

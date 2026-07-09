@@ -14,7 +14,7 @@ const TABS = [
 
 export default function BottomNav({ activePage, onNavigate }: BottomNavProps) {
   return (
-    <div className="md:hidden fixed bottom-5 left-4 right-4 z-[110]">
+    <div className="md:hidden fixed bottom-[17px] left-4 right-4 z-[110]">
       <div className="liquid-glass rounded-3xl p-2 flex items-center justify-around">
         {TABS.map((tab) => {
           const isActive = activePage === tab.id;
