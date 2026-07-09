@@ -1,26 +1,46 @@
 [
-  { "id": "1", "name": "Aditya Sharma", "role": "Lead Architect", "bio": "Full-stack developer focused on creating highly efficient geospatial algorithms. Aditya ensures Campus Compass runs at production speed.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuDvrAEzs8dUek4DjF81DPRFAwsgLDh-_gxjEDTAM8B1Z8QMOpHH4F8KqUfxYJzcMEM02AexlE7U4lZMRCqp68LAQP5CypgzPsn7phy98u4P0X6bdQouJP4fFl--HFNRhPXqXCuitUO_lnwhbZr5tXgoCCEKI6XV8wLXYRPNNo6gWUKSOnOCVLVpUiZS35_jwc55u04l3hwEGWJnfghQ02b_1YCDcwkqYoEezKg0e_PFu9cVZmMx8DncHw", "batch": "2026", "batchTitle": "Core Team" },
-  { "id": "2", "name": "Ishita Verma", "role": "Product Designer", "bio": "Specializes in glassmorphic interfaces and user experience. Ishita crafted the sophisticated visual identity of our campus ecosystem.", "github": "https://dribbble.com", "linkedin": "https://linkedin.com", "avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuCsS3tgI84IKHoxildk5LX8tsBQ5BrgGEblBqkh_qxBj9Q1wECdKGVzzRPaXhndMsLJzHGm464zpH4jlasPCbUP4v_NeCn4cwBdyzUKXlY3aRMDJ-ta8UjY8Y3npO-vitLs2xlCPKrsDmi_JpyEGlMZzKt-npJ02Ag7pvsWz8vkDSKuTOsMr4caTNXvGeXlKMSxkeJKwYw2tQa9oMe-itX-K-Gfl_YaUJur_MSwHygjnrp7ZQts5wyM9g", "batch": "2026", "batchTitle": "Core Team" },
-  { "id": "3", "name": "Rohan Das", "role": "Systems Engineer", "bio": "Expert in cloud infrastructure and mapping services. Rohan ensures the real-time routing remains accurate across all MIT Bengaluru labs.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuAkGWzHU1uOWCoLH0S6Os1wf_Y2hjKFCdZjbDzFcQRo4MnbujowSUUKA27LV5hDoBXKo7Zuna9qoJ-7QDaIGGxPfRHACKC_E9eqlOBEwZsLSs0arviomzbVTYHsbtqjgxik81HBbhu6_H-zJaAzAK1ymVGJ7bu25ngWpNycZuKggAVhRCGPHuSwYEPKMkpPIcFzLnGFet7ZBqTRQCvLhDB_201WpMhA6QPk7Y44PvkiokRmjbz6XRQpOA", "batch": "2026", "batchTitle": "Core Team" },
-  { "id": "4", "name": "Team Member 4", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2026", "batchTitle": "Core Team" },
-  { "id": "5", "name": "Team Member 5", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2026", "batchTitle": "Core Team" },
-  { "id": "6", "name": "Team Member 6", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2026", "batchTitle": "Core Team" },
-  
-  { "id": "7", "name": "Sneha Kapoor", "role": "Data Scientist", "bio": "Analyzing crowd flow and facility usage. Sneha's data models provide the 'Quiet' and 'Crowded' badges across the navigation map.", "github": "https://kaggle.com", "linkedin": "https://linkedin.com", "avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuABHCixw5iv2sLXQoN_OhkgSAK3or7_ts2NBqRE3409lHOQa-I39wBs26u0GGpLx1g7LcRSZSbtelluZ3bmKerLbBMMoNB_iPu4vu_1iU8WiCwKXCgA63PQi5D73MWhLE6uYO4VFMwi1uOtGtvJ_s9dyRWgezr-m2WK3ymBNiZe-snUxpeuXlGSTrDqz_JQdWvPrIJXSmnx3o62ccvccVmDYUa7D0L72qQlwcBqxLLQisI-Btq1VH3Cvg", "batch": "2027", "batchTitle": "Founding Contributors" },
-  { "id": "8", "name": "Vikram Rao", "role": "Security Lead", "bio": "Vikram manages the encryption and authentication protocols, ensuring student data and location history remain completely private.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuCaj8pug5yTcRx_2ZPfNp1hFCMI4eFyH9bEmiTEPFm5o6D5sWuQg6llPOdCyCtG88AOICkTQG6YnFSvs5Zhsj3_CiYKwtKNCDbDoEGNUni6_SX0ktDNO1x9qyV4VHOUgq_NGyZui9WobH3Kdipuuc4A5lXW-lANlQLzRq3MVNEMJoHXb8nTCtRmwtAxd6U2itXiPEnHf2JQQkK_N7sXgkEElyz3hhKqCuz8l5M-L3hglXdi1QDAjiGuGg", "batch": "2027", "batchTitle": "Founding Contributors" },
-  { "id": "9", "name": "Ananya Pillai", "role": "Mobile Specialist", "bio": "Responsible for the seamless React Native integration. Ananya makes sure the compass works perfectly on every mobile device.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuAQdz_gjEp4ybGJySZUsjIHBs5SH2uXUnRZjKh8opQb-7cPiGrMk33I9Vuj-aSkNNzZk6U1T1qcqkRi3x-xWgN7JpkLjU8XoYnlNmie5dkjnoGajvxgYHGW80FyWQ5fygIhBAxAAVZWXZuXPpsw1EJA1ZmidhMr6wVty6mxsY7oqTxr9Fr9Fqo6qium72feIpC6WoApjd0_Uxdz6h6CLoSogKsc-JO8QXWpBUz8Vfq_vz-YUCs3RNXaBQ", "batch": "2027", "batchTitle": "Founding Contributors" },
-  { "id": "10", "name": "Team Member 10", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2027", "batchTitle": "Founding Contributors" },
-  { "id": "11", "name": "Team Member 11", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2027", "batchTitle": "Founding Contributors" },
-  
-  { "id": "12", "name": "Team Member 12", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2028", "batchTitle": "Future Contributors" },
-  { "id": "13", "name": "Team Member 13", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2028", "batchTitle": "Future Contributors" },
-  { "id": "14", "name": "Team Member 14", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2028", "batchTitle": "Future Contributors" },
-  { "id": "15", "name": "Team Member 15", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2028", "batchTitle": "Future Contributors" },
-  { "id": "16", "name": "Team Member 16", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2028", "batchTitle": "Future Contributors" },
-
-  { "id": "17", "name": "Team Member 17", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2029", "batchTitle": "New Recruits" },
-  { "id": "18", "name": "Team Member 18", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2029", "batchTitle": "New Recruits" },
-  { "id": "19", "name": "Team Member 19", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2029", "batchTitle": "New Recruits" },
-  { "id": "20", "name": "Team Member 20", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2029", "batchTitle": "New Recruits" },
-  { "id": "21", "name": "Team Member 21", "role": "Role Placeholder", "bio": "Short bio placeholder. Add details about their contributions and background here.", "github": "https://github.com", "linkedin": "https://linkedin.com", "avatar": "", "batch": "2029", "batchTitle": "New Recruits" }
+  {
+    "id": "1",
+    "name": "Jayesh Yadav",
+    "role": "Founder & Chief Architect",
+    "bio": "Responsible for the overall architecture, frontend development, UI direction, and project coordination. Focused on building a scalable, open-source navigation platform designed specifically for the MIT Bengaluru campus.",
+    "github": "https://github.com/JayeshRocks",
+    "linkedin": "https://linkedin.com/in/jayesh-yadav-a33b5941a/",
+    "avatar": "/images/team/JayeshYadav.jpg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  },
+  {
+    "id": "2",
+    "name": "G. Rishikesh",
+    "role": "Founder & Schematic Architect",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com/",
+    "linkedin": "https://linkedin.com/",
+    "avatar": "/images/team/Ritz.jpg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  },
+  {
+    "id": "3",
+    "name": "Rudra Patel",
+    "role": "Co-Founder & Design Head",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com/rudrapatelco",
+    "linkedin": "https://linkedin.com/",
+    "avatar": "/images/team/RudraPatel.png",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  },
+  {
+    "id": "4",
+    "name": "Adhya Agarwal",
+    "role": "Co-Founder",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com/",
+    "linkedin": "https://linkedin.com/",
+    "avatar": "/images/team/AdhyaAgarwal.jpeg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  }
 ]
