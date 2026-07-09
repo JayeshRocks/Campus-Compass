@@ -38,7 +38,7 @@ export default function MeetTeam() {
   }, []);
 
   return (
-    <div className="h-full w-full bg-[#020617] text-on-surface px-6 md:px-12 pb-6 md:pb-12 overflow-y-auto relative">
+    <div className="h-full w-full bg-slate-50 dark:bg-[#020617] px-6 md:px-12 pb-6 md:pb-12 overflow-y-auto relative">
       <style>{`
         .team-card {
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -90,10 +90,10 @@ export default function MeetTeam() {
         <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-container/10 border border-primary-container/20 text-primary-container font-label-md text-label-md uppercase tracking-widest">
           The Minds Behind It
         </span>
-        <h1 className="font-display-lg text-4xl md:text-5xl lg:text-[48px] font-bold text-on-surface">
+        <h1 className="font-display-lg text-4xl md:text-5xl lg:text-[48px] font-bold text-slate-900 dark:text-on-surface">
           Meet the Team
         </h1>
-        <p className="font-body-lg text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+        <p className="font-body-lg text-lg text-slate-600 dark:text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
           Built by students, for students. Meet the creative and technical forces who designed and engineered the platform, organized by their joining batches.
         </p>
       </div>
@@ -106,19 +106,19 @@ export default function MeetTeam() {
             className="batch-section max-w-6xl w-full mb-20 relative"
             style={{ animation: `fadeInUp 0.8s ease forwards ${batchIndex * 0.2}s`, opacity: 0, transform: "translateY(20px)" }}
           >
-            <div className="sticky-header py-6 bg-[#020617]/90 backdrop-blur-md border-b border-blue-500/40 mb-8 flex items-center justify-between">
-              <h2 className="font-headline-lg text-3xl font-bold text-blue-200 flex items-center gap-3 shadow-sm">
-                {batch === "2027" && <span className="material-symbols-outlined text-blue-400">history</span>}
+            <div className="sticky-header py-6 bg-slate-50/90 dark:bg-[#020617]/90 backdrop-blur-md border-b border-slate-200 dark:border-blue-500/40 mb-8 flex items-center justify-between">
+              <h2 className="font-headline-lg text-3xl font-bold text-blue-600 dark:text-blue-200 flex items-center gap-3 shadow-sm">
+                {batch === "2027" && <span className="material-symbols-outlined text-blue-500 dark:text-blue-400">history</span>}
                 {batch}
               </h2>
-              <span className="font-label-md text-on-surface-variant">{groupedContributors[batch].title}</span>
+              <span className="font-label-md text-slate-500 dark:text-on-surface-variant">{groupedContributors[batch].title}</span>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-0">
               {groupedContributors[batch].members.map((member, index) => (
-                <div
-                  key={member.id}
-                  className="team-card bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant/30 rounded-3xl flex flex-col items-center hover:shadow-2xl hover:-translate-y-2 group"
+                  <div
+                    key={member.id}
+                    className="team-card bg-white/80 dark:bg-surface-container-lowest/80 backdrop-blur-md border border-slate-200 dark:border-outline-variant/30 rounded-3xl flex flex-col items-center hover:shadow-2xl hover:-translate-y-2 group"
                   style={{
                     animation: `fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards ${index * 0.1 + 0.2}s`,
                     opacity: 0,
@@ -140,22 +140,22 @@ export default function MeetTeam() {
                         />
                       </div>
                     </div>
-                    <h3 className="font-bold text-2xl text-on-surface mb-2 relative z-10">{member.name}</h3>
-                    <span className="bg-primary/10 text-primary-container font-label-sm text-xs px-4 py-1.5 rounded-full mb-4 relative z-10 tracking-wide font-medium">
+                    <h3 className="font-bold text-2xl text-slate-900 dark:text-on-surface mb-2 relative z-10">{member.name}</h3>
+                    <span className="bg-primary-container/10 text-primary-container font-label-sm text-xs px-4 py-1.5 rounded-full mb-4 relative z-10 tracking-wide font-medium">
                       {member.role}
                     </span>
-                    <p className="font-body-md text-on-surface-variant leading-relaxed text-sm mb-6 flex-1 relative z-10">
+                    <p className="font-body-md text-slate-600 dark:text-on-surface-variant leading-relaxed text-sm mb-6 flex-1 relative z-10">
                       {member.bio}
                     </p>
                   </div>
                   
-                  <div className="w-full mt-auto border-t border-outline-variant/30 p-4 flex justify-center gap-6 relative z-10 bg-surface-container-lowest/50">
+                  <div className="w-full mt-auto border-t border-slate-200 dark:border-outline-variant/30 p-4 flex justify-center gap-6 relative z-10 bg-slate-50/50 dark:bg-surface-container-lowest/50">
                     {member.github && (
                       <a
                         href={member.github}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 group/link"
+                        className="text-slate-500 dark:text-on-surface-variant hover:text-blue-600 dark:hover:text-primary transition-colors flex items-center gap-2 group/link"
                       >
                         <span className="material-symbols-outlined text-[20px] group-hover/link:scale-110 transition-transform">
                           {member.github.includes("dribbble") ? "palette" : member.github.includes("kaggle") ? "analytics" : "terminal"}
@@ -170,7 +170,7 @@ export default function MeetTeam() {
                         href={member.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 group/link"
+                        className="text-slate-500 dark:text-on-surface-variant hover:text-blue-600 dark:hover:text-primary transition-colors flex items-center gap-2 group/link"
                       >
                         <span className="material-symbols-outlined text-[20px] group-hover/link:scale-110 transition-transform">hub</span>
                         <span className="font-label-sm text-xs font-medium">LinkedIn</span>
@@ -184,10 +184,10 @@ export default function MeetTeam() {
         ))}
 
         {/* Call to Action */}
-        <div className="mt-12 p-12 bg-surface-container-high/30 rounded-3xl border border-outline-variant/20 max-w-4xl w-full text-center relative overflow-hidden animate-fade-in">
+        <div className="mt-12 p-12 bg-white/60 dark:bg-surface-container-high/30 rounded-3xl border border-slate-200 dark:border-outline-variant/20 max-w-4xl w-full text-center relative overflow-hidden animate-fade-in">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary-container/10 blur-[80px] rounded-full -mr-32 -mt-32 pointer-events-none" />
-          <h2 className="font-headline-lg text-3xl font-bold text-on-surface mb-4 relative z-10">Want to join the mission?</h2>
-          <p className="font-body-md text-on-surface-variant mb-8 relative z-10">
+          <h2 className="font-headline-lg text-3xl font-bold text-slate-900 dark:text-on-surface mb-4 relative z-10">Want to join the mission?</h2>
+          <p className="font-body-md text-slate-600 dark:text-on-surface-variant mb-8 relative z-10">
             We're always looking for talented MIT Bengaluru students to help expand our navigation ecosystem.
           </p>
           <button className="bg-primary-container text-on-primary-container font-headline-md text-lg px-8 py-3.5 rounded-xl hover:shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:brightness-110 active:scale-95 transition-all relative z-10 font-medium">

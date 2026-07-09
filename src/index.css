@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
-@variant hover (@media (hover: hover) { &:hover });
 
 @theme {
   --color-on-secondary-fixed-variant: #38485d;
