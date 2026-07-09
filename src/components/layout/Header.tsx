@@ -69,13 +69,13 @@ export default function Header({
           <button
             onClick={onMenuToggle}
             disabled={activePage !== "map"}
-            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant flex-shrink-0 ${activePage !== "map" ? "opacity-30 pointer-events-none" : ""}`}
+            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant flex-shrink-0 -ml-[2px] lg:ml-0 ${activePage !== "map" ? "opacity-30 pointer-events-none" : ""}`}
           >
             <span className="material-symbols-outlined transition-transform group-hover:rotate-180" style={{ fontVariationSettings: "'FILL' 0" }}>menu</span>
           </button>
           <div
             onClick={() => onNavigate("map")}
-            className="flex items-center gap-1.5 lg:gap-2.5 cursor-pointer group min-w-0"
+            className="flex items-center gap-1.5 lg:gap-2.5 cursor-pointer group min-w-0 ml-[1px] lg:ml-0"
           >
             <div className="w-9 h-9 rounded-xl bg-blue-600 dark:bg-primary-container flex items-center justify-center text-white dark:text-on-primary-container shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
               <Logo size={20} className="text-white dark:text-on-primary-container" />

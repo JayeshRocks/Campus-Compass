@@ -2,15 +2,27 @@ interface MapControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetCompass: () => void;
+  onLocateUser: () => void;
 }
 
 export default function MapControls({
   onZoomIn,
   onZoomOut,
   onResetCompass,
+  onLocateUser,
 }: MapControlsProps) {
   return (
     <div className="fixed bottom-[100px] md:bottom-[24px] right-[24px] z-[80] flex flex-col gap-3 transition-all duration-300">
+      {/* Locate User */}
+      <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-full shadow-lg ghost-border w-12 h-12 flex mx-auto">
+        <button
+          onClick={onLocateUser}
+          className="w-12 h-12 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-surface-container-high/50 transition-colors cursor-pointer active:scale-95 group"
+          title="Find My Location"
+        >
+          <span className="material-symbols-outlined text-blue-600 dark:text-primary group-hover:scale-110 transition-transform">my_location</span>
+        </button>
+      </div>
       {/* Compass */}
       <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-full shadow-lg ghost-border w-12 h-12 flex mx-auto">
         <button

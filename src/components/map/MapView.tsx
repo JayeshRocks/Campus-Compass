@@ -8,6 +8,7 @@ import FeedbackButton from "./FeedbackButton";
 import BuildingMarker from "./BuildingMarker";
 import BuildingPopup from "./BuildingPopup";
 import ReportIssueForm from "./ReportIssueForm";
+import WeatherWidget from "./WeatherWidget";
 
 interface MapViewProps {
   buildings: Building[];
@@ -46,7 +47,10 @@ export default function MapView({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
   const [showReportIssue, setShowReportIssue] = useState(false);
+  const [isWeatherVisible, setIsWeatherVisible] = useState(true);
+  
   const watchIdRef = useRef<number | null>(null);
+  const weatherTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Clean up location watch on unmount
   useEffect(() => {
@@ -54,8 +58,36 @@ export default function MapView({
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
+      if (weatherTimerRef.current) {
+        clearTimeout(weatherTimerRef.current);
+      }
     };
   }, []);
+
+  // Weather Widget Visibility Logic
+  useEffect(() => {
+    if (!map) return;
+
+    const resetWeatherTimer = () => {
+      setIsWeatherVisible(true);
+      if (weatherTimerRef.current) clearTimeout(weatherTimerRef.current);
+      weatherTimerRef.current = setTimeout(() => {
+        setIsWeatherVisible(false);
+      }, 3500);
+    };
+
+    resetWeatherTimer();
+
+    map.on('movestart', resetWeatherTimer);
+    map.on('zoomstart', resetWeatherTimer);
+    map.on('dragstart', resetWeatherTimer);
+
+    return () => {
+      map.off('movestart', resetWeatherTimer);
+      map.off('zoomstart', resetWeatherTimer);
+      map.off('dragstart', resetWeatherTimer);
+    };
+  }, [map]);
 
   const selectedBuildingRef = useRef(selectedBuilding);
   useEffect(() => { selectedBuildingRef.current = selectedBuilding; }, [selectedBuilding]);
@@ -286,16 +318,30 @@ export default function MapView({
     });
   };
 
-  // Auto-request location on component mount
-  useEffect(() => {
+  const handleLocateUser = () => {
     if (!("geolocation" in navigator)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setToastMessage("Geolocation is not supported by your browser.");
       setTimeout(() => setToastMessage(null), 3000);
       return;
     }
 
+    if (userLoc && map) {
+      // If we already have a location, just jump to it
+      map.flyTo({
+        center: [userLoc.lng, userLoc.lat],
+        zoom: 17,
+        duration: 1500,
+      });
+      return;
+    }
+
     setToastMessage("Acquiring GPS signal...");
+
+    // Clear existing watch if present
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+    }
+
     let firstLock = true;
 
     watchIdRef.current = navigator.geolocation.watchPosition(
@@ -315,26 +361,27 @@ export default function MapView({
           firstLock = false;
         }
       },
-      () => {
-        setToastMessage("Unable to retrieve your location.");
-        setTimeout(() => setToastMessage(null), 3000);
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setToastMessage("Location access denied. Please enable it in browser settings.");
+        } else {
+          setToastMessage("Unable to retrieve your location.");
+        }
+        setTimeout(() => setToastMessage(null), 4000);
       },
       { 
         enableHighAccuracy: true, 
         timeout: 10000, 
-        maximumAge: 0 // Force device to bypass cache and query hardware
+        maximumAge: 10000 // Allow a 10-second old cached location to speed up lock
       }
     );
-  }, [map]); // Dependency on map so it can flyTo when ready
+  };
 
   const handleShowToast = (featureName: string, version: string = "2") => {
     setToastMessage(`${featureName} coming in Version ${version}!`);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Compute adaptive layout bounds for category chips
-  const chipsLeft = isSidebarOpen ? "md:left-[300px]" : "md:left-[24px]";
-  const chipsRight = selectedBuilding ? "md:right-[400px]" : "md:right-[24px]";
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
@@ -374,38 +421,18 @@ export default function MapView({
         </>
       )}
 
-      {/* Category Chips Layer */}
-      <div
-        className={`hidden md:flex fixed top-[80px] left-4 right-4 ${chipsLeft} ${chipsRight} z-[80] gap-2 overflow-x-auto no-scrollbar py-2 px-4 pointer-events-auto transition-all duration-300 ${
-          isSidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
-      >
-        {categoryChips.map((chip) => {
-          const isActive = activeCategory === chip.id;
-          return (
-            <button
-              key={chip.id}
-              onClick={() => onCategoryChange(isActive ? "all" : chip.id)}
-              className={`px-4 py-1.5 rounded-full font-label-md text-label-md flex items-center gap-2 shadow-sm border cursor-pointer transition-colors ${
-                isActive
-                  ? "bg-blue-600 border-blue-700 text-white"
-                  : "glass-panel text-slate-700 hover:bg-slate-50 border-slate-200 dark:border-outline-variant/30 dark:text-on-surface dark:hover:bg-surface-container-high"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[18px]">{chip.icon}</span>
-              {chip.label}
-            </button>
-          );
-        })}
-      </div>
 
       {/* Map Controls */}
       <MapControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onResetCompass={handleResetCompass}
+        onLocateUser={handleLocateUser}
       />
       
+      {/* Weather Widget */}
+      <WeatherWidget isVisible={isWeatherVisible} isSidebarOpen={isSidebarOpen} />
+
       {/* Feedback Button Component */}
       <FeedbackButton onClick={() => setShowReportIssue(true)} />
 
