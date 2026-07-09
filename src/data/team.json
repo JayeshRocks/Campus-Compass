@@ -3,7 +3,7 @@
     "id": "1",
     "name": "Jayesh Yadav",
     "role": "Founder & Chief Architect",
-    "bio": "Responsible for the overall architecture, frontend development, UI direction, and project coordination. Focused on building a scalable, open-source navigation platform designed specifically for the MIT Bengaluru campus.",
+    "bio": "Responsible for the overall architecture, frontend development, UI direction, backend database and feedback system development, and project coordination.",
     "github": "https://github.com/JayeshRocks",
     "linkedin": "https://linkedin.com/in/jayesh-yadav-a33b5941a/",
     "avatar": "/images/team/JayeshYadav.jpg",
@@ -24,7 +24,7 @@
   {
     "id": "3",
     "name": "Rudra Patel",
-    "role": "Co-Founder & Design Head",
+    "role": "Founder & Design Head",
     "bio": "Short bio placeholder. Add details about their contributions and background here.",
     "github": "https://github.com/rudrapatelco",
     "linkedin": "https://linkedin.com/",
