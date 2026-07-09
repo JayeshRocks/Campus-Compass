@@ -15,6 +15,9 @@ import BottomNav from "./components/layout/BottomNav";
 export default function App() {
   const [activePage, setActivePage] = useState<string>("map");
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      return false; // Always closed on first view / reload on mobile
+    }
     const saved = localStorage.getItem("isSidebarOpen");
     return saved ? JSON.parse(saved) : true;
   });
@@ -23,8 +26,14 @@ export default function App() {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
     null,
   );
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isSatellite, setIsSatellite] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem("theme");
+    return saved ? saved === "dark" : true;
+  });
+  const [isSatellite, setIsSatellite] = useState(() => {
+    const saved = localStorage.getItem("isSatellite");
+    return saved ? JSON.parse(saved) : true;
+  });
   const [userRole, setUserRole] = useState<UserRole | null>(
     () => localStorage.getItem("userRole") as UserRole | null,
   );
@@ -64,7 +73,13 @@ export default function App() {
     } else {
       document.documentElement.classList.remove("dark");
     }
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
   }, [isDarkMode]);
+
+  // Sync satellite state
+  useEffect(() => {
+    localStorage.setItem("isSatellite", JSON.stringify(isSatellite));
+  }, [isSatellite]);
 
   // If the selected building is filtered out, deselect it
   useEffect(() => {
