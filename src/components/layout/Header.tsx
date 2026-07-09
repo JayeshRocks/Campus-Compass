@@ -68,7 +68,8 @@ export default function Header({
         <div className="flex items-center gap-2 md:gap-4 min-w-0 md:min-w-[240px]">
           <button
             onClick={onMenuToggle}
-            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant flex-shrink-0`}
+            disabled={activePage !== "map"}
+            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant flex-shrink-0 ${activePage !== "map" ? "opacity-30 pointer-events-none" : ""}`}
           >
             <span className="material-symbols-outlined transition-transform group-hover:rotate-180" style={{ fontVariationSettings: "'FILL' 0" }}>menu</span>
           </button>
