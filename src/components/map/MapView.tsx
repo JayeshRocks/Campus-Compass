@@ -14,30 +14,17 @@ interface MapViewProps {
   buildings: Building[];
   selectedBuilding: Building | null;
   onSelectBuilding: (b: Building | null) => void;
-  activeCategory: CategoryType;
-  onCategoryChange: (c: CategoryType) => void;
   isSidebarOpen: boolean;
   isDarkMode: boolean;
   isSatellite: boolean;
 }
 
-const categoryChips = [
-  { id: "academic", label: "Academic", icon: "school" },
-  { id: "hostels", label: "Hostels", icon: "bed" },
-  { id: "food", label: "Food", icon: "restaurant" },
-  { id: "sports", label: "Sports", icon: "sports_soccer" },
-  { id: "labs", label: "Labs", icon: "science" },
-  { id: "admin", label: "Admin", icon: "admin_panel_settings" },
-  { id: "parking", label: "Parking", icon: "local_parking" },
-  { id: "security", label: "Security", icon: "security" },
-] as const;
+
 
 export default function MapView({
   buildings,
   selectedBuilding,
   onSelectBuilding,
-  activeCategory,
-  onCategoryChange,
   isSidebarOpen,
   isDarkMode,
   isSatellite,
@@ -50,7 +37,7 @@ export default function MapView({
   const [isWeatherVisible, setIsWeatherVisible] = useState(true);
   
   const watchIdRef = useRef<number | null>(null);
-  const weatherTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const weatherTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Clean up location watch on unmount
   useEffect(() => {

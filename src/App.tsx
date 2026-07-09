@@ -120,8 +120,6 @@ export default function App() {
             buildings={filteredBuildings}
             selectedBuilding={selectedBuilding}
             onSelectBuilding={setSelectedBuilding}
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
             isSidebarOpen={isSidebarOpen}
             isDarkMode={isDarkMode}
             isSatellite={isSatellite}
