@@ -49,12 +49,12 @@ export default function Sidebar({
     <>
       {/* Mobile Backdrop */}
       <div 
-        className={`md:hidden fixed top-[64px] inset-x-0 bottom-0 bg-slate-900/20 dark:bg-black/40 backdrop-blur-sm z-[90] transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`md:hidden fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md z-[90] transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={onClose}
       />
       
       <nav
-        className={`fixed left-0 md:left-4 top-[64px] md:top-[80px] h-[calc(100vh-64px)] md:h-[calc(100vh-96px)] w-[85vw] max-w-[320px] md:w-sidebar_width bg-white/95 dark:bg-surface/95 md:bg-white/80 md:dark:bg-surface/70 backdrop-blur-2xl border-r md:border border-slate-200 dark:border-outline-variant/20 md:rounded-2xl flex flex-col z-[95] shadow-2xl transition-transform duration-300 overflow-hidden ${
+        className={`liquid-glass fixed left-0 md:left-4 top-0 md:top-[80px] h-[100vh] md:h-[calc(100vh-96px)] pt-[64px] md:pt-0 w-[85vw] max-w-[320px] md:w-sidebar_width md:rounded-2xl flex flex-col z-[95] transition-transform duration-300 overflow-hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full md:-translate-x-[110%] pointer-events-none"
         }`}
       >

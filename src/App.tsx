@@ -113,7 +113,7 @@ export default function App() {
           />
         </main>
       ) : (
-        <main className="pt-[64px] pb-[90px] md:pb-0 relative h-[100vh] w-full overflow-hidden">
+        <main className="pt-[64px] relative h-[100vh] w-full overflow-hidden">
           {activePage === "home" && <Home />}
           {activePage === "about" && <About />}
           {activePage === "campus-guide" && <CampusGuide />}

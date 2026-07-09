@@ -35,13 +35,13 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-      <div className="w-full max-w-4xl bg-white dark:bg-surface border border-slate-200 dark:border-outline-variant/30 rounded-3xl shadow-2xl overflow-hidden relative animate-fade-in flex flex-col md:flex-row">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm">
+      <div className="w-full max-w-4xl max-h-full overflow-y-auto liquid-glass rounded-3xl relative animate-fade-in flex flex-col md:flex-row">
         
         {/* Decorative Background for light/dark */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 blur-[100px] rounded-full -mr-48 -mt-48 pointer-events-none" />
 
-        <div className="p-8 md:p-12 md:w-1/2 flex flex-col justify-center relative z-10 bg-slate-50 dark:bg-transparent">
+        <div className="p-8 md:p-12 md:w-1/2 flex flex-col justify-center relative z-10 bg-slate-50/50 dark:bg-transparent">
           <h2 className="font-headline-lg text-3xl font-bold text-slate-900 dark:text-on-surface mb-4">Help Us Improve</h2>
           <p className="text-body-md text-slate-600 dark:text-on-surface-variant mb-8 leading-relaxed">
             Found a missing shortcut? Noticed a floor plan error? Campus Compass is a community-driven project that thrives on your input. Together, we can build the most accurate map of MIT Bengaluru.
@@ -54,7 +54,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="p-8 md:p-12 md:w-1/2 bg-white dark:bg-surface relative z-10 border-l border-slate-200 dark:border-outline-variant/20">
+        <div className="p-8 md:p-12 md:w-1/2 bg-transparent dark:bg-transparent relative z-10 border-t md:border-t-0 md:border-l border-slate-200 dark:border-outline-variant/20">
           <button onClick={onClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 dark:text-on-surface-variant dark:hover:text-on-surface rounded-full hover:bg-slate-100 dark:hover:bg-surface-container-high transition-colors">
             <span className="material-symbols-outlined">close</span>
           </button>

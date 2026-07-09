@@ -59,11 +59,11 @@ export default function Header({
     }
   }, [searchQuery, isSearchOpen]);
 
-  const glassyButtonClass = "p-2 rounded-full border border-slate-200/60 dark:border-white/10 bg-white/40 dark:bg-white/5 backdrop-blur-md shadow-sm transition-all hover:bg-white/80 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md cursor-pointer active:scale-95 flex items-center justify-center group";
+  const glassyButtonClass = "p-2 rounded-full border border-slate-200/60 dark:border-white/10 bg-white/50 dark:bg-white/10 backdrop-blur-md shadow-sm transition-all hover:bg-white/80 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md cursor-pointer active:scale-95 flex items-center justify-center group";
 
   return (
     <>
-      <header className="fixed top-0 w-full h-[64px] bg-white/80 dark:bg-surface/70 backdrop-blur-xl border-b border-slate-200 dark:border-outline-variant/20 shadow-sm flex items-center justify-between px-gutter z-[100]">
+      <header className="liquid-glass fixed top-0 w-full h-[64px] flex items-center justify-between px-gutter z-[100]">
         {/* Left: Branding & Menu */}
         <div className="flex items-center gap-2 md:gap-4 min-w-0 md:min-w-[240px]">
           <button
@@ -168,7 +168,7 @@ export default function Header({
       {/* Floating Glassmorphism Search Bar */}
       {isSearchOpen && activePage === "map" && (
         <div className={`fixed top-[80px] left-1/2 -translate-x-1/2 z-[85] w-full max-w-lg px-4 animate-slide-down transition-all duration-300 ${isSidebarOpen ? "md:ml-[140px]" : ""}`}>
-          <div className="bg-white/90 dark:bg-surface-container-highest/90 backdrop-blur-2xl border border-slate-200 dark:border-outline-variant/40 rounded-2xl shadow-2xl p-2.5 flex items-center gap-3 transition-shadow hover:shadow-blue-500/10 dark:hover:shadow-primary/10 ring-1 ring-slate-900/5 dark:ring-white/5">
+          <div className="liquid-glass rounded-2xl p-2.5 flex items-center gap-3 transition-shadow hover:shadow-blue-500/10 dark:hover:shadow-primary/10">
             <span className="material-symbols-outlined text-slate-400 dark:text-on-surface-variant ml-2">search</span>
             <input
               type="text"

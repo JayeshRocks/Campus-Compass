@@ -1,0 +1,159 @@
+{
+  "name": "@callstack/liquid-glass",
+  "version": "0.8.0",
+  "description": "Liquid Glass in React Native",
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "@callstack/liquid-glass-source": "./src/index.tsx",
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "lib",
+    "ios",
+    "cpp",
+    "*.podspec",
+    "react-native.config.js",
+    "!ios/build",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ],
+  "scripts": {
+    "example": "yarn workspace @callstack/liquid-glass-example",
+    "typecheck": "tsc",
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "clean": "del-cli example/ios/build lib",
+    "prepare": "bob build",
+    "release": "release-it --only-version"
+  },
+  "keywords": [
+    "react-native",
+    "ios"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callstack/liquid-glass.git"
+  },
+  "author": "Oskar Kwaśniewski <oskarkwasniewski@icloud.com> (https://github.com/okwasniewski)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/callstack/liquid-glass/issues"
+  },
+  "homepage": "https://github.com/callstack/liquid-glass#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@commitlint/config-conventional": "^20.5.0",
+    "@eslint/compat": "^2.0.3",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
+    "@react-native/babel-preset": "0.85.0",
+    "@react-native/eslint-config": "0.85.0",
+    "@release-it/conventional-changelog": "^10.0.6",
+    "@types/react": "^19.2.0",
+    "commitlint": "^20.5.0",
+    "del-cli": "^7.0.0",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-ft-flow": "^3.0.11",
+    "eslint-plugin-prettier": "^5.5.5",
+    "hermes-eslint": "^0.36.1",
+    "lefthook": "^2.1.4",
+    "prettier": "^3.8.1",
+    "react": "19.2.3",
+    "react-native": "0.85.0",
+    "react-native-builder-bob": "^0.43.0",
+    "release-it": "^19.2.4",
+    "turbo": "^2.8.21",
+    "typescript": "^6.0.2"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "workspaces": [
+    "example"
+  ],
+  "packageManager": "yarn@4.15.0",
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release ${version}",
+      "tagName": "v${version}"
+    },
+    "npm": {
+      "publish": true
+    },
+    "github": {
+      "release": true
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": {
+          "name": "angular"
+        }
+      }
+    }
+  },
+  "prettier": {
+    "quoteProps": "consistent",
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "useTabs": false
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  },
+  "codegenConfig": {
+    "name": "LiquidGlassViewSpec",
+    "type": "all",
+    "jsSrcsDir": "src",
+    "ios": {
+      "componentProvider": {
+        "LiquidGlassView": "LiquidGlassView",
+        "LiquidGlassContainerView": "LiquidGlassContainerView"
+      },
+      "modulesProvider": {
+        "NativeLiquidGlassModule": "LiquidGlassModule"
+      }
+    }
+  },
+  "create-react-native-library": {
+    "type": "fabric-view",
+    "languages": "kotlin-objc",
+    "tools": [
+      "eslint",
+      "lefthook",
+      "release-it"
+    ],
+    "version": "0.62.0"
+  }
+}

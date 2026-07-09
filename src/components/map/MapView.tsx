@@ -376,7 +376,7 @@ export default function MapView({
 
       {/* Category Chips Layer */}
       <div
-        className={`fixed top-[80px] left-4 right-4 ${chipsLeft} ${chipsRight} z-[80] flex gap-2 overflow-x-auto no-scrollbar py-2 px-4 pointer-events-auto transition-all duration-300 ${
+        className={`hidden md:flex fixed top-[80px] left-4 right-4 ${chipsLeft} ${chipsRight} z-[80] gap-2 overflow-x-auto no-scrollbar py-2 px-4 pointer-events-auto transition-all duration-300 ${
           isSidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
@@ -411,7 +411,7 @@ export default function MapView({
 
       {/* Slide-in Building Info Card */}
       <aside
-        className={`fixed right-4 md:right-[24px] top-[140px] md:top-[88px] w-[calc(100vw-32px)] md:w-[360px] bg-white/95 dark:bg-surface-container-lowest/90 backdrop-blur-xl border border-slate-200 dark:border-outline-variant/30 rounded-2xl shadow-2xl z-[85] overflow-hidden flex flex-col transition-all duration-300 transform ${
+        className={`liquid-glass fixed right-4 md:right-[24px] top-[140px] md:top-[88px] w-[calc(100vw-32px)] md:w-[360px] rounded-2xl z-[85] overflow-hidden flex flex-col transition-all duration-300 transform ${
           selectedBuilding ? "translate-x-0 opacity-100" : "translate-x-[110%] opacity-0 pointer-events-none"
         }`}
       >
