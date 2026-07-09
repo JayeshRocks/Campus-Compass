@@ -41,6 +41,11 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
         {/* Decorative Background for light/dark */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 blur-[100px] rounded-full -mr-48 -mt-48 pointer-events-none" />
 
+        {/* Global Close Button */}
+        <button onClick={onClose} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-slate-700 hover:text-slate-900 dark:text-on-surface-variant dark:hover:text-white bg-slate-200/40 dark:bg-surface-container-high/30 rounded-full hover:bg-slate-200/80 dark:hover:bg-surface-container-high/70 transition-all z-50 shadow-sm backdrop-blur-sm">
+          <span className="material-symbols-outlined text-[22px]">close</span>
+        </button>
+
         <div className="p-8 md:p-12 md:w-1/2 flex flex-col justify-center relative z-10 bg-slate-50/50 dark:bg-transparent">
           <h2 className="font-headline-lg text-3xl font-bold text-slate-900 dark:text-on-surface mb-4">Help Us Improve</h2>
           <p className="text-body-md text-slate-600 dark:text-on-surface-variant mb-8 leading-relaxed">
@@ -55,10 +60,6 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="p-8 md:p-12 md:w-1/2 bg-transparent dark:bg-transparent relative z-10 border-t md:border-t-0 md:border-l border-slate-200 dark:border-outline-variant/20">
-          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 dark:text-on-surface-variant dark:hover:text-on-surface rounded-full hover:bg-slate-100 dark:hover:bg-surface-container-high transition-colors">
-            <span className="material-symbols-outlined">close</span>
-          </button>
-          
           <form onSubmit={handleSubmit} className="space-y-6 mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
