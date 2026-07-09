@@ -167,25 +167,28 @@ export default function Header({
 
       {/* Floating Glassmorphism Search Bar */}
       {isSearchOpen && activePage === "map" && (
-        <div className={`fixed top-[80px] left-1/2 -translate-x-1/2 z-[85] w-full max-w-lg px-4 animate-slide-down transition-all duration-300 ${isSidebarOpen ? "md:ml-[140px]" : ""}`}>
-          <div className="liquid-glass rounded-2xl p-2.5 flex items-center gap-3 transition-shadow hover:shadow-blue-500/10 dark:hover:shadow-primary/10">
-            <span className="material-symbols-outlined text-slate-400 dark:text-on-surface-variant ml-2">search</span>
+        <div className={`fixed top-[80px] left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-[85] md:w-[calc(100%-2rem)] md:max-w-lg animate-fade-in transition-all duration-300 ${isSidebarOpen ? "md:ml-[140px]" : ""}`}>
+          <div className="liquid-glass relative rounded-2xl p-2.5 flex items-center gap-3 transition-shadow hover:shadow-blue-500/20 dark:hover:shadow-primary/20 ring-2 ring-white/60 dark:ring-white/10 shadow-xl overflow-hidden">
+            {/* Extra opacity layer exclusively for dark mode */}
+            <div className="absolute inset-0 bg-slate-900/60 hidden dark:block -z-10 pointer-events-none"></div>
+            
+            <span className="material-symbols-outlined text-slate-700 dark:text-on-surface ml-2 text-[24px]">search</span>
             <input
               type="text"
               autoFocus
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search buildings, rooms, resources..."
-              className="flex-1 bg-transparent border-none outline-none text-slate-900 dark:text-on-surface font-body-md placeholder:text-slate-400 dark:placeholder:text-on-surface-variant/50"
+              className="flex-1 bg-transparent border-none outline-none text-slate-900 dark:text-white font-body-md font-semibold placeholder:text-slate-600 dark:placeholder:text-on-surface-variant/70 placeholder:font-medium"
             />
             <button
               onClick={() => {
                 setIsSearchOpen(false);
                 if (!searchQuery) onSearchChange("");
               }}
-              className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-on-surface-variant transition-colors"
+              className="p-1.5 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/10 text-slate-700 dark:text-on-surface transition-colors relative z-10"
             >
-              <span className="material-symbols-outlined text-[20px]">close</span>
+              <span className="material-symbols-outlined text-[24px]">close</span>
             </button>
           </div>
         </div>

@@ -61,7 +61,7 @@ export default function Sidebar({
       {/* Scrollable Categories */}
       <div className="flex-1 overflow-y-auto sidebar-scroll py-4 px-2">
         <div className="space-y-1 relative">
-          <h3 className="px-3 py-2 text-xs font-label-sm text-slate-500 dark:text-on-surface-variant uppercase tracking-wider relative z-10">
+          <h3 className="px-3 py-2 text-xs font-label-sm text-slate-600 dark:text-on-surface-variant uppercase tracking-wider relative z-10">
             Categories
           </h3>
           {/* Active Frosted Glass Indicator */}
@@ -82,12 +82,12 @@ export default function Sidebar({
                 }`}
               >
                 <span
-                  className={`material-symbols-outlined text-[20px] transition-transform ${isActive ? "text-blue-600 dark:text-primary" : "text-slate-500 dark:text-on-surface-variant group-hover:text-blue-600 dark:group-hover:text-primary"}`}
+                  className={`material-symbols-outlined text-[20px] transition-transform ${isActive ? "text-blue-600 dark:text-primary" : "text-slate-600 dark:text-on-surface-variant group-hover:text-blue-600 dark:group-hover:text-primary"}`}
                   style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
                 >
                   {cat.icon}
                 </span>
-                <span className={`font-label-md text-sm tracking-wide transition-colors ${isActive ? "text-slate-900 dark:text-on-surface font-semibold" : "text-slate-500 dark:text-on-surface-variant group-hover:text-slate-900 dark:group-hover:text-on-surface font-medium"}`}>
+                <span className={`font-label-md text-sm tracking-wide transition-colors ${isActive ? "text-slate-900 dark:text-on-surface font-semibold" : "text-slate-700 dark:text-on-surface-variant group-hover:text-slate-900 dark:group-hover:text-on-surface font-medium"}`}>
                   {cat.label}
                 </span>
               </button>
