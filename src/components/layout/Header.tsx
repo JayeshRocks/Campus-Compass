@@ -65,7 +65,7 @@ export default function Header({
     <>
       <header className="liquid-glass fixed top-0 w-full h-[64px] flex items-center justify-between px-gutter z-[100]">
         {/* Left: Branding & Menu */}
-        <div className="flex items-center gap-2 md:gap-4 min-w-0 md:min-w-[240px]">
+        <div className="flex items-center gap-1.5 lg:gap-4 min-w-0 lg:min-w-[240px]">
           <button
             onClick={onMenuToggle}
             disabled={activePage !== "map"}
@@ -75,17 +75,20 @@ export default function Header({
           </button>
           <div
             onClick={() => onNavigate("map")}
-            className="flex items-center gap-2.5 cursor-pointer group min-w-0"
+            className="flex items-center gap-1.5 lg:gap-2.5 cursor-pointer group min-w-0"
           >
             <div className="w-9 h-9 rounded-xl bg-blue-600 dark:bg-primary-container flex items-center justify-center text-white dark:text-on-primary-container shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
               <Logo size={20} className="text-white dark:text-on-primary-container" />
             </div>
-            <h1 className="font-headline-md text-[20px] font-bold text-slate-900 dark:text-on-surface hidden lg:block tracking-tight truncate">Campus Compass</h1>
+            <h1 className="font-headline-md font-bold tracking-tight flex flex-col lg:block leading-[1.1] lg:leading-normal min-w-0">
+              <span className="text-[16px] sm:text-[18px] lg:text-[20px] text-slate-900 dark:text-on-surface truncate">Campus</span>
+              <span className="text-[13px] sm:text-[14px] lg:text-[20px] lg:ml-1 text-blue-600 dark:text-primary lg:text-slate-900 lg:dark:text-on-surface truncate">Compass</span>
+            </h1>
           </div>
         </div>
 
         {/* Center: Navigation Tabs */}
-        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 justify-center px-4">
+        <div className="hidden md:flex flex-1 lg:flex-none lg:absolute lg:left-1/2 lg:-translate-x-1/2 justify-center px-2 lg:px-4 min-w-0">
           <nav className="bg-slate-100/50 dark:bg-surface-container-low/50 backdrop-blur-md p-1 rounded-full border border-slate-200 dark:border-white/10 flex items-center gap-1 relative overflow-hidden" onMouseLeave={() => {
             const activeIndex = TABS.findIndex((t) => t.id === activePage);
             const activeTab = tabsRef.current[activeIndex];
@@ -131,7 +134,7 @@ export default function Header({
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2 md:gap-3 min-w-0 md:min-w-[120px] justify-end">
+        <div className="flex items-center gap-1.5 lg:gap-3 min-w-0 lg:min-w-[240px] justify-end">
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             disabled={activePage !== "map"}
