@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Building, CategoryType } from "../../data/buildings";
+import type { Building } from "../../data/buildings";
 import MapControls from "./MapControls";
 import UserLocation from "./UserLocation";
 import FeedbackButton from "./FeedbackButton";
