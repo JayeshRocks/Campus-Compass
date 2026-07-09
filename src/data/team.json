@@ -42,5 +42,27 @@
     "avatar": "/images/team/AdhyaAgarwal.jpeg",
     "batch": "2026",
     "batchTitle": "Core Team"
+  },
+  {
+    "id": "5",
+    "name": "Anirudh",
+    "role": "Co-Founder",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com/",
+    "linkedin": "https://linkedin.com/",
+    "avatar": "/images/team/Anirudh.jpg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  },
+  {
+    "id": "6",
+    "name": "Pranav",
+    "role": "Co-Founder",
+    "bio": "Short bio placeholder. Add details about their contributions and background here.",
+    "github": "https://github.com/",
+    "linkedin": "https://linkedin.com/",
+    "avatar": "/images/team/Pranav.jpg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
   }
 ]
