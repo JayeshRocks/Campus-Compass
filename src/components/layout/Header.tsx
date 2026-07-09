@@ -157,7 +157,8 @@ export default function Header({
 
           <button
             onClick={onSatelliteToggle}
-            className={`glitch-btn relative overflow-hidden ${glassyButtonClass} ${isSatellite ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-500 dark:text-cyan-400 dark:border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:bg-cyan-500/20' : 'text-slate-600 dark:text-on-surface-variant hover:border-blue-500/50 dark:hover:border-primary/50'}`}
+            disabled={activePage !== "map"}
+            className={`glitch-btn relative overflow-hidden ${glassyButtonClass} ${isSatellite ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-500 dark:text-cyan-400 dark:border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:bg-cyan-500/20' : 'text-slate-600 dark:text-on-surface-variant hover:border-blue-500/50 dark:hover:border-primary/50'} ${activePage !== "map" ? "opacity-30 pointer-events-none" : ""}`}
             data-icon="satellite_alt"
           >
             <span className={`material-symbols-outlined text-[20px] transition-colors ${isSatellite ? '' : 'group-hover:text-blue-600 dark:group-hover:text-primary'}`} style={{ fontVariationSettings: "'FILL' 1" }}>satellite_alt</span>
