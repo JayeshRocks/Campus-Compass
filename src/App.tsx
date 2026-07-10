@@ -13,6 +13,7 @@ import CampusGuide from "./pages/CampusGuide";
 import BottomNav from "./components/layout/BottomNav";
 
 export default function App() {
+  const [showTabsInHeader, setShowTabsInHeader] = useState(true);
   const [activePage, setActivePage] = useState<string>("map");
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (typeof window !== "undefined" && window.innerWidth < 768) {
@@ -106,6 +107,8 @@ export default function App() {
         onSatelliteToggle={() => setIsSatellite(!isSatellite)}
         onNavigate={setActivePage}
         isSidebarOpen={isSidebarOpen}
+        showTabsInHeader={showTabsInHeader}
+        onTabsLayoutChange={setShowTabsInHeader}
       />
 
       {activePage === "map" ? (
@@ -136,7 +139,7 @@ export default function App() {
         </main>
       )}
 
-      <BottomNav activePage={activePage} onNavigate={setActivePage} />
+      <BottomNav activePage={activePage} onNavigate={setActivePage} showTabsInHeader={showTabsInHeader} />
     </>
   );
 }

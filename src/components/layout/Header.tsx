@@ -11,6 +11,9 @@ interface HeaderProps {
   isSatellite: boolean;
   onSatelliteToggle: () => void;
   onNavigate: (page: string) => void;
+  isSidebarOpen?: boolean;
+  showTabsInHeader?: boolean;
+  onTabsLayoutChange?: (show: boolean) => void;
 }
 
 const TABS = [
@@ -31,8 +34,13 @@ export default function Header({
   onSatelliteToggle,
   onNavigate,
   isSidebarOpen,
-}: HeaderProps & { isSidebarOpen?: boolean }) {
+  showTabsInHeader = true,
+  onTabsLayoutChange,
+}: HeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [titleMode, setTitleMode] = useState<'full' | 'short' | 'hidden'>('full');
+  const headerRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 0 });
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);  useEffect(() => {
     // Set timeout ensures layout is painted and offsets are accurate
@@ -51,6 +59,79 @@ export default function Header({
     return () => clearTimeout(timer);
   }, [activePage]);
 
+  // Layout check logic
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const checkLayout = () => {
+      const isVertical = window.innerHeight > window.innerWidth;
+      
+      // If it's a vertical view (like mobile portrait), strongly prefer bottom nav
+      if (isVertical) {
+        if (onTabsLayoutChange && showTabsInHeader) {
+          onTabsLayoutChange(false);
+        }
+        
+        // Evaluate title space
+        const headerW = headerRef.current?.offsetWidth || window.innerWidth;
+        const rightW = rightRef.current?.scrollWidth || 0;
+        const availableForTitle = headerW - rightW - 64; // Menu button + padding
+        
+        if (availableForTitle < 120) {
+          setTitleMode('hidden');
+        } else if (availableForTitle < 240) {
+          setTitleMode('short');
+        } else {
+          setTitleMode('full');
+        }
+        return;
+      }
+
+      // Horizontal orientation logic
+      const headerW = headerRef.current?.offsetWidth || window.innerWidth;
+      const rightW = rightRef.current?.scrollWidth || 0;
+      
+      // Space for tabs and title
+      const availableSpace = headerW - rightW - 64; 
+      
+      const TABS_WIDTH = 460; // Increased to ensure safe margin for tabs
+      const TITLE_FULL_W = 260; // Width of side-by-side title
+      const TITLE_SHORT_W = 120; // Width of stacked title
+      
+      let newTitleMode: 'full' | 'short' | 'hidden' = 'full';
+      let tabsFit = true;
+      
+      if (TITLE_FULL_W + TABS_WIDTH <= availableSpace) {
+        newTitleMode = 'full';
+        tabsFit = true;
+      } else if (TITLE_SHORT_W + TABS_WIDTH <= availableSpace) {
+        newTitleMode = 'short';
+        tabsFit = true;
+      } else if (TABS_WIDTH <= availableSpace) {
+        newTitleMode = 'hidden';
+        tabsFit = true;
+      } else {
+        // Hide tabs, show short or full title if tabs go to bottom depending on space
+        tabsFit = false;
+        // recalculate title mode with tabs gone
+        if (TITLE_FULL_W <= availableSpace + TABS_WIDTH) {
+           newTitleMode = 'full';
+        } else {
+           newTitleMode = 'short';
+        }
+      }
+      
+      setTitleMode(newTitleMode);
+      if (onTabsLayoutChange && showTabsInHeader !== tabsFit) {
+        onTabsLayoutChange(tabsFit);
+      }
+    };
+
+    checkLayout();
+    window.addEventListener('resize', checkLayout);
+    return () => window.removeEventListener('resize', checkLayout);
+  }, [showTabsInHeader, onTabsLayoutChange]);
+
   // If search query is typed, automatically open the search bar
   useEffect(() => {
     if (searchQuery && !isSearchOpen) {
@@ -63,7 +144,7 @@ export default function Header({
 
   return (
     <>
-      <header className="liquid-glass fixed top-0 w-full h-[64px] flex items-center justify-between px-gutter z-[100]">
+      <header ref={headerRef} className="liquid-glass fixed top-0 w-full h-[64px] flex items-center justify-between px-gutter z-[100]">
         {/* Left: Branding & Menu */}
         <div className="flex items-center gap-1.5 lg:gap-4 min-w-0 lg:min-w-[240px]">
           <button
@@ -80,16 +161,19 @@ export default function Header({
             <div className="w-9 h-9 rounded-xl bg-blue-600 dark:bg-primary-container flex items-center justify-center text-white dark:text-on-primary-container shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
               <Logo size={20} className="text-white dark:text-on-primary-container" />
             </div>
-            <h1 className="font-headline-md font-bold tracking-tight flex flex-col lg:block leading-[1.1] lg:leading-normal min-w-0">
-              <span className="text-[16px] sm:text-[18px] lg:text-[20px] text-slate-900 dark:text-on-surface truncate">Campus</span>
-              <span className="text-[13px] sm:text-[14px] lg:text-[20px] lg:ml-1 text-blue-600 dark:text-primary lg:text-slate-900 lg:dark:text-on-surface truncate">Compass</span>
-            </h1>
+            {titleMode !== 'hidden' && (
+              <h1 className={`font-headline-md font-bold tracking-tight min-w-0 ${titleMode === 'short' ? 'flex flex-col justify-center items-start leading-[1.1]' : 'flex items-baseline gap-1'}`}>
+                <span className="block text-[16px] sm:text-[18px] lg:text-[20px] text-slate-900 dark:text-on-surface truncate">Campus</span>
+                <span className={`block text-[13px] sm:text-[14px] lg:text-[20px] text-blue-600 dark:text-primary truncate ${titleMode === 'full' ? 'lg:text-slate-900 lg:dark:text-on-surface' : ''}`}>Compass</span>
+              </h1>
+            )}
           </div>
         </div>
 
         {/* Center: Navigation Tabs */}
-        <div className="hidden md:flex flex-1 lg:flex-none lg:absolute lg:left-1/2 lg:-translate-x-1/2 justify-center px-2 lg:px-4 min-w-0">
-          <nav className="bg-slate-100/50 dark:bg-surface-container-low/50 backdrop-blur-md p-1 rounded-full border border-slate-200 dark:border-white/10 flex items-center gap-1 relative overflow-hidden" onMouseLeave={() => {
+        {showTabsInHeader && (
+          <div className="flex flex-1 lg:flex-none lg:absolute lg:left-1/2 lg:-translate-x-1/2 justify-center px-2 lg:px-4 min-w-0">
+            <nav className="bg-slate-100/50 dark:bg-surface-container-low/50 backdrop-blur-md p-1 rounded-full border border-slate-200 dark:border-white/10 flex items-center gap-1 relative overflow-hidden" onMouseLeave={() => {
             const activeIndex = TABS.findIndex((t) => t.id === activePage);
             const activeTab = tabsRef.current[activeIndex];
             if (activeTab) {
@@ -132,9 +216,10 @@ export default function Header({
             })}
           </nav>
         </div>
+        )}
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-1.5 lg:gap-3 min-w-0 lg:min-w-[240px] justify-end">
+        <div ref={rightRef} className="flex items-center gap-1.5 lg:gap-3 min-w-0 lg:min-w-[240px] justify-end">
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             disabled={activePage !== "map"}

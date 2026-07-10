@@ -68,11 +68,15 @@ export default function MapView({
     map.on('movestart', resetWeatherTimer);
     map.on('zoomstart', resetWeatherTimer);
     map.on('dragstart', resetWeatherTimer);
+    map.on('mousemove', resetWeatherTimer);
+    map.on('touchstart', resetWeatherTimer);
 
     return () => {
       map.off('movestart', resetWeatherTimer);
       map.off('zoomstart', resetWeatherTimer);
       map.off('dragstart', resetWeatherTimer);
+      map.off('mousemove', resetWeatherTimer);
+      map.off('touchstart', resetWeatherTimer);
     };
   }, [map]);
 

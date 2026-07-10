@@ -3,6 +3,7 @@
 interface BottomNavProps {
   activePage: string;
   onNavigate: (page: string) => void;
+  showTabsInHeader?: boolean;
 }
 
 const TABS = [
@@ -12,9 +13,11 @@ const TABS = [
   { id: "about", label: "About", icon: "info" },
 ];
 
-export default function BottomNav({ activePage, onNavigate }: BottomNavProps) {
+export default function BottomNav({ activePage, onNavigate, showTabsInHeader = false }: BottomNavProps) {
+  if (showTabsInHeader) return null;
+
   return (
-    <div className="md:hidden fixed bottom-[17px] left-4 right-4 z-[110]">
+    <div className="fixed bottom-[17px] left-4 right-4 z-[110]">
       <div className="liquid-glass rounded-3xl p-2 flex items-center justify-around">
         {TABS.map((tab) => {
           const isActive = activePage === tab.id;
