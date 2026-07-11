@@ -91,12 +91,12 @@ export default function Header({
       const headerW = headerRef.current?.offsetWidth || window.innerWidth;
       const rightW = rightRef.current?.scrollWidth || 0;
       
-      // Space for tabs and title
-      const availableSpace = headerW - rightW - 64; 
+      // Space for tabs and title (added larger safety margin for padding/gaps)
+      const availableSpace = headerW - rightW - 120; 
       
-      const TABS_WIDTH = 460; // Increased to ensure safe margin for tabs
-      const TITLE_FULL_W = 260; // Width of side-by-side title
-      const TITLE_SHORT_W = 120; // Width of stacked title
+      const TABS_WIDTH = 560; // Increased for extra safety and actual physical width
+      const TITLE_FULL_W = 320; 
+      const TITLE_SHORT_W = 180; 
       
       let newTitleMode: 'full' | 'short' | 'hidden' = 'full';
       let tabsFit = true;
@@ -113,11 +113,13 @@ export default function Header({
       } else {
         // Hide tabs, show short or full title if tabs go to bottom depending on space
         tabsFit = false;
-        // recalculate title mode with tabs gone
-        if (TITLE_FULL_W <= availableSpace + TABS_WIDTH) {
+        // recalculate title mode with tabs gone (using the space available to just the title)
+        if (TITLE_FULL_W <= availableSpace + TABS_WIDTH) { // Note: Adding back TABS_WIDTH because availableSpace assumes tabs were there.
            newTitleMode = 'full';
-        } else {
+        } else if (TITLE_SHORT_W <= availableSpace + TABS_WIDTH) {
            newTitleMode = 'short';
+        } else {
+           newTitleMode = 'hidden';
         }
       }
       
@@ -146,7 +148,7 @@ export default function Header({
     <>
       <header ref={headerRef} className="liquid-glass fixed top-0 w-full h-[64px] flex items-center justify-between px-gutter z-[100]">
         {/* Left: Branding & Menu */}
-        <div className="flex items-center gap-1.5 lg:gap-4 min-w-0 lg:min-w-[240px]">
+        <div className="flex items-center gap-3 lg:gap-6 min-w-0 lg:min-w-[240px]">
           <button
             onClick={onMenuToggle}
             disabled={activePage !== "map"}
@@ -172,7 +174,7 @@ export default function Header({
 
         {/* Center: Navigation Tabs */}
         {showTabsInHeader && (
-          <div className="flex flex-1 lg:flex-none lg:absolute lg:left-1/2 lg:-translate-x-1/2 justify-center px-2 lg:px-4 min-w-0">
+          <div className="flex flex-1 justify-center px-2 lg:px-4 min-w-0">
             <nav className="bg-slate-100/50 dark:bg-surface-container-low/50 backdrop-blur-md p-1 rounded-full border border-slate-200 dark:border-white/10 flex items-center gap-1 relative overflow-hidden" onMouseLeave={() => {
             const activeIndex = TABS.findIndex((t) => t.id === activePage);
             const activeTab = tabsRef.current[activeIndex];

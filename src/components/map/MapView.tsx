@@ -17,6 +17,7 @@ interface MapViewProps {
   isSidebarOpen: boolean;
   isDarkMode: boolean;
   isSatellite: boolean;
+  showTabsInHeader: boolean;
 }
 
 
@@ -28,6 +29,7 @@ export default function MapView({
   isSidebarOpen,
   isDarkMode,
   isSatellite,
+  showTabsInHeader,
 }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
@@ -98,7 +100,7 @@ export default function MapView({
       sources: {
         "esri-satellite": {
           type: "raster",
-          tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+          tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?blankTile=false"],
           tileSize: 256,
           maxzoom: 19
         }
@@ -238,7 +240,7 @@ export default function MapView({
             "esri-satellite": {
               type: "raster",
               tiles: [
-                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?blankTile=false"
               ],
               tileSize: 256,
               maxzoom: 19
@@ -419,13 +421,14 @@ export default function MapView({
         onZoomOut={handleZoomOut}
         onResetCompass={handleResetCompass}
         onLocateUser={handleLocateUser}
+        hasBottomNav={!showTabsInHeader}
       />
       
       {/* Weather Widget */}
       <WeatherWidget isVisible={isWeatherVisible} isSidebarOpen={isSidebarOpen} />
 
       {/* Feedback Button Component */}
-      <FeedbackButton onClick={() => setShowReportIssue(true)} />
+      <FeedbackButton onClick={() => setShowReportIssue(true)} hasBottomNav={!showTabsInHeader} />
 
       {/* Slide-in Building Info Card */}
       <aside

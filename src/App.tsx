@@ -11,38 +11,26 @@ import ReportLocation from "./pages/ReportLocation";
 import RoleModal, { type UserRole } from "./components/RoleModal";
 import CampusGuide from "./pages/CampusGuide";
 import BottomNav from "./components/layout/BottomNav";
+import CookieBanner from "./components/ui/CookieBanner";
 
 export default function App() {
   const [showTabsInHeader, setShowTabsInHeader] = useState(true);
   const [activePage, setActivePage] = useState<string>("map");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
-      return false; // Always closed on first view / reload on mobile
-    }
-    const saved = localStorage.getItem("isSidebarOpen");
-    return saved ? JSON.parse(saved) : true;
-  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
-    null,
-  );
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem("theme");
     return saved ? saved === "dark" : true;
   });
   const [isSatellite, setIsSatellite] = useState(() => {
     const saved = localStorage.getItem("isSatellite");
-    return saved ? JSON.parse(saved) : true;
+    return saved ? JSON.parse(saved) : false;
   });
   const [userRole, setUserRole] = useState<UserRole | null>(
     () => localStorage.getItem("userRole") as UserRole | null,
   );
-
-  // Sync sidebar state
-  useEffect(() => {
-    localStorage.setItem("isSidebarOpen", JSON.stringify(isSidebarOpen));
-  }, [isSidebarOpen]);
 
   // Filter buildings dynamically based on category and search
   const filteredBuildings = buildings.filter((building) => {
@@ -126,6 +114,7 @@ export default function App() {
             isSidebarOpen={isSidebarOpen}
             isDarkMode={isDarkMode}
             isSatellite={isSatellite}
+            showTabsInHeader={showTabsInHeader}
           />
         </main>
       ) : (
@@ -139,7 +128,12 @@ export default function App() {
         </main>
       )}
 
-      <BottomNav activePage={activePage} onNavigate={setActivePage} showTabsInHeader={showTabsInHeader} />
+      <BottomNav
+        activePage={activePage}
+        onNavigate={setActivePage}
+        showTabsInHeader={showTabsInHeader}
+      />
+      <CookieBanner />
     </>
   );
 }
