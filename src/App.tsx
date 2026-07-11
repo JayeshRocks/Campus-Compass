@@ -76,7 +76,6 @@ export default function App() {
       selectedBuilding &&
       !filteredBuildings.some((b) => b.id === selectedBuilding.id)
     ) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedBuilding(null);
     }
   }, [filteredBuildings, selectedBuilding]);
@@ -106,6 +105,7 @@ export default function App() {
             onClose={() => setIsSidebarOpen(false)}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
+            showTabsInHeader={showTabsInHeader}
           />
           <MapView
             buildings={filteredBuildings}

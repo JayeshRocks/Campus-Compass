@@ -6,6 +6,7 @@ interface SidebarProps {
   onClose?: () => void;
   activeCategory: CategoryType;
   onCategoryChange: (category: CategoryType) => void;
+  showTabsInHeader?: boolean;
 }
 
 const ALL_CATEGORIES = [
@@ -25,6 +26,7 @@ export default function Sidebar({
   onClose,
   activeCategory,
   onCategoryChange,
+  showTabsInHeader = true,
 }: SidebarProps) {
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0, opacity: 0 });
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
@@ -49,13 +51,15 @@ export default function Sidebar({
     <>
       {/* Mobile Backdrop */}
       <div 
-        className={`md:hidden fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md z-[90] transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`${showTabsInHeader ? "hidden" : "fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md z-[90] transition-opacity duration-300"} ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={onClose}
       />
       
       <nav
-        className={`liquid-glass fixed left-0 md:left-4 top-[68px] md:top-[80px] h-[calc(100dvh-161px)] md:h-[calc(100dvh-96px)] w-[85vw] max-w-[320px] md:w-sidebar_width rounded-r-2xl md:rounded-2xl flex flex-col z-[95] transition-transform duration-300 overflow-hidden ${
-          isOpen ? "translate-x-0" : "-translate-x-full md:-translate-x-[110%] pointer-events-none"
+        className={`liquid-glass fixed flex flex-col z-[95] transition-transform duration-300 overflow-hidden ${
+          !showTabsInHeader 
+            ? `left-0 top-[68px] h-[calc(100dvh-161px)] w-[85vw] max-w-[320px] rounded-r-2xl ${isOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"}`
+            : `left-4 top-[80px] h-[calc(100dvh-96px)] w-sidebar_width rounded-2xl ${isOpen ? "translate-x-0" : "-translate-x-[110%] pointer-events-none"}`
         }`}
       >
       {/* Scrollable Categories */}
