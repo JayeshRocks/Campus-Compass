@@ -190,9 +190,17 @@ export default function MeetTeam() {
           <p className="font-body-md text-slate-600 dark:text-on-surface-variant mb-8 relative z-10">
             We're always looking for talented MIT Bengaluru students to help expand our navigation ecosystem.
           </p>
-          <button className="bg-primary-container text-on-primary-container font-headline-md text-lg px-8 py-3.5 rounded-xl hover:shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:brightness-110 active:scale-95 transition-all relative z-10 font-medium">
-            Apply for Internship
-          </button>
+          <div className="relative inline-block z-10 mt-2">
+            <button 
+              disabled
+              className="bg-primary-container/50 text-on-primary-container/50 dark:bg-primary-container/30 dark:text-on-primary-container/30 font-headline-md text-lg px-8 py-3.5 rounded-xl cursor-not-allowed transition-all font-medium opacity-70"
+            >
+              Apply for Internship
+            </button>
+            <div className="absolute -top-3 -right-4 bg-red-500 text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full shadow-lg transform rotate-6 border-2 border-white dark:border-slate-900 uppercase tracking-wider whitespace-nowrap">
+              Currently Not Available
+            </div>
+          </div>
         </div>
       </div>
 
