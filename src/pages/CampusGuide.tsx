@@ -169,11 +169,12 @@ export default function CampusGuide() {
             <p className="text-body-md text-slate-600 dark:text-on-surface-variant text-lg">Quick guides to help you navigate campus life.</p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { icon: 'apartment', title: 'Hostel Guide', desc: 'Everything you need to know about hostel life.', accent: '#F5A356', tint: '#FBEADC', link: '/pdfs/Hostel Guide.pdf' },
               { icon: 'wifi', title: 'Wi-Fi Setup', desc: 'Connect your laptop and phone to campus Wi-Fi.', accent: '#5B6EF5', tint: '#E3E6FD', link: '/pdfs/iBus Wi-Fi Registration.pdf' },
               { icon: 'school', title: 'Academic Guide', desc: 'Detailed academic guidelines and procedures.', accent: '#9B8AFB', tint: '#ECE8FB', link: '/pdfs/Academic Guide.pdf' },
+              { icon: 'calendar_month', title: 'Academic Calendar', desc: 'Official dates for semesters, exams, and holidays.', accent: '#10B981', tint: '#D1FAE5', link: '/pdfs/Academic Calendar.pdf' },
               { icon: 'menu_book', title: 'Campus Rules', desc: 'Important rules and transport guidelines.', accent: '#E8574F', tint: '#FBE1DF', link: '/pdfs/Campus Rules and Transport.pdf' },
               { icon: 'restaurant', title: 'Mess Timings', desc: 'Daily breakfast, lunch and dinner timings.', accent: '#4CAF7D', tint: '#E1F5EA', link: '/pdfs/Mess Timings.pdf' },
               { icon: 'groups', title: 'Student Clubs', desc: 'Explore technical, cultural and sports clubs.', accent: '#F06BA8', tint: '#FCE4EF', link: '/pdfs/Student Clubs.pdf' },
@@ -247,17 +248,13 @@ export default function CampusGuide() {
                 </div>
                 <h2 className="font-headline-lg text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">Still have questions?</h2>
                 <p className="text-body-lg text-white/90 dark:text-slate-300 text-lg mb-8 max-w-lg">
-                  Reach out to the student team for assistance, or continue exploring the interactive campus map.
+                  Reach out to the student team for assistance or feedback on the platform.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-                  <a href="mailto:support.mitb@mahe.edu" className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-[#1A94A6] dark:text-white rounded-xl font-label-lg font-bold transition-all shadow-lg flex items-center justify-center gap-2 group/btn backdrop-blur-md dark:border dark:border-white/5">
+                  <a href="mailto:CampusCompass.mitblr@gmail.com" className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-primary hover:bg-slate-50 dark:hover:brightness-110 text-[#1A94A6] dark:text-on-primary rounded-xl font-label-lg font-bold transition-all shadow-lg flex items-center justify-center gap-2 group/btn">
                     <span className="material-symbols-outlined text-[20px] group-hover/btn:scale-110 transition-transform">chat</span>
                     Contact Team
-                  </a>
-                  <a href="/" className="w-full sm:w-auto px-8 py-3.5 bg-[#1A94A6]/50 hover:bg-[#146A78]/60 dark:bg-white/5 dark:hover:bg-white/10 backdrop-blur-md text-white border border-white/20 dark:border-white/5 rounded-xl font-label-lg font-bold transition-all flex items-center justify-center gap-2 group/btn">
-                    <span className="material-symbols-outlined text-[20px] group-hover/btn:scale-110 transition-transform">map</span>
-                    Open Campus Map
                   </a>
                 </div>
               </div>

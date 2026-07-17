@@ -227,7 +227,7 @@ export default function MeetTeam() {
               </div>
               <button 
                 disabled
-                className="bg-slate-100/50 text-slate-400 dark:bg-white/5 dark:text-white/40 font-headline-md text-lg px-10 py-4 rounded-2xl cursor-not-allowed font-medium border border-slate-200/50 dark:border-white/5 backdrop-blur-md transition-all shadow-inner"
+                className="bg-white dark:bg-primary text-[#1A94A6] dark:text-on-primary font-headline-md text-lg px-10 py-4 rounded-2xl cursor-not-allowed opacity-60 font-bold shadow-lg transition-all"
               >
                 Apply for Internship
               </button>

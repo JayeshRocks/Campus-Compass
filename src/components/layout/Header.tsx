@@ -46,7 +46,11 @@ export default function Header({
   const headerRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 0 });
-  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);  useEffect(() => {
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const headerSearchButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
     // Set timeout ensures layout is painted and offsets are accurate
     const timer = setTimeout(() => {
       const activeIndex = TABS.findIndex((t) => t.id === activePage);
@@ -86,11 +90,29 @@ export default function Header({
 
   // If search query is typed, automatically open the search bar
   useEffect(() => {
-    if (searchQuery && !isSearchOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (searchQuery) {
       setIsSearchOpen(true);
     }
-  }, [searchQuery, isSearchOpen]);
+  }, [searchQuery]);
+
+  // Handle clicking outside the search bar to close and clear it
+  useEffect(() => {
+    if (!isSearchOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      // Don't close if clicking the header search button (it has its own toggle logic)
+      if (headerSearchButtonRef.current?.contains(e.target as Node)) return;
+      
+      // Close and clear if clicking outside the search container
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
+        onSearchChange("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSearchOpen, onSearchChange]);
 
   const glassyButtonClass = "p-2 rounded-full border border-slate-200/60 dark:border-white/10 bg-white/50 dark:bg-white/10 backdrop-blur-md shadow-sm transition-all hover:bg-white/80 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md cursor-pointer active:scale-95 flex items-center justify-center group";
 
@@ -171,7 +193,11 @@ export default function Header({
         {/* Right: Actions */}
         <div ref={rightRef} className="flex flex-1 items-center gap-1.5 lg:gap-3 justify-end min-w-0">
           <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            ref={headerSearchButtonRef}
+            onClick={() => {
+              if (isSearchOpen) onSearchChange("");
+              setIsSearchOpen(!isSearchOpen);
+            }}
             disabled={activePage !== "map"}
             className={`${glassyButtonClass} ${
               activePage !== "map"
@@ -207,7 +233,7 @@ export default function Header({
 
       {/* Floating Glassmorphism Search Bar */}
       {isSearchOpen && activePage === "map" && (
-        <div className={`fixed top-[80px] left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-[85] md:w-[calc(100%-2rem)] md:max-w-lg animate-fade-in transition-all duration-300 ${isSidebarOpen ? "md:ml-[140px]" : ""}`}>
+        <div ref={searchContainerRef} className={`fixed top-[80px] left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-[85] md:w-[calc(100%-2rem)] md:max-w-lg animate-fade-in transition-all duration-300 ${isSidebarOpen ? "md:ml-[140px]" : ""}`}>
           <div className="liquid-glass relative rounded-2xl p-2.5 flex items-center gap-3 transition-shadow hover:shadow-[#22B8CF]/20 dark:hover:shadow-primary/20 ring-2 ring-white/60 dark:ring-white/10 shadow-xl overflow-hidden">
             {/* Extra opacity layer exclusively for dark mode */}
             <div className="absolute inset-0 bg-slate-900/60 hidden dark:block -z-10 pointer-events-none"></div>
@@ -223,8 +249,8 @@ export default function Header({
             />
             <button
               onClick={() => {
+                onSearchChange("");
                 setIsSearchOpen(false);
-                if (!searchQuery) onSearchChange("");
               }}
               className="p-1.5 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/10 text-slate-700 dark:text-on-surface transition-colors relative z-10"
             >

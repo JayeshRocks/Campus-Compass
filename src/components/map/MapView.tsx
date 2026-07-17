@@ -136,6 +136,9 @@ export default function MapView({
   const buildingsRef = useRef(buildings);
   useEffect(() => { buildingsRef.current = buildings; }, [buildings]);
 
+  const activeBuildingIdsRef = useRef(activeBuildingIds);
+  useEffect(() => { activeBuildingIdsRef.current = activeBuildingIds; }, [activeBuildingIds]);
+
   const isSatelliteRef = useRef(isSatellite);
   useEffect(() => { isSatelliteRef.current = isSatellite; }, [isSatellite]);
 
@@ -285,9 +288,16 @@ export default function MapView({
 
     const addBuildingLayers = () => {
       if (!mapInstance.getSource("campus-buildings")) {
+        const isFiltering = activeBuildingIdsRef.current && activeBuildingIdsRef.current.size < buildingsRef.current.length;
         const geojsonFeatures = buildingsRef.current.map(b => ({
           type: "Feature",
-          properties: { id: b.id, name: b.name, shortName: b.shortName, category: b.category },
+          properties: { 
+            id: b.id, 
+            name: b.name, 
+            shortName: b.shortName, 
+            category: b.category,
+            isActive: isFiltering ? activeBuildingIdsRef.current?.has(b.id) : true
+          },
           geometry: b.geometry
         }));
 
@@ -306,34 +316,39 @@ export default function MapView({
           source: "campus-buildings",
           paint: {
             "fill-extrusion-color": [
-              "match",
-              ["get", "id"],
-              "cricket_field", "#22c55e",
-              "football_field", "#15803d",
-              "volleyball_courts", "#4ade80",
-              "basketball_court_1", "#16a34a",
-              "basketball_half_court", "#16a34a",
-              "cricket_nets", "#86efac",
-              "mlcp_15", "#ef4444",
-              "gate_1", "#2dd4bf",
-              "gate_2", "#2dd4bf",
-              "gate_3", "#2dd4bf",
-              "blue_dove_mess", "#ef4444",
-              "ta_pai", "#eab308",
-              "cub_13", "#ec4899",
-              "cub_14", "#ec4899",
-              "laundry", "#f97316",
+              "case",
+              ["==", ["get", "isActive"], false],
+              isDarkMode ? "#334155" : "#e2e8f0",
               [
                 "match",
-                ["get", "category"],
-                "academic", "#06b6d4",
-                "hostels", "#f97316",
-                "food", "#eab308",
-                "sports", "#22c55e",
-                "admin", "#ec4899",
-                "parking", "#ef4444",
-                "security", "#2dd4bf",
-                "#94a3b8"
+                ["get", "id"],
+                "cricket_field", "#22c55e",
+                "football_field", "#15803d",
+                "volleyball_courts", "#4ade80",
+                "basketball_court_1", "#16a34a",
+                "basketball_half_court", "#16a34a",
+                "cricket_nets", "#86efac",
+                "mlcp_15", "#ef4444",
+                "gate_1", "#2dd4bf",
+                "gate_2", "#2dd4bf",
+                "gate_3", "#2dd4bf",
+                "blue_dove_mess", "#ef4444",
+                "ta_pai", "#eab308",
+                "cub_13", "#ec4899",
+                "cub_14", "#ec4899",
+                "laundry", "#f97316",
+                [
+                  "match",
+                  ["get", "category"],
+                  "academic", "#06b6d4",
+                  "hostels", "#f97316",
+                  "food", "#eab308",
+                  "sports", "#22c55e",
+                  "admin", "#ec4899",
+                  "parking", "#ef4444",
+                  "security", "#2dd4bf",
+                  "#94a3b8"
+                ]
               ]
             ],
             "fill-extrusion-height": [
@@ -377,8 +392,14 @@ export default function MapView({
           type: "line",
           source: "campus-buildings",
           paint: {
-            "line-color": "#0ea5e9",
-            "line-width": 1.5
+            "line-color": [
+              "case",
+              ["==", ["get", "isActive"], false],
+              isDarkMode ? "#475569" : "#cbd5e1",
+              "#0ea5e9"
+            ],
+            "line-width": 1.5,
+            "line-opacity": 1
           }
         });
 
@@ -574,12 +595,16 @@ export default function MapView({
     if (!map) return;
     const source = map.getSource("campus-buildings") as maplibregl.GeoJSONSource;
     if (source) {
-      const visibleBuildings = activeBuildingIds
-        ? buildings.filter(b => activeBuildingIds.has(b.id))
-        : buildings;
-      const geojsonFeatures = visibleBuildings.map(b => ({
+      const isFiltering = activeBuildingIds && activeBuildingIds.size < buildings.length;
+      const geojsonFeatures = buildings.map(b => ({
         type: "Feature",
-        properties: { id: b.id, name: b.name, shortName: b.shortName, category: b.category },
+        properties: { 
+          id: b.id, 
+          name: b.name, 
+          shortName: b.shortName, 
+          category: b.category,
+          isActive: isFiltering ? activeBuildingIds.has(b.id) : true
+        },
         geometry: b.geometry
       }));
       source.setData({
