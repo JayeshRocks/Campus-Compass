@@ -171,6 +171,22 @@ html.dark .page-blobs {
   background-color: rgba(148, 163, 184, 0.5);
 }
 
+/* Custom scrollbar for main pages (offsets below the fixed header) */
+.page-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.page-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin-top: 64px; /* avoid fixed header */
+}
+.page-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+}
+.page-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.6);
+}
+
 /* MapLibre custom popup style (Light default) */
 .campus-custom-popup .maplibregl-popup-content {
   background: rgba(255, 255, 255, 0.9) !important;
@@ -240,6 +256,13 @@ html.dark .sidebar-scroll::-webkit-scrollbar-thumb {
 }
 html.dark .sidebar-scroll:hover::-webkit-scrollbar-thumb {
   background-color: rgba(67, 70, 85, 0.5);
+}
+
+html.dark .page-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(67, 70, 85, 0.4);
+}
+html.dark .page-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(67, 70, 85, 0.6);
 }
 
 /* MapLibre custom popup dark style override */

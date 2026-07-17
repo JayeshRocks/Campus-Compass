@@ -20,7 +20,7 @@ export default function CampusGuide() {
   }, []);
 
   return (
-    <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
+    <div className="h-full w-full page-blobs page-scroll text-slate-900 dark:text-on-surface px-6 md:px-12 pb-6 md:pb-12 pt-24 md:pt-32 overflow-y-auto">
       <div className="max-w-6xl mx-auto space-y-16 pb-8">
         {/* Campus Contacts Section */}
         <section className="animate-fade-in">

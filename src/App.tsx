@@ -178,7 +178,7 @@ export default function App() {
           />
         </main>
       ) : (
-        <main className={`pt-[64px] ${!showTabsInHeader ? 'pb-[90px]' : ''} relative h-[100dvh] w-full overflow-hidden`}>
+        <main className={`${!showTabsInHeader ? 'pb-[90px]' : ''} relative h-[100dvh] w-full overflow-hidden`}>
           {activePage === "home" && <Home />}
           {activePage === "about" && <About />}
           {activePage === "campus-guide" && <CampusGuide />}

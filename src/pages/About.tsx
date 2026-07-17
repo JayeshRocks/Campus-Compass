@@ -21,12 +21,12 @@ export default function About() {
   }, []);
 
   return (
-    <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto relative">
+    <div className="h-full w-full page-blobs page-scroll text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#16233F]/50 pointer-events-none hidden dark:block"></div>
       
       <div className="max-w-5xl mx-auto relative z-10 pb-8">
         {/* Hero Section */}
-        <div className="text-center mb-16 animate-fade-in relative pt-4 md:pt-8">
+        <div className="text-center mb-16 animate-fade-in relative pt-20 md:pt-28">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none"></div>
           
           <div className="w-24 h-24 rounded-[2rem] bg-[#D7F3F6] dark:bg-surface-container-high/50 mx-auto flex items-center justify-center mb-8 border border-[#B7E9ED] dark:border-white/10 relative shadow-2xl overflow-hidden group">
