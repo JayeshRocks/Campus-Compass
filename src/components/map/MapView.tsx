@@ -38,9 +38,44 @@ export default function MapView({
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [is3D, setIs3D] = useState(true);
+  const [bearing, setBearing] = useState(-17);
   const [showRoads, setShowRoads] = useState(true);
   const showRoadsRef = useRef(showRoads);
   useEffect(() => { showRoadsRef.current = showRoads; }, [showRoads]);
+
+  const prevIs3DRef = useRef(is3D);
+  const prevShowRoadsRef = useRef(showRoads);
+
+  useEffect(() => {
+    if (!map) return;
+    if (isSatellite) {
+      prevIs3DRef.current = is3D;
+      prevShowRoadsRef.current = showRoads;
+      
+      if (showRoads) {
+        setShowRoads(false);
+        if (map.getLayer("campus-roads-line")) {
+          map.setLayoutProperty("campus-roads-line", "visibility", "none");
+        }
+      }
+      if (is3D) {
+        setIs3D(false);
+        map.easeTo({ pitch: 0, bearing: 0, duration: 800 });
+      }
+    } else {
+      if (prevShowRoadsRef.current && !showRoads) {
+        setShowRoads(true);
+        if (map.getLayer("campus-roads-line")) {
+          map.setLayoutProperty("campus-roads-line", "visibility", "visible");
+        }
+      }
+      if (prevIs3DRef.current && !is3D) {
+        setIs3D(true);
+        map.easeTo({ pitch: 55, bearing: -17, duration: 800 });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSatellite, map]);
   const fetchRoadsRef = useRef<(() => Promise<void>) | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distanceM: number; durationS: number } | null>(null);
   const navigatingBuildingRef = useRef<typeof selectedBuilding>(null);
@@ -164,7 +199,9 @@ export default function MapView({
       dragRotate: true,
     });
 
-    mapInstance.touchZoomRotate.disableRotation();
+    mapInstance.on('rotate', () => {
+      setBearing(mapInstance.getBearing());
+    });
 
     // Fetch real road/path geometry from OpenStreetMap (Overpass API) for the
     // campus bounding box and render it as a road layer under the buildings.
@@ -173,91 +210,73 @@ export default function MapView({
       roadsFetchStartedRef.current = true;
       console.log("[roads] fetchRoads() called");
 
-      // Try several free public Overpass mirrors in order — the main
-      // instance frequently times out (504) under load.
-      const mirrors = [
-        "https://overpass-api.de/api/interpreter",
-        "https://overpass.kumi.systems/api/interpreter",
-        "https://overpass.openstreetmap.ru/api/interpreter",
-      ];
-      const bbox = "13.118,77.578,13.135,77.598"; // south,west,north,east
-      const query = `[out:json][timeout:25];(way["highway"](${bbox}););out geom;`;
-
-      let data: { elements?: unknown[] } | null = null;
-
-      for (const mirror of mirrors) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tryAddLayer = (features: any) => {
+        if (!mapInstance.isStyleLoaded()) {
+          setTimeout(() => tryAddLayer(features), 200);
+          return;
+        }
         try {
-          console.log("[roads] trying mirror:", mirror);
-          const res = await fetch(mirror, { method: "POST", body: query });
-          console.log("[roads] response status:", res.status, "from", mirror);
-          if (res.ok) {
-            data = await res.json();
-            break;
+          if (mapInstance.getSource("campus-roads")) {
+            (mapInstance.getSource("campus-roads") as maplibregl.GeoJSONSource).setData({
+              type: "FeatureCollection",
+              features: features as any,
+            });
+            console.log("[roads] updated existing source");
+          } else {
+            mapInstance.addSource("campus-roads", {
+              type: "geojson",
+              data: { type: "FeatureCollection", features },
+            });
+            mapInstance.addLayer(
+              {
+                id: "campus-roads-line",
+                type: "line",
+                source: "campus-roads",
+                layout: {
+                  "line-join": "round",
+                  "line-cap": "round",
+                  visibility: showRoadsRef.current ? "visible" : "none",
+                },
+                paint: {
+                  "line-color": isDarkMode ? "#64748b" : "#94a3b8",
+                  "line-width": 3,
+                  "line-opacity": 0.9,
+                },
+              },
+              mapInstance.getLayer("campus-buildings-fill") ? "campus-buildings-fill" : undefined
+            );
+            console.log("[roads] added new source + layer");
           }
         } catch (err) {
-          console.warn("[roads] mirror failed:", mirror, err);
+          console.error("[roads] error adding layer:", err);
         }
-      }
+      };
 
-      if (!data) {
-        console.error("[roads] all mirrors failed, will retry on next style load");
-        roadsFetchStartedRef.current = false;
-        return;
+      try {
+        const cached = localStorage.getItem("campus-roads-cache");
+        if (cached) {
+          const features = JSON.parse(cached);
+          console.log("[roads] loaded from cache instantly");
+          tryAddLayer(features);
+          return;
+        }
+      } catch (err) {
+        console.warn("[roads] cache read failed", err);
       }
 
       try {
-        console.log("[roads] elements received:", data.elements?.length);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const features = (data.elements || [])
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .filter((el: any) => el.type === "way" && el.geometry)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .map((el: any) => ({
-            type: "Feature",
-            properties: { highway: el.tags?.highway || "road" },
-            geometry: {
-              type: "LineString",
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              coordinates: el.geometry.map((g: any) => [g.lon, g.lat]),
-            },
-          }));
-        console.log("[roads] features built:", features.length);
-
-        if (mapInstance.getSource("campus-roads")) {
-          (mapInstance.getSource("campus-roads") as maplibregl.GeoJSONSource).setData({
-            type: "FeatureCollection",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            features: features as any,
-          });
-          console.log("[roads] updated existing source");
-        } else if (mapInstance.isStyleLoaded()) {
-          mapInstance.addSource("campus-roads", {
-            type: "geojson",
-            data: { type: "FeatureCollection", features },
-          });
-          mapInstance.addLayer(
-            {
-              id: "campus-roads-line",
-              type: "line",
-              source: "campus-roads",
-              layout: {
-                "line-join": "round",
-                "line-cap": "round",
-                visibility: showRoadsRef.current ? "visible" : "none",
-              },
-              paint: {
-                "line-color": isDarkMode ? "#64748b" : "#94a3b8",
-                "line-width": 3,
-                "line-opacity": 0.9,
-              },
-            },
-            mapInstance.getLayer("campus-buildings-fill") ? "campus-buildings-fill" : undefined
-          );
-          console.log("[roads] added new source + layer");
-        } else {
-          console.log("[roads] style not loaded, skipped adding layer");
-          roadsFetchStartedRef.current = false;
+        console.log("[roads] fetching local static roads");
+        const res = await fetch("/roads.geojson");
+        if (!res.ok) {
+          throw new Error(`Local fetch failed: ${res.status}`);
         }
+        const data = await res.json();
+        const features = data.features || [];
+        console.log("[roads] features loaded:", features.length);
+        
+        localStorage.setItem("campus-roads-cache", JSON.stringify(features));
+        tryAddLayer(features);
       } catch (err) {
         console.error("[roads] processing failed:", err);
         roadsFetchStartedRef.current = false;
@@ -838,7 +857,9 @@ export default function MapView({
         is3D={is3D}
         onToggleRoads={handleToggleRoads}
         showRoads={showRoads}
+        isSatellite={isSatellite}
         hasBottomNav={!showTabsInHeader}
+        bearing={bearing}
       />
       
       {/* Weather Widget */}
