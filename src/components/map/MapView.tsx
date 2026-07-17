@@ -9,6 +9,10 @@ import BuildingPopup from "./BuildingPopup";
 import ReportIssueForm from "./ReportIssueForm";
 import WeatherWidget from "./WeatherWidget";
 
+// Cache state variables outside the component to survive React unmounts (tab switches)
+let cachedMapState: { center: [number, number]; zoom: number; pitch: number; bearing: number } | null = null;
+let lastFlewToBuildingId: string | null = null;
+
 interface MapViewProps {
   buildings: Building[];
   activeBuildingIds?: Set<string>;
@@ -39,8 +43,15 @@ export default function MapView({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [is3D, setIs3D] = useState(true);
-  const [bearing, setBearing] = useState(-17);
+  const [is3D, setIs3D] = useState(() => {
+    const saved = localStorage.getItem("campusCompass_is3D");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [bearing, setBearing] = useState(cachedMapState ? cachedMapState.bearing : (is3D ? -17 : 0));
+
+  useEffect(() => {
+    localStorage.setItem("campusCompass_is3D", JSON.stringify(is3D));
+  }, [is3D]);
 
   const prevIs3DRef = useRef(is3D);
   const prevDarkRef = useRef(isDarkMode);
@@ -118,7 +129,14 @@ export default function MapView({
   // Fly to the selected building whenever it changes — covers selection via
   // search results as well as clicking a marker/polygon directly.
   useEffect(() => {
-    if (!map || !selectedBuilding) return;
+    if (!selectedBuilding) {
+      lastFlewToBuildingId = null;
+      return;
+    }
+    if (!map) return;
+    if (lastFlewToBuildingId === selectedBuilding.id) return; // Skip flyTo if we just restored from a tab switch
+
+    lastFlewToBuildingId = selectedBuilding.id;
     map.flyTo({
       center: [selectedBuilding.longitude, selectedBuilding.latitude],
       zoom: 18,
@@ -191,17 +209,27 @@ export default function MapView({
       container: mapContainerRef.current,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       style: initialStyle as any,
-      center: [77.5898, 13.1264], // MAHE Bengaluru Center
-      zoom: 15.5,
+      center: cachedMapState ? cachedMapState.center : [77.5898, 13.1264], // MAHE Bengaluru Center
+      zoom: cachedMapState ? cachedMapState.zoom : 15.5,
       minZoom: 10,
       maxBounds: [[77.40, 12.80], [77.75, 13.25]], // Greater Bangalore Bounds
-      pitch: 55,
-      bearing: -17,
+      pitch: cachedMapState ? cachedMapState.pitch : (is3D ? 55 : 0),
+      bearing: cachedMapState ? cachedMapState.bearing : (is3D ? -17 : 0),
       dragRotate: true,
+      attributionControl: false,
     });
 
     mapInstance.on('rotate', () => {
       setBearing(mapInstance.getBearing());
+    });
+
+    mapInstance.on('moveend', () => {
+      cachedMapState = {
+        center: [mapInstance.getCenter().lng, mapInstance.getCenter().lat],
+        zoom: mapInstance.getZoom(),
+        pitch: mapInstance.getPitch(),
+        bearing: mapInstance.getBearing()
+      };
     });
 
     // Fetch real road/path geometry from OpenStreetMap (Overpass API) for the
@@ -518,12 +546,12 @@ export default function MapView({
           allCoords.push([coord[0], coord[1]]);
         });
       });
-      if (allCoords.length > 0) {
+      if (allCoords.length > 0 && !cachedMapState) {
         const bounds = allCoords.reduce(
           (acc, coord) => acc.extend(coord),
           new maplibregl.LngLatBounds(allCoords[0], allCoords[0])
         );
-        mapInstance.fitBounds(bounds, { padding: 100, duration: 0, pitch: 55, bearing: -17 });
+        mapInstance.fitBounds(bounds, { padding: 100, duration: 0, pitch: is3D ? 55 : 0, bearing: is3D ? -17 : 0 });
       }
 
       setMap(mapInstance);
@@ -898,7 +926,6 @@ export default function MapView({
             <BuildingPopup
               map={map}
               building={selectedBuilding}
-              onClose={() => onSelectBuilding(null)}
             />
           )}
         </>

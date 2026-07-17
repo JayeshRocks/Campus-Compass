@@ -274,7 +274,9 @@ export default function Header({
                   <span className="material-symbols-outlined text-slate-500 dark:text-on-surface-variant text-[20px]">location_on</span>
                   <div className="flex flex-col min-w-0">
                     <span className="font-semibold text-sm text-slate-900 dark:text-white truncate">{building.name}</span>
-                    <span className="text-xs text-slate-500 dark:text-on-surface-variant">{building.shortName} • {building.category}</span>
+                    <span className="text-xs text-slate-500 dark:text-on-surface-variant">
+                      {building.shortName} • <span className="capitalize">{building.category}</span>
+                    </span>
                   </div>
                 </button>
               ))}

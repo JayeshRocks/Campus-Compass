@@ -5,10 +5,9 @@ import type { Building } from "../../data/buildings";
 interface BuildingPopupProps {
   map: maplibregl.Map;
   building: Building;
-  onClose: () => void;
 }
 
-export default function BuildingPopup({ map, building, onClose }: BuildingPopupProps) {
+export default function BuildingPopup({ map, building }: BuildingPopupProps) {
   const popupRef = useRef<maplibregl.Popup | null>(null);
 
   useEffect(() => {
@@ -32,18 +31,12 @@ export default function BuildingPopup({ map, building, onClose }: BuildingPopupP
       .setDOMContent(container)
       .addTo(map);
 
-    const handleClose = () => {
-      onClose();
-    };
-    popup.on("close", handleClose);
-
     popupRef.current = popup;
 
     return () => {
-      popup.off("close", handleClose);
       popup.remove();
     };
-  }, [map, building, onClose]);
+  }, [map, building]);
 
   return null;
 }
