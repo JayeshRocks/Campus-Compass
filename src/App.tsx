@@ -117,6 +117,28 @@ export default function App() {
 
   return (
     <>
+      <div className="fixed inset-0 z-[99999] hidden [@media(max-height:550px)_and_(orientation:landscape)_and_(pointer:coarse)]:flex flex-col bg-background/80 backdrop-blur-xl p-4 overflow-y-auto text-center dark">
+        <div className="m-auto liquid-glass rounded-[24px] p-4 sm:p-6 flex flex-col items-center max-w-md w-full shadow-2xl border border-white/10 dark:border-white/5 relative overflow-hidden group shrink-0">
+          {/* Slow spinning gradient background for ambient effect */}
+          <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-br from-primary/20 via-transparent to-tertiary/20 animate-spin pointer-events-none" style={{ animationDuration: '15s' }} />
+          
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="bg-primary/10 p-3 sm:p-4 rounded-full mb-3 ring-1 ring-primary/20 transition-transform duration-500 group-hover:scale-110">
+              <span className="material-symbols-outlined text-3xl sm:text-4xl text-primary drop-shadow-[0_0_15px_rgba(34,184,207,0.5)]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                screen_rotation
+              </span>
+            </div>
+            
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
+              Rotate Device
+            </h2>
+            
+            <p className="text-on-surface-variant text-xs sm:text-sm leading-relaxed px-2">
+              Campus Compass is carefully designed for portrait viewing. Please rotate your device to continue exploring.
+            </p>
+          </div>
+        </div>
+      </div>
       {!userRole && <RoleModal onSelectRole={setUserRole} />}
       <Header
         activePage={activePage}
