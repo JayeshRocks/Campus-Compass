@@ -25,7 +25,7 @@ export default function ReportLocation() {
 
   return (
     <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
-      <div className="max-w-xl mx-auto animate-fade-in">
+      <div className="max-w-xl mx-auto pb-8 animate-fade-in">
         <div className="text-center mb-8">
           <span className="text-[#22B8CF] dark:text-primary font-label-md text-label-md bg-[#EAFBFC] dark:bg-primary/10 px-3 py-1 rounded-full border border-[#B7E9ED] dark:border-primary/20">
             Coordinates Sync

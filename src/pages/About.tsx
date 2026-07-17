@@ -4,7 +4,7 @@ export default function About() {
   return (
     <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#16233F]/50 pointer-events-none hidden dark:block"></div>
-      <div className="max-w-3xl mx-auto relative z-10 pb-20">
+      <div className="max-w-3xl mx-auto relative z-10 pb-8">
         <div className="text-center mb-12 animate-fade-in">
           <div className="w-20 h-20 rounded-3xl bg-[#D7F3F6] dark:bg-primary-container/20 mx-auto flex items-center justify-center mb-8 border border-[#B7E9ED] dark:border-primary/30 relative shadow-xl">
             <div className="absolute inset-0 bg-[#5DCBDA]/20 dark:bg-primary/10 blur-xl rounded-full"></div>

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import teamData from "../data/team.json";
 
 interface Contributor {
@@ -31,14 +31,29 @@ export default function MeetTeam() {
   // Sort batches descending (e.g. 2027, 2026...) or ascending. Let's do ascending for this context (2026, 2027)
   const sortedBatches = Object.keys(groupedContributors).sort();
 
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const [isCtaVisible, setIsCtaVisible] = useState(false);
+
   // We rely purely on CSS animations (fadeInUp) for entry to ensure smooth and glitch-free scrolling.
   // IntersectionObserver was causing aggressive fading out when scrolling past sections.
   useEffect(() => {
-    // No-op or handle anything else needed in the future
+    // Only track visibility for the CTA card to trigger its glow on mobile
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsCtaVisible(entry.isIntersecting);
+      },
+      { threshold: 0.5 } // Trigger when 50% of the card is visible
+    );
+
+    if (ctaRef.current) {
+      observer.observe(ctaRef.current);
+    }
+
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="h-full w-full page-blobs px-6 md:px-12 pb-6 md:pb-12 overflow-y-auto relative">
+    <div className="h-full w-full page-blobs px-6 md:px-12 pb-0 md:pb-12 overflow-y-auto relative">
       <style>{`
         .team-card {
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -183,13 +198,15 @@ export default function MeetTeam() {
           </section>
         ))}
 
-        {/* Call to Action */}
-        <div tabIndex={0} className="mt-16 relative max-w-4xl w-full mx-auto animate-fade-in group mb-12 outline-none">
+        <div ref={ctaRef} tabIndex={0} className="mt-16 relative max-w-4xl w-full mx-auto animate-fade-in group md:mb-12 outline-none">
           {/* Glowing Aura Background */}
-          <div className="absolute -inset-2 bg-gradient-to-r from-primary via-secondary to-primary rounded-[3rem] blur-xl opacity-60 group-hover:opacity-100 transition duration-1000 group-hover:duration-500" />
+          <div className={`absolute -inset-2 bg-gradient-to-r from-primary via-secondary to-primary rounded-[3rem] blur-xl transition duration-1000 group-hover:duration-500 ${isCtaVisible ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`} />
           
           {/* Premium Glass Card */}
-          <div className="relative p-12 sm:p-16 bg-white/80 dark:bg-surface/90 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 dark:border-white/10 text-center overflow-hidden shadow-2xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.6)]">
+          <div 
+            className="relative p-12 sm:p-16 bg-white/80 dark:bg-surface/90 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 dark:border-white/10 text-center overflow-hidden shadow-2xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
+            style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
+          >
             
             {/* Internal Ambient Glows */}
             <div className="absolute -top-32 -left-32 w-80 h-80 bg-primary/40 dark:bg-primary/40 blur-[80px] rounded-full pointer-events-none" />

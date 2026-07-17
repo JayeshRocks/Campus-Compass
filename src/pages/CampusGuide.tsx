@@ -1,7 +1,27 @@
+import { useEffect, useRef, useState } from "react";
+
 export default function CampusGuide() {
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const [isCtaVisible, setIsCtaVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsCtaVisible(entry.isIntersecting);
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ctaRef.current) {
+      observer.observe(ctaRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
-      <div className="max-w-6xl mx-auto space-y-16 pb-24">
+      <div className="max-w-6xl mx-auto space-y-16 pb-8">
         {/* Campus Contacts Section */}
         <section className="animate-fade-in">
           <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -202,28 +222,38 @@ export default function CampusGuide() {
 
         {/* Help / Support Section */}
         <section className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <div className="mt-8 rounded-3xl bg-gradient-to-br from-[#22B8CF] to-[#16233F] dark:from-primary/20 dark:to-[#16233F]/40 p-8 md:p-12 text-center shadow-xl border border-[#22B8CF]/20 dark:border-white/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 dark:bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#D7F3F6]/30 dark:bg-[#D7F3F6]/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/4"></div>
+          <div ref={ctaRef} tabIndex={0} className="mt-12 relative w-full mx-auto group outline-none">
+            {/* Glowing Aura Background */}
+            <div className={`absolute -inset-2 bg-gradient-to-r from-primary via-secondary to-primary rounded-[2.5rem] blur-xl transition duration-1000 group-hover:duration-500 ${isCtaVisible ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`} />
             
-            <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
-              <div className="w-16 h-16 rounded-2xl bg-white/20 dark:bg-surface-container/50 backdrop-blur-md flex items-center justify-center text-white mb-6 border border-white/20">
-                <span className="material-symbols-outlined text-[32px]">help_center</span>
-              </div>
-              <h2 className="font-headline-lg text-3xl md:text-4xl font-bold text-white mb-4">Still have questions?</h2>
-              <p className="text-body-lg text-[#D7F3F6] dark:text-on-surface-variant text-lg mb-8 max-w-lg">
-                Reach out to the student team for assistance, or continue exploring the interactive campus map.
-              </p>
+            {/* Premium Glass Card */}
+            <div 
+              className="relative rounded-[2rem] bg-gradient-to-br from-[#22B8CF] to-[#16233F] dark:from-surface/90 dark:to-surface/90 backdrop-blur-2xl p-8 md:p-12 text-center shadow-2xl border border-[#22B8CF]/40 dark:border-white/10 overflow-hidden dark:shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
+              style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
+            >
+              {/* Internal Ambient Glows */}
+              <div className="absolute -top-32 -left-32 w-80 h-80 bg-white/20 dark:bg-primary/40 blur-[80px] rounded-full pointer-events-none" />
+              <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-[#D7F3F6]/20 dark:bg-secondary/40 blur-[80px] rounded-full pointer-events-none" />
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-                <a href="mailto:support.mitb@mahe.edu" className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-primary hover:bg-slate-50 dark:hover:bg-primary/90 text-[#1A94A6] dark:text-on-primary rounded-xl font-label-lg font-bold transition-all shadow-lg flex items-center justify-center gap-2 group">
-                  <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">chat</span>
-                  Contact Team
-                </a>
-                <a href="/" className="w-full sm:w-auto px-8 py-3.5 bg-[#1A94A6]/50 hover:bg-[#146A78]/60 dark:bg-surface-container/50 dark:hover:bg-surface-container-high/60 backdrop-blur-md text-white border border-white/20 rounded-xl font-label-lg font-bold transition-all flex items-center justify-center gap-2 group">
-                  <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">map</span>
-                  Open Campus Map
-                </a>
+              <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 dark:bg-surface-container/50 backdrop-blur-md flex items-center justify-center text-white mb-6 border border-white/20">
+                  <span className="material-symbols-outlined text-[32px]">help_center</span>
+                </div>
+                <h2 className="font-headline-lg text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">Still have questions?</h2>
+                <p className="text-body-lg text-white/90 dark:text-slate-300 text-lg mb-8 max-w-lg">
+                  Reach out to the student team for assistance, or continue exploring the interactive campus map.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
+                  <a href="mailto:support.mitb@mahe.edu" className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-[#1A94A6] dark:text-white rounded-xl font-label-lg font-bold transition-all shadow-lg flex items-center justify-center gap-2 group/btn backdrop-blur-md dark:border dark:border-white/5">
+                    <span className="material-symbols-outlined text-[20px] group-hover/btn:scale-110 transition-transform">chat</span>
+                    Contact Team
+                  </a>
+                  <a href="/" className="w-full sm:w-auto px-8 py-3.5 bg-[#1A94A6]/50 hover:bg-[#146A78]/60 dark:bg-white/5 dark:hover:bg-white/10 backdrop-blur-md text-white border border-white/20 dark:border-white/5 rounded-xl font-label-lg font-bold transition-all flex items-center justify-center gap-2 group/btn">
+                    <span className="material-symbols-outlined text-[20px] group-hover/btn:scale-110 transition-transform">map</span>
+                    Open Campus Map
+                  </a>
+                </div>
               </div>
             </div>
           </div>
