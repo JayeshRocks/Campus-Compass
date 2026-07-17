@@ -91,9 +91,13 @@ export default function MeetTeam() {
         }
         .sticky-header {
           position: sticky;
-          top: -1px; /* Sticks to the top of this scrolling container */
+          top: 16px; /* Added breathing room below the main header */
           z-index: 50;
           transition: all 0.3s ease;
+          pointer-events: none; /* Empty space around the island shouldn't block clicks */
+        }
+        .sticky-header > div {
+          pointer-events: auto; /* Re-enable clicks for the actual pill */
         }
         .batch-section {
           /* Handled by fadeInUp animation */
@@ -121,12 +125,18 @@ export default function MeetTeam() {
             className="batch-section max-w-6xl w-full mb-20 relative"
             style={{ animation: `fadeInUp 0.8s ease forwards ${batchIndex * 0.2}s`, opacity: 0, transform: "translateY(20px)" }}
           >
-            <div className="sticky-header py-6 bg-slate-50/90 dark:bg-[#16233F]/90 backdrop-blur-md border-b border-slate-200 dark:border-[#22B8CF]/40 mb-8 flex items-center justify-between">
-              <h2 className="font-headline-lg text-3xl font-bold text-[#22B8CF] dark:text-[#B7E9ED] flex items-center gap-3 shadow-sm">
-                {batch === "2027" && <span className="material-symbols-outlined text-[#22B8CF] dark:text-[#5DCBDA]">history</span>}
-                {batch}
-              </h2>
-              <span className="font-label-md text-slate-500 dark:text-on-surface-variant">{groupedContributors[batch].title}</span>
+            <div className="sticky-header mb-10 flex justify-center w-full px-4 sm:px-0">
+              <div className="flex items-center justify-between w-full max-w-4xl px-6 md:px-8 py-4 bg-white/70 dark:bg-[#1a2b4c]/70 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(34,184,207,0.15)] ring-1 ring-black/5 dark:ring-white/5 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_8px_32px_rgba(34,184,207,0.25)]">
+                <h2 className="font-headline-lg text-2xl md:text-3xl font-extrabold flex items-center gap-3">
+                  {batch === "2027" && <span className="material-symbols-outlined text-[#22B8CF] dark:text-[#5DCBDA]">history</span>}
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#22B8CF] to-blue-500 dark:from-[#5DCBDA] dark:to-[#8BE9FD] drop-shadow-sm">
+                    {batch}
+                  </span>
+                </h2>
+                <span className="font-label-md px-4 py-1.5 rounded-full bg-slate-100/80 dark:bg-white/10 text-slate-700 dark:text-slate-100 border border-slate-200/50 dark:border-white/5 shadow-sm backdrop-blur-md">
+                  {groupedContributors[batch].title}
+                </span>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-0">

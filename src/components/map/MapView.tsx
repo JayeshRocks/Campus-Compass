@@ -408,17 +408,30 @@ export default function MapView({
           type: "symbol",
           source: "campus-buildings",
           layout: {
-            "text-field": ["get", "shortName"],
-            "text-size": 11,
-            "text-font": ["Noto Sans Regular"],
+            "text-field": ["upcase", ["get", "shortName"]],
+            "text-size": 10.5,
+            "text-font": ["Noto Sans Bold"],
+            "text-letter-spacing": 0.15,
             "text-allow-overlap": true,
             "text-ignore-placement": true,
-            "text-max-width": 8
+            "text-max-width": 10
           },
           paint: {
-            "text-color": "#0f172a",
-            "text-halo-color": "#ffffff",
-            "text-halo-width": 1.2
+            "text-color": [
+              "case",
+              ["==", ["get", "isActive"], false],
+              isDarkMode ? "#64748b" : "#94a3b8",
+              isDarkMode ? "#ffffff" : "#0f172a"
+            ],
+            "text-halo-color": isDarkMode ? "rgba(15, 23, 42, 0.85)" : "rgba(255, 255, 255, 0.85)",
+            "text-halo-width": 1.5,
+            "text-halo-blur": 1,
+            "text-opacity": [
+              "case",
+              ["==", ["get", "isActive"], false],
+              0.6,
+              1
+            ]
           }
         });
 
