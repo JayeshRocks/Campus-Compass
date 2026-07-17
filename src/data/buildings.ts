@@ -347,80 +347,8 @@ export const buildings: Building[] = [
         ]
       ]
     }
-  },
-  {
-    "id": "auditorium_2",
-    "name": "Auditorium/Blue Dove Mess",
-    "shortName": "Auditorium",
-    "category": "admin",
-    "description": "A facility on campus serving as Auditorium/Blue Dove Mess.",
-    "latitude": 13.1275256,
-    "longitude": 77.5889622,
-    "busyStatus": "Quiet",
-    "busyColor": "bg-green-500",
-    "details": {
-      "hours": "Open • 24/7",
-      "distance": "2 mins away",
-      "floors": "3 Floor(s)",
-      "features": [
-        "Wi-Fi",
-        "Accessible"
-      ]
-    },
-    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            77.5885668,
-            13.1277177
-          ],
-          [
-            77.5885719,
-            13.1277671
-          ],
-          [
-            77.5893577,
-            13.1277587
-          ],
-          [
-            77.5893476,
-            13.1276555
-          ],
-          [
-            77.5893441,
-            13.1272847
-          ],
-          [
-            77.5891853,
-            13.1272919
-          ],
-          [
-            77.5887312,
-            13.1272841
-          ],
-          [
-            77.588674,
-            13.1272882
-          ],
-          [
-            77.5886157,
-            13.1273
-          ],
-          [
-            77.5885681,
-            13.1273419
-          ],
-          [
-            77.5885668,
-            13.1277177
-          ]
-        ]
-      ]
-    }
-  },
-  {
+  }
+  ,{
     "id": "hb1_3",
     "name": "Hostel Block 1",
     "shortName": "HB1",
@@ -1107,112 +1035,8 @@ export const buildings: Building[] = [
         ]
       ]
     }
-  },
-  {
-    "id": "cub_13",
-    "name": "Central Utility Block 1",
-    "shortName": "CUB",
-    "category": "academic",
-    "description": "A facility on campus serving as Central Utility Block 1.",
-    "latitude": 13.1265712,
-    "longitude": 77.5919258,
-    "busyStatus": "Quiet",
-    "busyColor": "bg-green-500",
-    "details": {
-      "hours": "Open • 24/7",
-      "distance": "2 mins away",
-      "floors": "1 Floor(s)",
-      "features": [
-        "Wi-Fi",
-        "Accessible"
-      ]
-    },
-    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            77.5917668,
-            13.1266035
-          ],
-          [
-            77.5920711,
-            13.1266419
-          ],
-          [
-            77.5920847,
-            13.1265388
-          ],
-          [
-            77.5917805,
-            13.1265005
-          ],
-          [
-            77.5917668,
-            13.1266035
-          ]
-        ]
-      ]
-    }
-  },
-  {
-    "id": "cub_14",
-    "name": "Central Utility Block 2",
-    "shortName": "CUB",
-    "category": "academic",
-    "description": "A facility on campus serving as Central Utility Block 2.",
-    "latitude": 13.1272759,
-    "longitude": 77.5883391,
-    "busyStatus": "Quiet",
-    "busyColor": "bg-green-500",
-    "details": {
-      "hours": "Open • 24/7",
-      "distance": "2 mins away",
-      "floors": "1 Floor(s)",
-      "features": [
-        "Wi-Fi",
-        "Accessible"
-      ]
-    },
-    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            77.5881998,
-            13.1271286
-          ],
-          [
-            77.5882622,
-            13.1274231
-          ],
-          [
-            77.5883494,
-            13.1274231
-          ],
-          [
-            77.5883494,
-            13.127349
-          ],
-          [
-            77.5884784,
-            13.127349
-          ],
-          [
-            77.5884784,
-            13.1271286
-          ],
-          [
-            77.5881998,
-            13.1271286
-          ]
-        ]
-      ]
-    }
-  },
-  {
+  }
+  ,{
     "id": "mlcp_15",
     "name": "MLCP",
     "shortName": "MLCP",
@@ -1262,10 +1086,10 @@ export const buildings: Building[] = [
   },
   {
     "id": "sc_16",
-    "name": "Sports Complex/Chefs Touch Mess",
+    "name": "Marena/Chefs Touch Mess",
     "shortName": "SC",
     "category": "sports",
-    "description": "A facility on campus serving as Sports Complex/Chefs Touch Mess.",
+    "description": "Marena building, home to the Sports Complex and Chef's Touch Mess.",
     "latitude": 13.1284449,
     "longitude": 77.5898774,
     "busyStatus": "Quiet",
@@ -1325,423 +1149,6 @@ export const buildings: Building[] = [
     }
   },
   {
-    "id": "smi_17",
-    "name": "Srishti Manipal Institute of Art, Design and Technology",
-    "shortName": "SMI",
-    "category": "academic",
-    "description": "A facility on campus serving as Srishti Manipal Institute of Art, Design and Technology.",
-    "latitude": 13.1258755,
-    "longitude": 77.5915553,
-    "busyStatus": "Quiet",
-    "busyColor": "bg-green-500",
-    "details": {
-      "hours": "Open • 24/7",
-      "distance": "2 mins away",
-      "floors": "1 Floor(s)",
-      "features": [
-        "Wi-Fi",
-        "Accessible"
-      ]
-    },
-    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            77.5908722,
-            13.1266269
-          ],
-          [
-            77.5907654,
-            13.1259342
-          ],
-          [
-            77.5909281,
-            13.1249403
-          ],
-          [
-            77.5909317,
-            13.1249181
-          ],
-          [
-            77.5909966,
-            13.1249307
-          ],
-          [
-            77.5914873,
-            13.1250262
-          ],
-          [
-            77.5923452,
-            13.1268328
-          ],
-          [
-            77.5915217,
-            13.1267205
-          ],
-          [
-            77.5908722,
-            13.1266269
-          ]
-        ]
-      ]
-    }
-  },
-  {
-    "id": "rooh_18",
-    "name": "Rooh",
-    "shortName": "Rooh",
-    "category": "academic",
-    "description": "A facility on campus serving as Rooh.",
-    "latitude": 13.1259686,
-    "longitude": 77.5911265,
-    "busyStatus": "Quiet",
-    "busyColor": "bg-green-500",
-    "details": {
-      "hours": "Open • 24/7",
-      "distance": "2 mins away",
-      "floors": "5 Floor(s)",
-      "features": [
-        "Wi-Fi",
-        "Accessible"
-      ]
-    },
-    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            77.5912564,
-            13.1258441
-          ],
-          [
-            77.5912557,
-            13.1259381
-          ],
-          [
-            77.591255,
-            13.1260289
-          ],
-          [
-            77.5912544,
-            13.1261016
-          ],
-          [
-            77.5911187,
-            13.1261006
-          ],
-          [
-            77.5909965,
-            13.1260997
-          ],
-          [
-            77.5909985,
-            13.1258356
-          ],
-          [
-            77.5912564,
-            13.1258441
-          ]
-        ]
-      ]
-    }
-  },
-  {
-    "id": "rizaq_19",
-    "name": "Rizaq",
-    "shortName": "Rizaq",
-    "category": "academic",
-    "description": "A facility on campus serving as Rizaq.",
-    "latitude": 13.1252683,
-    "longitude": 77.5912153,
-    "busyStatus": "Quiet",
-    "busyColor": "bg-green-500",
-    "details": {
-      "hours": "Open • 24/7",
-      "distance": "2 mins away",
-      "floors": "5 Floor(s)",
-      "features": [
-        "Wi-Fi",
-        "Accessible"
-      ]
-    },
-    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            77.5913952,
-            13.1253803
-          ],
-          [
-            77.5914054,
-            13.1253134
-          ],
-          [
-            77.5913918,
-            13.1253109
-          ],
-          [
-            77.5913755,
-            13.1253079
-          ],
-          [
-            77.5913648,
-            13.1253629
-          ],
-          [
-            77.5912054,
-            13.1253335
-          ],
-          [
-            77.5911945,
-            13.1253896
-          ],
-          [
-            77.5909282,
-            13.1253404
-          ],
-          [
-            77.5909734,
-            13.1251086
-          ],
-          [
-            77.5911462,
-            13.1251405
-          ],
-          [
-            77.5914234,
-            13.1251917
-          ],
-          [
-            77.5914135,
-            13.1252422
-          ],
-          [
-            77.5914537,
-            13.1252497
-          ],
-          [
-            77.5914463,
-            13.1252874
-          ],
-          [
-            77.5914687,
-            13.1252767
-          ],
-          [
-            77.591489,
-            13.1253223
-          ],
-          [
-            77.5914759,
-            13.1253278
-          ],
-          [
-            77.5915023,
-            13.1253869
-          ],
-          [
-            77.5914167,
-            13.125428
-          ],
-          [
-            77.5913952,
-            13.1253803
-          ]
-        ]
-      ]
-    }
-  },
-  {
-    "id": "rta_20",
-    "name": "Rta",
-    "shortName": "Rta",
-    "category": "academic",
-    "description": "A facility on campus serving as Rta.",
-    "latitude": 13.1262528,
-    "longitude": 77.591604,
-    "busyStatus": "Quiet",
-    "busyColor": "bg-green-500",
-    "details": {
-      "hours": "Open • 24/7",
-      "distance": "2 mins away",
-      "floors": "5 Floor(s)",
-      "features": [
-        "Wi-Fi",
-        "Accessible"
-      ]
-    },
-    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            77.5913959,
-            13.1261581
-          ],
-          [
-            77.5914755,
-            13.1261425
-          ],
-          [
-            77.5915255,
-            13.1261327
-          ],
-          [
-            77.5916661,
-            13.126105
-          ],
-          [
-            77.5916811,
-            13.1261773
-          ],
-          [
-            77.5916845,
-            13.126194
-          ],
-          [
-            77.59169,
-            13.126193
-          ],
-          [
-            77.5917799,
-            13.1261753
-          ],
-          [
-            77.591812,
-            13.1263301
-          ],
-          [
-            77.5914535,
-            13.1264006
-          ],
-          [
-            77.5913959,
-            13.1261581
-          ]
-        ]
-      ]
-    }
-  },
-  {
-    "id": "raah_21",
-    "name": "Raah",
-    "shortName": "Raah",
-    "category": "academic",
-    "description": "A facility on campus serving as Raah.",
-    "latitude": 13.1256358,
-    "longitude": 77.5911291,
-    "busyStatus": "Quiet",
-    "busyColor": "bg-green-500",
-    "details": {
-      "hours": "Open • 24/7",
-      "distance": "2 mins away",
-      "floors": "5 Floor(s)",
-      "features": [
-        "Wi-Fi",
-        "Accessible"
-      ]
-    },
-    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            77.591259,
-            13.1255019
-          ],
-          [
-            77.5912583,
-            13.1256025
-          ],
-          [
-            77.5912571,
-            13.1257587
-          ],
-          [
-            77.5912569,
-            13.1257749
-          ],
-          [
-            77.5909991,
-            13.1257651
-          ],
-          [
-            77.5910012,
-            13.1254967
-          ],
-          [
-            77.591259,
-            13.1255019
-          ]
-        ]
-      ]
-    }
-  },
-  {
-    "id": "raqs_22",
-    "name": "Raqs",
-    "shortName": "Raqs",
-    "category": "academic",
-    "description": "A facility on campus serving as Raqs.",
-    "latitude": 13.1258869,
-    "longitude": 77.5916563,
-    "busyStatus": "Quiet",
-    "busyColor": "bg-green-500",
-    "details": {
-      "hours": "Open • 24/7",
-      "distance": "2 mins away",
-      "floors": "5 Floor(s)",
-      "features": [
-        "Wi-Fi",
-        "Accessible"
-      ]
-    },
-    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            77.5916908,
-            13.1257009
-          ],
-          [
-            77.5918291,
-            13.1259729
-          ],
-          [
-            77.5917005,
-            13.1260348
-          ],
-          [
-            77.5916218,
-            13.1260728
-          ],
-          [
-            77.5914922,
-            13.1258177
-          ],
-          [
-            77.5914836,
-            13.1258008
-          ],
-          [
-            77.5916908,
-            13.1257009
-          ]
-        ]
-      ]
-    }
-  },
-      
-  {
     "id": "cricket_field",
     "name": "Cricket Field & Jogging Track",
     "shortName": "Cricket",
@@ -1765,74 +1172,27 @@ export const buildings: Building[] = [
       "type": "Polygon",
       "coordinates": [
         [
-          [
-            77.5902,
-            13.1299
-          ],
-          [
-            77.590169551813,
-            13.13003776603565
-          ],
-          [
-            77.59008284271248,
-            13.130154558441227
-          ],
-          [
-            77.58995307337294,
-            13.130232596631704
-          ],
-          [
-            77.5898,
-            13.13026
-          ],
-          [
-            77.58964692662705,
-            13.130232596631704
-          ],
-          [
-            77.58951715728752,
-            13.130154558441227
-          ],
-          [
-            77.58943044818699,
-            13.13003776603565
-          ],
-          [
-            77.5894,
-            13.1299
-          ],
-          [
-            77.58943044818699,
-            13.129762233964348
-          ],
-          [
-            77.58951715728752,
-            13.129645441558772
-          ],
-          [
-            77.58964692662705,
-            13.129567403368295
-          ],
-          [
-            77.5898,
-            13.129539999999999
-          ],
-          [
-            77.58995307337294,
-            13.129567403368295
-          ],
-          [
-            77.59008284271248,
-            13.129645441558772
-          ],
-          [
-            77.590169551813,
-            13.129762233964348
-          ],
-          [
-            77.5902,
-            13.1299
-          ]
+          [77.59028, 13.1299],
+          [77.5902565, 13.1300298],
+          [77.5901883, 13.1301469],
+          [77.5900821, 13.1302398],
+          [77.5899483, 13.1302994],
+          [77.5898, 13.13032],
+          [77.5896517, 13.1302994],
+          [77.5895179, 13.1302398],
+          [77.5894117, 13.1301469],
+          [77.5893435, 13.1300298],
+          [77.58932, 13.1299],
+          [77.5893435, 13.1297702],
+          [77.5894117, 13.1296531],
+          [77.5895179, 13.1295602],
+          [77.5896517, 13.1295006],
+          [77.5898, 13.12948],
+          [77.5899483, 13.1295006],
+          [77.5900821, 13.1295602],
+          [77.5901883, 13.1296531],
+          [77.5902565, 13.1297702],
+          [77.59028, 13.1299]
         ]
       ]
     }
@@ -1844,7 +1204,7 @@ export const buildings: Building[] = [
     "category": "sports",
     "description": "Main football turf and ground.",
     "latitude": 13.1288,
-    "longitude": 77.5898,
+    "longitude": 77.5907,
     "busyStatus": "Busy",
     "busyColor": "bg-red-500",
     "details": {
@@ -1861,23 +1221,23 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.5895,
+            77.5904,
             13.1292
           ],
           [
-            77.59009999999999,
+            77.591,
             13.1292
           ],
           [
-            77.59009999999999,
+            77.591,
             13.1284
           ],
           [
-            77.5895,
+            77.5904,
             13.1284
           ],
           [
-            77.5895,
+            77.5904,
             13.1292
           ]
         ]
@@ -1938,8 +1298,8 @@ export const buildings: Building[] = [
     "shortName": "BB Court",
     "category": "sports",
     "description": "Full size basketball court.",
-    "latitude": 13.1293,
-    "longitude": 77.59,
+    "latitude": 13.1290,
+    "longitude": 77.5903,
     "busyStatus": "Busy",
     "busyColor": "bg-red-500",
     "details": {
@@ -1957,24 +1317,24 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.58985,
-            13.1294
+            77.5901,
+            13.1291
           ],
           [
-            77.59015000000001,
-            13.1294
+            77.5904,
+            13.1291
           ],
           [
-            77.59015000000001,
-            13.1292
+            77.5904,
+            13.1289
           ],
           [
-            77.58985,
-            13.1292
+            77.5901,
+            13.1289
           ],
           [
-            77.58985,
-            13.1294
+            77.5901,
+            13.1291
           ]
         ]
       ]
@@ -1986,8 +1346,8 @@ export const buildings: Building[] = [
     "shortName": "Half Court",
     "category": "sports",
     "description": "Half court for practice.",
-    "latitude": 13.1293,
-    "longitude": 77.5894,
+    "latitude": 13.1290,
+    "longitude": 77.5898,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
@@ -2005,24 +1365,24 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.5893,
-            13.1294
+            77.5897,
+            13.1291
           ],
           [
-            77.5895,
-            13.1294
+            77.5899,
+            13.1291
           ],
           [
-            77.5895,
-            13.1292
+            77.5899,
+            13.1289
           ],
           [
-            77.5893,
-            13.1292
+            77.5897,
+            13.1289
           ],
           [
-            77.5893,
-            13.1294
+            77.5897,
+            13.1291
           ]
         ]
       ]
@@ -2034,8 +1394,8 @@ export const buildings: Building[] = [
     "shortName": "Nets",
     "category": "sports",
     "description": "Practice nets for cricket.",
-    "latitude": 13.1288,
-    "longitude": 77.5894,
+    "latitude": 13.1290,
+    "longitude": 77.5900,
     "busyStatus": "Moderate",
     "busyColor": "bg-yellow-500",
     "details": {
@@ -2052,24 +1412,24 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.5893,
-            13.12895
+            77.5899,
+            13.1291
           ],
           [
-            77.5895,
-            13.12895
+            77.5901,
+            13.1291
           ],
           [
-            77.5895,
-            13.12865
+            77.5901,
+            13.1289
           ],
           [
-            77.5893,
-            13.12865
+            77.5899,
+            13.1289
           ],
           [
-            77.5893,
-            13.12895
+            77.5899,
+            13.1291
           ]
         ]
       ]
@@ -2081,8 +1441,8 @@ export const buildings: Building[] = [
     "shortName": "Gate 3",
     "category": "security",
     "description": "North entrance security checkpoint.",
-    "latitude": 13.1307,
-    "longitude": 77.5897,
+    "latitude": 13.13048,
+    "longitude": 77.58985,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
@@ -2100,24 +1460,24 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.58964999999999,
-            13.130749999999999
+            77.5898,
+            13.13053
           ],
           [
-            77.58975,
-            13.130749999999999
+            77.5899,
+            13.13053
           ],
           [
-            77.58975,
-            13.13065
+            77.5899,
+            13.13043
           ],
           [
-            77.58964999999999,
-            13.13065
+            77.5898,
+            13.13043
           ],
           [
-            77.58964999999999,
-            13.130749999999999
+            77.5898,
+            13.13053
           ]
         ]
       ]
@@ -2129,8 +1489,8 @@ export const buildings: Building[] = [
     "shortName": "Gate 2",
     "category": "security",
     "description": "East entrance security checkpoint.",
-    "latitude": 13.1292,
-    "longitude": 77.5908,
+    "latitude": 13.1288,
+    "longitude": 77.5912,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
@@ -2148,24 +1508,24 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.59075,
-            13.12925
+            77.5911,
+            13.1289
           ],
           [
-            77.59085,
-            13.12925
+            77.5913,
+            13.1289
           ],
           [
-            77.59085,
-            13.129150000000001
+            77.5913,
+            13.1287
           ],
           [
-            77.59075,
-            13.129150000000001
+            77.5911,
+            13.1287
           ],
           [
-            77.59075,
-            13.12925
+            77.5911,
+            13.1289
           ]
         ]
       ]
@@ -2177,8 +1537,8 @@ export const buildings: Building[] = [
     "shortName": "Gate 1",
     "category": "security",
     "description": "Main South entrance.",
-    "latitude": 13.1245,
-    "longitude": 77.5925,
+    "latitude": 13.12411,
+    "longitude": 77.5926,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
@@ -2196,24 +1556,24 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.59245,
-            13.12455
+            77.59255,
+            13.12416
+          ],
+          [
+            77.59265,
+            13.12416
+          ],
+          [
+            77.59265,
+            13.12406
           ],
           [
             77.59255,
-            13.12455
+            13.12406
           ],
           [
             77.59255,
-            13.12445
-          ],
-          [
-            77.59245,
-            13.12445
-          ],
-          [
-            77.59245,
-            13.12455
+            13.12416
           ]
         ]
       ]
@@ -2269,12 +1629,12 @@ export const buildings: Building[] = [
   },
   {
     "id": "blue_dove_mess",
-    "name": "Blue Dove Mess",
+    "name": "Melon (Chef's Touch)",
     "shortName": "Melon",
     "category": "food",
-    "description": "Dining mess hall for students.",
-    "latitude": 13.1278,
-    "longitude": 77.5881,
+    "description": "Dining mess hall for students, run by Chef's Touch.",
+    "latitude": 13.12765,
+    "longitude": 77.588277,
     "busyStatus": "Busy",
     "busyColor": "bg-red-500",
     "details": {
@@ -2292,24 +1652,24 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.58794999999999,
-            13.12795
+            77.588127,
+            13.1278
           ],
           [
-            77.58825,
-            13.12795
+            77.588427,
+            13.1278
           ],
           [
-            77.58825,
-            13.127650000000001
+            77.588427,
+            13.1275
           ],
           [
-            77.58794999999999,
-            13.127650000000001
+            77.588127,
+            13.1275
           ],
           [
-            77.58794999999999,
-            13.12795
+            77.588127,
+            13.1278
           ]
         ]
       ]
@@ -2317,10 +1677,10 @@ export const buildings: Building[] = [
   },
   {
     "id": "ta_pai",
-    "name": "TA Pai Convention Center",
-    "shortName": "TA Pai",
+    "name": "TA Pai Auditorium",
+    "shortName": "TA Pai Auditorium",
     "category": "admin",
-    "description": "Main convention and event center.",
+    "description": "Main convention and event center, also housing the Blue Dove Mess dining facility.",
     "latitude": 13.1276,
     "longitude": 77.5888,
     "busyStatus": "Quiet",
@@ -2331,7 +1691,8 @@ export const buildings: Building[] = [
       "floors": "2 Floors",
       "features": [
         "Events",
-        "Stage"
+        "Stage",
+        "Dining"
       ]
     },
     "image": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80",
@@ -2340,24 +1701,48 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.58850000000001,
-            13.127799999999999
+            77.5885668,
+            13.1277177
           ],
           [
-            77.5891,
-            13.127799999999999
+            77.5885719,
+            13.1277671
           ],
           [
-            77.5891,
-            13.1274
+            77.5893577,
+            13.1277587
           ],
           [
-            77.58850000000001,
-            13.1274
+            77.5893476,
+            13.1276555
           ],
           [
-            77.58850000000001,
-            13.127799999999999
+            77.5893441,
+            13.1272847
+          ],
+          [
+            77.5891853,
+            13.1272919
+          ],
+          [
+            77.5887312,
+            13.1272841
+          ],
+          [
+            77.588674,
+            13.1272882
+          ],
+          [
+            77.5886157,
+            13.1273
+          ],
+          [
+            77.5885681,
+            13.1273419
+          ],
+          [
+            77.5885668,
+            13.1277177
           ]
         ]
       ]
@@ -2369,8 +1754,8 @@ export const buildings: Building[] = [
     "shortName": "Sign",
     "category": "admin",
     "description": "Main campus signboard location.",
-    "latitude": 13.1264,
-    "longitude": 77.5903,
+    "latitude": 13.1258435,
+    "longitude": 77.590453,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
@@ -2387,76 +1772,174 @@ export const buildings: Building[] = [
       "coordinates": [
         [
           [
-            77.59035,
-            13.1264
+            77.590503,
+            13.1258435
           ],
           [
-            77.59034619397663,
-            13.126417220754456
+            77.59049919,
+            13.12586072
           ],
           [
-            77.59033535533906,
-            13.126431819805154
+            77.59048836,
+            13.12587532
           ],
           [
-            77.59031913417162,
-            13.126441574578964
+            77.59047213,
+            13.12588507
           ],
           [
-            77.5903,
-            13.126445
+            77.590453,
+            13.1258885
           ],
           [
-            77.59028086582838,
-            13.126441574578964
+            77.59043387,
+            13.12588507
           ],
           [
-            77.59026464466093,
-            13.126431819805154
+            77.59041764,
+            13.12587532
           ],
           [
-            77.59025380602337,
-            13.126417220754456
+            77.59040681,
+            13.12586072
           ],
           [
-            77.59025,
-            13.1264
+            77.590403,
+            13.1258435
           ],
           [
-            77.59025380602337,
-            13.126382779245544
+            77.59040681,
+            13.12582628
           ],
           [
-            77.59026464466093,
-            13.126368180194847
+            77.59041764,
+            13.12581168
           ],
           [
-            77.59028086582838,
-            13.126358425421037
+            77.59043387,
+            13.12580193
           ],
           [
-            77.5903,
-            13.126355
+            77.590453,
+            13.1257985
           ],
           [
-            77.59031913417162,
-            13.126358425421037
+            77.59047213,
+            13.12580193
           ],
           [
-            77.59033535533906,
-            13.126368180194847
+            77.59048836,
+            13.12581168
           ],
           [
-            77.59034619397663,
-            13.126382779245544
+            77.59049919,
+            13.12582628
           ],
           [
-            77.59035,
-            13.1264
+            77.590503,
+            13.1258435
           ]
         ]
       ]
     }
   }
-
+,
+  {
+    "id": "hb5_new",
+    "name": "HB5",
+    "shortName": "HB5",
+    "category": "hostels",
+    "description": "New hostel block currently under construction, located between MLCP and the Central Library.",
+    "latitude": 13.1267942,
+    "longitude": 77.58776,
+    "busyStatus": "Quiet",
+    "busyColor": "bg-green-500",
+    "details": {
+      "hours": "Under Construction",
+      "distance": "3 mins away",
+      "floors": "TBD",
+      "features": [
+        "Under Construction"
+      ]
+    },
+    "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [77.5876459, 13.1264476],
+          [77.5879577, 13.1263662],
+          [77.5878741, 13.1260625],
+          [77.5875623, 13.1261439],
+          [77.5876459, 13.1264476]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "chefs_touch_marena",
+    "name": "Chef's Touch (Marena)",
+    "shortName": "Chef's Touch",
+    "category": "food",
+    "description": "Chef's Touch food outlet, located inside the Marena (Sports Complex) building.",
+    "latitude": 13.1285449,
+    "longitude": 77.5900274,
+    "busyStatus": "Quiet",
+    "busyColor": "bg-green-500",
+    "details": {
+      "hours": "08:00 - 20:00",
+      "distance": "2 mins away",
+      "floors": "Ground Floor",
+      "features": [
+        "Dining",
+        "Food"
+      ]
+    },
+    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [77.5899774, 13.1286449],
+          [77.5900774, 13.1286449],
+          [77.5900774, 13.1285449],
+          [77.5899774, 13.1285449],
+          [77.5899774, 13.1286449]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "blue_dove_auditorium",
+    "name": "Blue Dove (Auditorium)",
+    "shortName": "Blue Dove",
+    "category": "food",
+    "description": "Blue Dove food outlet, located inside the TA Pai Auditorium building.",
+    "latitude": 13.1275,
+    "longitude": 77.5893,
+    "busyStatus": "Quiet",
+    "busyColor": "bg-green-500",
+    "details": {
+      "hours": "07:00 - 21:00",
+      "distance": "2 mins away",
+      "floors": "Ground Floor",
+      "features": [
+        "Dining",
+        "Food"
+      ]
+    },
+    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [77.5892500, 13.1275500],
+          [77.5893500, 13.1275500],
+          [77.5893500, 13.1274500],
+          [77.5892500, 13.1274500],
+          [77.5892500, 13.1275500]
+        ]
+      ]
+    }
+  }
     ];

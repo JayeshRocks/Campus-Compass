@@ -27,7 +27,7 @@ export default function BottomNav({ activePage, onNavigate, showTabsInHeader = f
               onClick={() => onNavigate(tab.id)}
               className={`flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all duration-300 active:scale-95 ${
                 isActive
-                  ? "bg-white/60 dark:bg-white/10 text-blue-600 dark:text-primary shadow-[0_4px_12px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+                  ? "bg-white/60 dark:bg-white/10 text-[#22B8CF] dark:text-primary shadow-[0_4px_12px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
                   : "text-slate-600 dark:text-on-surface-variant hover:bg-white/50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
               }`}
             >

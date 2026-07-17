@@ -38,7 +38,7 @@ export default function CookieBanner() {
 
         {/* Header Section */}
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-blue-500/10 dark:bg-primary/10 text-blue-600 dark:text-primary flex-shrink-0">
+          <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[#22B8CF]/10 dark:bg-primary/10 text-[#22B8CF] dark:text-primary flex-shrink-0">
             <span className="text-3xl">🍪</span>
           </div>
           <div className="space-y-1">
@@ -55,7 +55,7 @@ export default function CookieBanner() {
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <button 
             onClick={handleAccept}
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-primary-container dark:text-on-primary-container text-white px-6 py-2.5 rounded-xl font-bold font-label-md text-sm transition-all active:scale-95 shadow-lg shadow-blue-500/20"
+            className="bg-[#22B8CF] hover:bg-[#1A94A6] dark:bg-primary-container dark:text-on-primary-container text-white px-6 py-2.5 rounded-xl font-bold font-label-md text-sm transition-all active:scale-95 shadow-lg shadow-[#22B8CF]/20"
           >
             Got it, thanks!
           </button>

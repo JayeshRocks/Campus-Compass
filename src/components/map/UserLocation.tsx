@@ -18,15 +18,15 @@ export default function UserLocation({ map, latitude, longitude }: UserLocationP
 
       // Ripple accuracy circle
       const ripple = document.createElement("div");
-      ripple.className = "absolute w-16 h-16 bg-blue-500/20 rounded-full animate-ping";
+      ripple.className = "absolute w-16 h-16 bg-[#22B8CF]/20 rounded-full animate-ping";
 
       // Glow background
       const glow = document.createElement("div");
-      glow.className = "absolute w-8 h-8 bg-blue-500/30 rounded-full";
+      glow.className = "absolute w-8 h-8 bg-[#22B8CF]/30 rounded-full";
 
       // Core blue location dot
       const dot = document.createElement("div");
-      dot.className = "relative w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-[0_0_10px_rgba(37,99,235,0.8)]";
+      dot.className = "relative w-4 h-4 bg-[#22B8CF] border-2 border-white rounded-full shadow-[0_0_10px_rgba(37,99,235,0.8)]";
 
       el.appendChild(ripple);
       el.appendChild(glow);

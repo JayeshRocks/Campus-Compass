@@ -38,7 +38,7 @@ export default function MeetTeam() {
   }, []);
 
   return (
-    <div className="h-full w-full bg-slate-50 dark:bg-[#020617] px-6 md:px-12 pb-6 md:pb-12 overflow-y-auto relative">
+    <div className="h-full w-full page-blobs px-6 md:px-12 pb-6 md:pb-12 overflow-y-auto relative">
       <style>{`
         .team-card {
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -106,9 +106,9 @@ export default function MeetTeam() {
             className="batch-section max-w-6xl w-full mb-20 relative"
             style={{ animation: `fadeInUp 0.8s ease forwards ${batchIndex * 0.2}s`, opacity: 0, transform: "translateY(20px)" }}
           >
-            <div className="sticky-header py-6 bg-slate-50/90 dark:bg-[#020617]/90 backdrop-blur-md border-b border-slate-200 dark:border-blue-500/40 mb-8 flex items-center justify-between">
-              <h2 className="font-headline-lg text-3xl font-bold text-blue-600 dark:text-blue-200 flex items-center gap-3 shadow-sm">
-                {batch === "2027" && <span className="material-symbols-outlined text-blue-500 dark:text-blue-400">history</span>}
+            <div className="sticky-header py-6 bg-slate-50/90 dark:bg-[#16233F]/90 backdrop-blur-md border-b border-slate-200 dark:border-[#22B8CF]/40 mb-8 flex items-center justify-between">
+              <h2 className="font-headline-lg text-3xl font-bold text-[#22B8CF] dark:text-[#B7E9ED] flex items-center gap-3 shadow-sm">
+                {batch === "2027" && <span className="material-symbols-outlined text-[#22B8CF] dark:text-[#5DCBDA]">history</span>}
                 {batch}
               </h2>
               <span className="font-label-md text-slate-500 dark:text-on-surface-variant">{groupedContributors[batch].title}</span>
@@ -141,7 +141,7 @@ export default function MeetTeam() {
                       </div>
                     </div>
                     <h3 className="font-bold text-2xl text-slate-900 dark:text-on-surface mb-2 relative z-10">{member.name}</h3>
-                    <span className="bg-primary-container/10 text-primary-container font-label-sm text-xs px-4 py-1.5 rounded-full mb-4 relative z-10 tracking-wide font-medium">
+                    <span className="bg-[#22B8CF]/10 dark:bg-primary-container/10 text-[#0E7C92] dark:text-primary-container font-label-sm text-xs px-4 py-1.5 rounded-full mb-4 relative z-10 tracking-wide font-medium">
                       {member.role}
                     </span>
                     <p className="font-body-md text-slate-600 dark:text-on-surface-variant leading-relaxed text-sm mb-6 flex-1 relative z-10">
@@ -155,7 +155,7 @@ export default function MeetTeam() {
                         href={member.github}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-slate-500 dark:text-on-surface-variant hover:text-blue-600 dark:hover:text-primary transition-colors flex items-center gap-2 group/link"
+                        className="text-slate-500 dark:text-on-surface-variant hover:text-[#22B8CF] dark:hover:text-primary transition-colors flex items-center gap-2 group/link"
                       >
                         <span className="material-symbols-outlined text-[20px] group-hover/link:scale-110 transition-transform">
                           {member.github.includes("dribbble") ? "palette" : member.github.includes("kaggle") ? "analytics" : "terminal"}
@@ -170,7 +170,7 @@ export default function MeetTeam() {
                         href={member.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-slate-500 dark:text-on-surface-variant hover:text-blue-600 dark:hover:text-primary transition-colors flex items-center gap-2 group/link"
+                        className="text-slate-500 dark:text-on-surface-variant hover:text-[#22B8CF] dark:hover:text-primary transition-colors flex items-center gap-2 group/link"
                       >
                         <span className="material-symbols-outlined text-[20px] group-hover/link:scale-110 transition-transform">hub</span>
                         <span className="font-label-sm text-xs font-medium">LinkedIn</span>

@@ -22,10 +22,10 @@ export default function ReportIssue() {
   };
 
   return (
-    <div className="h-full w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
+    <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
       <div className="max-w-xl mx-auto animate-fade-in">
         <div className="text-center mb-8">
-          <span className="text-blue-600 dark:text-primary font-label-md text-label-md bg-blue-50 dark:bg-primary/10 px-3 py-1 rounded-full border border-blue-200 dark:border-primary/20">
+          <span className="text-[#22B8CF] dark:text-primary font-label-md text-label-md bg-[#EAFBFC] dark:bg-primary/10 px-3 py-1 rounded-full border border-[#B7E9ED] dark:border-primary/20">
             Support Desk
           </span>
           <h2 className="font-headline-lg text-headline-lg font-bold text-slate-900 dark:text-on-surface mt-4 tracking-tight">
@@ -59,7 +59,7 @@ export default function ReportIssue() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface placeholder-slate-400 dark:placeholder-on-surface-variant text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all shadow-sm"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface placeholder-slate-400 dark:placeholder-on-surface-variant text-sm focus:outline-none focus:ring-1 focus:ring-[#22B8CF] focus:border-[#22B8CF] transition-all shadow-sm"
                 />
               </div>
 
@@ -73,7 +73,7 @@ export default function ReportIssue() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface placeholder-slate-400 dark:placeholder-on-surface-variant text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all shadow-sm"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface placeholder-slate-400 dark:placeholder-on-surface-variant text-sm focus:outline-none focus:ring-1 focus:ring-[#22B8CF] focus:border-[#22B8CF] transition-all shadow-sm"
                 />
               </div>
 
@@ -84,7 +84,7 @@ export default function ReportIssue() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all shadow-sm"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-[#22B8CF] focus:border-[#22B8CF] transition-all shadow-sm"
                 >
                   <option value="map">Map rendering glitch</option>
                   <option value="ui">Layout or spacing alignment issue</option>
@@ -103,13 +103,13 @@ export default function ReportIssue() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the bug in detail..."
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface placeholder-slate-400 dark:placeholder-on-surface-variant text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all shadow-sm resize-none"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface placeholder-slate-400 dark:placeholder-on-surface-variant text-sm focus:outline-none focus:ring-1 focus:ring-[#22B8CF] focus:border-[#22B8CF] transition-all shadow-sm resize-none"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full mt-4 py-2.5 bg-blue-600 text-white font-semibold text-sm rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.2)] hover:bg-blue-700 transition-all cursor-pointer text-center"
+                className="w-full mt-4 py-2.5 bg-[#22B8CF] text-white font-semibold text-sm rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.2)] hover:bg-[#1A94A6] transition-all cursor-pointer text-center"
               >
                 Submit Bug Report
               </button>

@@ -86,7 +86,7 @@ export default function Sidebar({
                 }`}
               >
                 <span
-                  className={`material-symbols-outlined text-[20px] transition-transform ${isActive ? "text-blue-600 dark:text-primary" : "text-slate-600 dark:text-on-surface-variant group-hover:text-blue-600 dark:group-hover:text-primary"}`}
+                  className={`material-symbols-outlined text-[20px] transition-transform ${isActive ? "text-[#22B8CF] dark:text-primary" : "text-slate-600 dark:text-on-surface-variant group-hover:text-[#22B8CF] dark:group-hover:text-primary"}`}
                   style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
                 >
                   {cat.icon}

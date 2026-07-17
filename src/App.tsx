@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Header from "./components/layout/Header";
 import Sidebar from "./components/sidebar/Sidebar";
 import MapView from "./components/map/MapView";
@@ -43,17 +43,52 @@ export default function App() {
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       const nameMatch = building.name.toLowerCase().includes(query);
+      const shortNameMatch = building.shortName.toLowerCase().includes(query);
       const descMatch = building.description.toLowerCase().includes(query);
       const featureMatch = building.details.features.some((f) =>
         f.toLowerCase().includes(query),
       );
-      if (!nameMatch && !descMatch && !featureMatch) {
+      if (!nameMatch && !shortNameMatch && !descMatch && !featureMatch) {
         return false;
       }
     }
 
     return true;
   });
+
+  const activeBuildingIds = useMemo(
+    () => new Set(filteredBuildings.map((b) => b.id)),
+    [filteredBuildings],
+  );
+
+  // Ranked search results for the autocomplete dropdown — matches on
+  // shortName first (so "HB1" jumps straight to it), then full name.
+  const searchResults = (() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+    return buildings
+      .map((b) => {
+        const shortName = b.shortName.toLowerCase();
+        const name = b.name.toLowerCase();
+        let rank = -1;
+        if (shortName === query) rank = 0;
+        else if (shortName.startsWith(query)) rank = 1;
+        else if (name.startsWith(query)) rank = 2;
+        else if (shortName.includes(query) || name.includes(query)) rank = 3;
+        else if (b.description.toLowerCase().includes(query)) rank = 4;
+        return { building: b, rank };
+      })
+      .filter((r) => r.rank !== -1)
+      .sort((a, b) => a.rank - b.rank)
+      .slice(0, 8)
+      .map((r) => r.building);
+  })();
+
+  const handleSelectSearchResult = (building: Building) => {
+    setSelectedBuilding(building);
+    setSearchQuery("");
+    if (activePage !== "map") setActivePage("map");
+  };
 
   // Synchronize dark class on mount and when changed
   useEffect(() => {
@@ -87,6 +122,8 @@ export default function App() {
         activePage={activePage}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        searchResults={searchResults}
+        onSelectSearchResult={handleSelectSearchResult}
         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         isDarkMode={isDarkMode}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
@@ -108,7 +145,8 @@ export default function App() {
             showTabsInHeader={showTabsInHeader}
           />
           <MapView
-            buildings={filteredBuildings}
+            buildings={buildings}
+            activeBuildingIds={activeBuildingIds}
             selectedBuilding={selectedBuilding}
             onSelectBuilding={setSelectedBuilding}
             isSidebarOpen={isSidebarOpen}

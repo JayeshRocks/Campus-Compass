@@ -2,15 +2,15 @@ import { Logo } from "../components/ui/Logo";
 
 export default function About() {
   return (
-    <div className="h-full w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#020617]/50 pointer-events-none hidden dark:block"></div>
+    <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#16233F]/50 pointer-events-none hidden dark:block"></div>
       <div className="max-w-3xl mx-auto relative z-10 pb-20">
         <div className="text-center mb-12 animate-fade-in">
-          <div className="w-20 h-20 rounded-3xl bg-blue-100 dark:bg-primary-container/20 mx-auto flex items-center justify-center mb-8 border border-blue-200 dark:border-primary/30 relative shadow-xl">
-            <div className="absolute inset-0 bg-blue-400/20 dark:bg-primary/10 blur-xl rounded-full"></div>
-            <Logo className="w-10 h-10 text-blue-600 dark:text-primary relative z-10" />
+          <div className="w-20 h-20 rounded-3xl bg-[#D7F3F6] dark:bg-primary-container/20 mx-auto flex items-center justify-center mb-8 border border-[#B7E9ED] dark:border-primary/30 relative shadow-xl">
+            <div className="absolute inset-0 bg-[#5DCBDA]/20 dark:bg-primary/10 blur-xl rounded-full"></div>
+            <Logo className="w-10 h-10 text-[#22B8CF] dark:text-primary relative z-10" />
           </div>
-          <span className="text-blue-600 dark:text-primary font-label-md text-[11px] bg-blue-50 dark:bg-primary/10 px-4 py-1.5 rounded-full border border-blue-200 dark:border-primary/20 uppercase tracking-widest font-bold">
+          <span className="text-[#22B8CF] dark:text-primary font-label-md text-[11px] bg-[#EAFBFC] dark:bg-primary/10 px-4 py-1.5 rounded-full border border-[#B7E9ED] dark:border-primary/20 uppercase tracking-widest font-bold">
             About Campus Compass
           </span>
           <h2 className="font-headline-lg text-4xl md:text-5xl font-bold text-slate-900 dark:text-on-surface mt-6 tracking-tight">
@@ -24,7 +24,7 @@ export default function About() {
         <div className="space-y-8 bg-white/80 dark:bg-surface-container-lowest/80 backdrop-blur-xl border border-slate-200 dark:border-outline-variant/30 rounded-[2rem] p-8 md:p-10 shadow-2xl animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
           <section>
             <h3 className="font-headline-md text-xl font-bold text-slate-900 dark:text-on-surface flex items-center gap-3 mb-4">
-              <span className="material-symbols-outlined text-blue-600 dark:text-primary bg-blue-50 dark:bg-primary/10 p-2 rounded-xl">explore</span>
+              <span className="material-symbols-outlined text-[#22B8CF] dark:text-primary bg-[#EAFBFC] dark:bg-primary/10 p-2 rounded-xl">explore</span>
               Our Purpose
             </h3>
             <p className="font-body-md text-slate-600 dark:text-on-surface-variant text-base leading-relaxed">
@@ -34,23 +34,23 @@ export default function About() {
 
           <section className="border-t border-slate-200 dark:border-outline-variant/20 pt-8">
             <h3 className="font-headline-md text-xl font-bold text-slate-900 dark:text-on-surface flex items-center gap-3 mb-6">
-              <span className="material-symbols-outlined text-blue-600 dark:text-primary bg-blue-50 dark:bg-primary/10 p-2 rounded-xl">widgets</span>
+              <span className="material-symbols-outlined text-[#22B8CF] dark:text-primary bg-[#EAFBFC] dark:bg-primary/10 p-2 rounded-xl">widgets</span>
               Version 1 Milestones (Active)
             </h3>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600 dark:text-on-surface-variant">
-              <li className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-surface-container/50 border border-slate-100 dark:border-white/5 transition-colors hover:border-blue-200 dark:hover:border-primary/20">
+              <li className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-surface-container/50 border border-slate-100 dark:border-white/5 transition-colors hover:border-[#B7E9ED] dark:hover:border-primary/20">
                 <span className="material-symbols-outlined text-green-500 text-[20px] mt-0.5">check_circle</span>
                 <span className="leading-snug">Lock bounds centered to MIT Bengaluru with fluid panning.</span>
               </li>
-              <li className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-surface-container/50 border border-slate-100 dark:border-white/5 transition-colors hover:border-blue-200 dark:hover:border-primary/20">
+              <li className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-surface-container/50 border border-slate-100 dark:border-white/5 transition-colors hover:border-[#B7E9ED] dark:hover:border-primary/20">
                 <span className="material-symbols-outlined text-green-500 text-[20px] mt-0.5">check_circle</span>
                 <span className="leading-snug">Highlight all 26 campus POIs dynamically.</span>
               </li>
-              <li className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-surface-container/50 border border-slate-100 dark:border-white/5 transition-colors hover:border-blue-200 dark:hover:border-primary/20">
+              <li className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-surface-container/50 border border-slate-100 dark:border-white/5 transition-colors hover:border-[#B7E9ED] dark:hover:border-primary/20">
                 <span className="material-symbols-outlined text-green-500 text-[20px] mt-0.5">check_circle</span>
                 <span className="leading-snug">Draggable, zoomable vector tile mapping.</span>
               </li>
-              <li className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-surface-container/50 border border-slate-100 dark:border-white/5 transition-colors hover:border-blue-200 dark:hover:border-primary/20">
+              <li className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-surface-container/50 border border-slate-100 dark:border-white/5 transition-colors hover:border-[#B7E9ED] dark:hover:border-primary/20">
                 <span className="material-symbols-outlined text-green-500 text-[20px] mt-0.5">check_circle</span>
                 <span className="leading-snug">Search filters for academics, hostels, food, and sports.</span>
               </li>
@@ -59,13 +59,13 @@ export default function About() {
 
           <section className="border-t border-slate-200 dark:border-outline-variant/20 pt-8">
             <h3 className="font-headline-md text-xl font-bold text-slate-900 dark:text-on-surface flex items-center gap-3 mb-6">
-              <span className="material-symbols-outlined text-blue-600 dark:text-primary bg-blue-50 dark:bg-primary/10 p-2 rounded-xl">navigation</span>
+              <span className="material-symbols-outlined text-[#22B8CF] dark:text-primary bg-[#EAFBFC] dark:bg-primary/10 p-2 rounded-xl">navigation</span>
               Roadmap (Future Implementations)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="bg-slate-50 dark:bg-surface-container-high/40 p-5 rounded-2xl border border-slate-200 dark:border-outline-variant/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
                 <h4 className="font-bold text-slate-900 dark:text-on-surface mb-2 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-primary/20 flex items-center justify-center text-[10px] font-bold text-blue-600 dark:text-primary">V2</span>
+                  <span className="w-6 h-6 rounded-full bg-[#D7F3F6] dark:bg-primary/20 flex items-center justify-center text-[10px] font-bold text-[#22B8CF] dark:text-primary">V2</span>
                   Live Location
                 </h4>
                 <p className="text-slate-500 dark:text-on-surface-variant leading-relaxed text-[13px]">Integration of real-time GPS tracking and accuracy dot updates.</p>
@@ -88,8 +88,8 @@ export default function About() {
           </section>
 
           <section className="border-t border-slate-200 dark:border-outline-variant/20 pt-8">
-            <div className="bg-slate-50 dark:bg-surface-container/50 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-200 dark:border-outline-variant/30 relative overflow-hidden group hover:border-blue-200 dark:hover:border-primary/30 transition-colors">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 dark:bg-primary/5 blur-[80px] rounded-full pointer-events-none group-hover:bg-blue-500/10 dark:group-hover:bg-primary/10 transition-colors"></div>
+            <div className="bg-slate-50 dark:bg-surface-container/50 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-200 dark:border-outline-variant/30 relative overflow-hidden group hover:border-[#B7E9ED] dark:hover:border-primary/30 transition-colors">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#22B8CF]/5 dark:bg-primary/5 blur-[80px] rounded-full pointer-events-none group-hover:bg-[#22B8CF]/10 dark:group-hover:bg-primary/10 transition-colors"></div>
               
               <div className="relative z-10 text-center md:text-left">
                 <h3 className="font-headline-md text-xl font-bold text-slate-900 dark:text-on-surface mb-2">Open Source Community</h3>

@@ -108,8 +108,8 @@ export default function WeatherWidget({ isVisible, isSidebarOpen }: WeatherWidge
 
           {weather.type === "rain" && (
             <>
-              <div className="absolute inset-0 bg-blue-500/20 dark:bg-blue-400/30 rounded-full blur-md"></div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 relative z-10 text-blue-500 dark:text-blue-300">
+              <div className="absolute inset-0 bg-[#22B8CF]/20 dark:bg-[#5DCBDA]/30 rounded-full blur-md"></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 relative z-10 text-[#22B8CF] dark:text-[#8ADCE3]">
                 <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>
               </svg>
             </>

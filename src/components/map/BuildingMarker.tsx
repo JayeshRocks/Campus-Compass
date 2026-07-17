@@ -108,7 +108,7 @@ export default function BuildingMarker({ map, building, onClick, isSelected }: B
     const labelDiv = document.createElement("div");
     labelDiv.className = `absolute bottom-full mb-2 px-2.5 py-0.5 rounded text-[10px] font-bold tracking-tight shadow-md transition-all duration-200 pointer-events-none whitespace-nowrap ${
       isSelected
-        ? "bg-blue-600 text-white border border-blue-400 scale-105 opacity-100 visible z-50"
+        ? "bg-[#22B8CF] text-white border border-[#5DCBDA] scale-105 opacity-100 visible z-50"
         : "bg-slate-900/90 text-white border border-outline-variant/30 opacity-0 group-hover:opacity-100 group-hover:visible"
     }`;
     labelDiv.innerText = building.name;

@@ -3,6 +3,10 @@ interface MapControlsProps {
   onZoomOut: () => void;
   onResetCompass: () => void;
   onLocateUser: () => void;
+  onToggle3D: () => void;
+  is3D: boolean;
+  onToggleRoads: () => void;
+  showRoads: boolean;
   hasBottomNav?: boolean;
 }
 
@@ -11,6 +15,10 @@ export default function MapControls({
   onZoomOut,
   onResetCompass,
   onLocateUser,
+  onToggle3D,
+  is3D,
+  onToggleRoads,
+  showRoads,
   hasBottomNav = false,
 }: MapControlsProps) {
   return (
@@ -22,7 +30,7 @@ export default function MapControls({
           className="w-12 h-12 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-surface-container-high/50 transition-colors cursor-pointer active:scale-95 group"
           title="Find My Location"
         >
-          <span className="material-symbols-outlined text-blue-600 dark:text-primary group-hover:scale-110 transition-transform">my_location</span>
+          <span className="material-symbols-outlined text-[#22B8CF] dark:text-primary group-hover:scale-110 transition-transform">my_location</span>
         </button>
       </div>
       {/* Compass */}
@@ -32,7 +40,37 @@ export default function MapControls({
           className="w-12 h-12 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-surface-container-high/50 transition-colors cursor-pointer active:scale-95 group"
           title="Reset Map Orientation"
         >
-          <span className="material-symbols-outlined transform -rotate-45 text-blue-600 dark:text-primary group-hover:scale-110 transition-transform">explore</span>
+          <span className="material-symbols-outlined transform -rotate-45 text-[#22B8CF] dark:text-primary group-hover:scale-110 transition-transform">explore</span>
+        </button>
+      </div>
+      {/* 3D View Toggle */}
+      <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-full shadow-lg ghost-border w-12 h-12 flex mx-auto">
+        <button
+          onClick={onToggle3D}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer active:scale-95 group font-bold text-[13px] tracking-tight ${
+            is3D
+              ? "text-white bg-[#22B8CF] dark:bg-primary hover:brightness-110"
+              : "text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-surface-container-high/50"
+          }`}
+          title={is3D ? "Switch to flat 2D view" : "Switch to 3D perspective view"}
+        >
+          {is3D ? "3D" : "2D"}
+        </button>
+      </div>
+      {/* Roads Toggle */}
+      <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-full shadow-lg ghost-border w-12 h-12 flex mx-auto">
+        <button
+          onClick={onToggleRoads}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer active:scale-95 group ${
+            showRoads
+              ? "text-white bg-[#22B8CF] dark:bg-primary hover:brightness-110"
+              : "text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-surface-container-high/50"
+          }`}
+          title={showRoads ? "Hide roads" : "Show roads"}
+        >
+          <span className="material-symbols-outlined group-hover:scale-110 transition-transform">
+            {showRoads ? "route" : "hide_source"}
+          </span>
         </button>
       </div>
       {/* Zoom Controls */}

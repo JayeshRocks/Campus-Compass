@@ -39,7 +39,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
       <div className="w-full max-w-4xl max-h-full overflow-x-hidden overflow-y-auto liquid-glass rounded-3xl relative animate-fade-in flex flex-col md:flex-row">
         
         {/* Decorative Background for light/dark */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 blur-[100px] rounded-full -mr-48 -mt-48 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#22B8CF]/10 blur-[100px] rounded-full -mr-48 -mt-48 pointer-events-none" />
 
         {/* Global Close Button */}
         <button onClick={onClose} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-slate-700 hover:text-slate-900 dark:text-on-surface-variant dark:hover:text-white bg-slate-200/40 dark:bg-surface-container-high/30 rounded-full hover:bg-slate-200/80 dark:hover:bg-surface-container-high/70 transition-all z-50 shadow-sm backdrop-blur-sm">
@@ -52,7 +52,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
             Found a missing shortcut? Noticed a floor plan error? Campus Compass is a community-driven project that thrives on your input. Together, we can build the most accurate map of MIT Bengaluru.
           </p>
           <div className="flex flex-wrap gap-3">
-            <a href="https://github.com/JayeshRocks/Campus-Compass" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl font-label-md font-bold hover:bg-blue-700 transition-all group shadow-sm">
+            <a href="https://github.com/JayeshRocks/Campus-Compass" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-3 bg-[#22B8CF] text-white rounded-xl font-label-md font-bold hover:bg-[#1A94A6] transition-all group shadow-sm">
               <span className="material-symbols-outlined text-[18px]">terminal</span>
               GitHub Repository
             </a>
@@ -64,17 +64,17 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Full Name</label>
-                <input name="name" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="e.g. Aryan K." type="text" />
+                <input name="name" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="e.g. Aryan K." type="text" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Email Address</label>
-                <input name="email" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="aryan@example.com" type="email" />
+                <input name="email" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="aryan@example.com" type="email" />
               </div>
             </div>
             
             <div className="space-y-1.5">
               <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Category</label>
-              <select name="category" className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface outline-none appearance-none">
+              <select name="category" className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface outline-none appearance-none">
                 <option value="missing_place">Missing Place / Room</option>
                 <option value="incorrect_location">Incorrect Location</option>
                 <option value="bug">App Bug / Glitch</option>
@@ -84,7 +84,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
 
             <div className="space-y-1.5">
               <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Your Message</label>
-              <textarea name="message" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 resize-none outline-none" placeholder="Tell us what's on your mind..." rows={4}></textarea>
+              <textarea name="message" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 resize-none outline-none" placeholder="Tell us what's on your mind..." rows={4}></textarea>
             </div>
             
             <button 
@@ -93,7 +93,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
               className={`w-full py-3.5 rounded-xl font-label-md font-bold transition-all flex items-center justify-center gap-2 ${
                 status === "success" 
                   ? "bg-green-600 text-white" 
-                  : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-primary dark:text-on-primary dark:hover:brightness-110 shadow-md shadow-blue-500/10"
+                  : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-primary dark:text-on-primary dark:hover:brightness-110 shadow-md shadow-[#22B8CF]/10"
               }`}
             >
               {status === "idle" && (

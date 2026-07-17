@@ -5,13 +5,13 @@ import type { Building } from "../../data/buildings";
 import MapControls from "./MapControls";
 import UserLocation from "./UserLocation";
 import FeedbackButton from "./FeedbackButton";
-import BuildingMarker from "./BuildingMarker";
 import BuildingPopup from "./BuildingPopup";
 import ReportIssueForm from "./ReportIssueForm";
 import WeatherWidget from "./WeatherWidget";
 
 interface MapViewProps {
   buildings: Building[];
+  activeBuildingIds?: Set<string>;
   selectedBuilding: Building | null;
   onSelectBuilding: (b: Building | null) => void;
   isSidebarOpen: boolean;
@@ -24,6 +24,7 @@ interface MapViewProps {
 
 export default function MapView({
   buildings,
+  activeBuildingIds,
   selectedBuilding,
   onSelectBuilding,
   isSidebarOpen,
@@ -35,10 +36,19 @@ export default function MapView({
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [is3D, setIs3D] = useState(true);
+  const [showRoads, setShowRoads] = useState(true);
+  const showRoadsRef = useRef(showRoads);
+  useEffect(() => { showRoadsRef.current = showRoads; }, [showRoads]);
+  const fetchRoadsRef = useRef<(() => Promise<void>) | null>(null);
+  const [routeInfo, setRouteInfo] = useState<{ distanceM: number; durationS: number } | null>(null);
+  const navigatingBuildingRef = useRef<typeof selectedBuilding>(null);
   const [showReportIssue, setShowReportIssue] = useState(false);
   const [isWeatherVisible, setIsWeatherVisible] = useState(true);
   
   const watchIdRef = useRef<number | null>(null);
+  const roadsFetchStartedRef = useRef(false);
   const weatherTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Clean up location watch on unmount
@@ -85,11 +95,28 @@ export default function MapView({
   const selectedBuildingRef = useRef(selectedBuilding);
   useEffect(() => { selectedBuildingRef.current = selectedBuilding; }, [selectedBuilding]);
 
+  // Fly to the selected building whenever it changes — covers selection via
+  // search results as well as clicking a marker/polygon directly.
+  useEffect(() => {
+    if (!map || !selectedBuilding) return;
+    map.flyTo({
+      center: [selectedBuilding.longitude, selectedBuilding.latitude],
+      zoom: 18,
+      pitch: is3D ? 55 : 0,
+      bearing: is3D ? -17 : 0,
+      duration: 1200,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBuilding, map]);
+
   const onSelectRef = useRef(onSelectBuilding);
   useEffect(() => { onSelectRef.current = onSelectBuilding; }, [onSelectBuilding]);
 
   const buildingsRef = useRef(buildings);
   useEffect(() => { buildingsRef.current = buildings; }, [buildings]);
+
+  const isSatelliteRef = useRef(isSatellite);
+  useEffect(() => { isSatelliteRef.current = isSatellite; }, [isSatellite]);
 
   // Initialize MapLibre Map
   useEffect(() => {
@@ -97,6 +124,7 @@ export default function MapView({
 
     const initialStyle = isSatellite ? {
       version: 8,
+      glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
       sources: {
         "esri-satellite": {
           type: "raster",
@@ -108,9 +136,22 @@ export default function MapView({
       layers: [
         { id: "satellite-layer", type: "raster", source: "esri-satellite", minzoom: 0, maxzoom: 22 }
       ]
-    } : (isDarkMode 
-      ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-      : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json");
+    } : {
+      // Clean blank "schematic" canvas — no street tiles/city clutter,
+      // just a flat background so campus building shapes read like a diagram.
+      version: 8,
+      glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+      sources: {},
+      layers: [
+        {
+          id: "schematic-background",
+          type: "background",
+          paint: {
+            "background-color": isDarkMode ? "#0f172a" : "#FAFAF9"
+          }
+        }
+      ]
+    };
 
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -118,17 +159,118 @@ export default function MapView({
       style: initialStyle as any,
       center: [77.5898, 13.1264], // MAHE Bengaluru Center
       zoom: 15.5,
-      dragRotate: false,
+      pitch: 55,
+      bearing: -17,
+      dragRotate: true,
     });
 
-    mapInstance.dragRotate.disable();
     mapInstance.touchZoomRotate.disableRotation();
+
+    // Fetch real road/path geometry from OpenStreetMap (Overpass API) for the
+    // campus bounding box and render it as a road layer under the buildings.
+    const fetchRoads = async () => {
+      if (roadsFetchStartedRef.current) return;
+      roadsFetchStartedRef.current = true;
+      console.log("[roads] fetchRoads() called");
+
+      // Try several free public Overpass mirrors in order — the main
+      // instance frequently times out (504) under load.
+      const mirrors = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://overpass.openstreetmap.ru/api/interpreter",
+      ];
+      const bbox = "13.118,77.578,13.135,77.598"; // south,west,north,east
+      const query = `[out:json][timeout:25];(way["highway"](${bbox}););out geom;`;
+
+      let data: { elements?: unknown[] } | null = null;
+
+      for (const mirror of mirrors) {
+        try {
+          console.log("[roads] trying mirror:", mirror);
+          const res = await fetch(mirror, { method: "POST", body: query });
+          console.log("[roads] response status:", res.status, "from", mirror);
+          if (res.ok) {
+            data = await res.json();
+            break;
+          }
+        } catch (err) {
+          console.warn("[roads] mirror failed:", mirror, err);
+        }
+      }
+
+      if (!data) {
+        console.error("[roads] all mirrors failed, will retry on next style load");
+        roadsFetchStartedRef.current = false;
+        return;
+      }
+
+      try {
+        console.log("[roads] elements received:", data.elements?.length);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const features = (data.elements || [])
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((el: any) => el.type === "way" && el.geometry)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((el: any) => ({
+            type: "Feature",
+            properties: { highway: el.tags?.highway || "road" },
+            geometry: {
+              type: "LineString",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              coordinates: el.geometry.map((g: any) => [g.lon, g.lat]),
+            },
+          }));
+        console.log("[roads] features built:", features.length);
+
+        if (mapInstance.getSource("campus-roads")) {
+          (mapInstance.getSource("campus-roads") as maplibregl.GeoJSONSource).setData({
+            type: "FeatureCollection",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            features: features as any,
+          });
+          console.log("[roads] updated existing source");
+        } else if (mapInstance.isStyleLoaded()) {
+          mapInstance.addSource("campus-roads", {
+            type: "geojson",
+            data: { type: "FeatureCollection", features },
+          });
+          mapInstance.addLayer(
+            {
+              id: "campus-roads-line",
+              type: "line",
+              source: "campus-roads",
+              layout: {
+                "line-join": "round",
+                "line-cap": "round",
+                visibility: showRoadsRef.current ? "visible" : "none",
+              },
+              paint: {
+                "line-color": isDarkMode ? "#64748b" : "#94a3b8",
+                "line-width": 3,
+                "line-opacity": 0.9,
+              },
+            },
+            mapInstance.getLayer("campus-buildings-fill") ? "campus-buildings-fill" : undefined
+          );
+          console.log("[roads] added new source + layer");
+        } else {
+          console.log("[roads] style not loaded, skipped adding layer");
+          roadsFetchStartedRef.current = false;
+        }
+      } catch (err) {
+        console.error("[roads] processing failed:", err);
+        roadsFetchStartedRef.current = false;
+      }
+    };
+
+    fetchRoadsRef.current = fetchRoads;
 
     const addBuildingLayers = () => {
       if (!mapInstance.getSource("campus-buildings")) {
         const geojsonFeatures = buildingsRef.current.map(b => ({
           type: "Feature",
-          properties: { id: b.id, name: b.name, category: b.category },
+          properties: { id: b.id, name: b.name, shortName: b.shortName, category: b.category },
           geometry: b.geometry
         }));
 
@@ -143,21 +285,73 @@ export default function MapView({
 
         mapInstance.addLayer({
           id: "campus-buildings-fill",
-          type: "fill",
+          type: "fill-extrusion",
           source: "campus-buildings",
           paint: {
-            "fill-color": [
+            "fill-extrusion-color": [
               "match",
-              ["get", "category"],
-              "academic", "#06b6d4", // cyan
-              "hostels", "#f97316", // orange
-              "food", "#eab308",    // yellow
-              "sports", "#22c55e",  // green
-              "admin", "#ec4899",   // pink
-              "parking", "#ef4444", // red
-              "#94a3b8"
+              ["get", "id"],
+              "cricket_field", "#22c55e",
+              "football_field", "#15803d",
+              "volleyball_courts", "#4ade80",
+              "basketball_court_1", "#16a34a",
+              "basketball_half_court", "#16a34a",
+              "cricket_nets", "#86efac",
+              "mlcp_15", "#ef4444",
+              "gate_1", "#2dd4bf",
+              "gate_2", "#2dd4bf",
+              "gate_3", "#2dd4bf",
+              "blue_dove_mess", "#ef4444",
+              "ta_pai", "#eab308",
+              "cub_13", "#ec4899",
+              "cub_14", "#ec4899",
+              "laundry", "#f97316",
+              [
+                "match",
+                ["get", "category"],
+                "academic", "#06b6d4",
+                "hostels", "#f97316",
+                "food", "#eab308",
+                "sports", "#22c55e",
+                "admin", "#ec4899",
+                "parking", "#ef4444",
+                "security", "#2dd4bf",
+                "#94a3b8"
+              ]
             ],
-            "fill-opacity": 0.25
+            "fill-extrusion-height": [
+              "match",
+              ["get", "id"],
+              "cricket_field", 1,
+              "football_field", 1,
+              "volleyball_courts", 1,
+              "basketball_court_1", 1,
+              "basketball_half_court", 1,
+              "cricket_nets", 1,
+              "mlcp_15", 10,
+              "gate_1", 6,
+              "gate_2", 6,
+              "gate_3", 6,
+              "blue_dove_mess", 9,
+              "ta_pai", 16,
+              "cub_13", 10,
+              "cub_14", 10,
+              "laundry", 6,
+              [
+                "match",
+                ["get", "category"],
+                "academic", 22,
+                "hostels", 18,
+                "food", 9,
+                "sports", 1,
+                "admin", 14,
+                "parking", 8,
+                "security", 6,
+                8
+              ]
+            ],
+            "fill-extrusion-base": 0,
+            "fill-extrusion-opacity": 0.92
           }
         });
 
@@ -166,18 +360,27 @@ export default function MapView({
           type: "line",
           source: "campus-buildings",
           paint: {
-            "line-color": [
-              "match",
-              ["get", "category"],
-              "academic", "#0891b2",
-              "hostels", "#ea580c",
-              "food", "#ca8a04",
-              "sports", "#16a34a",
-              "admin", "#db2777",
-              "parking", "#dc2626",
-              "#64748b"
-            ],
+            "line-color": "#0ea5e9",
             "line-width": 1.5
+          }
+        });
+
+        mapInstance.addLayer({
+          id: "campus-buildings-label",
+          type: "symbol",
+          source: "campus-buildings",
+          layout: {
+            "text-field": ["get", "shortName"],
+            "text-size": 11,
+            "text-font": ["Noto Sans Regular"],
+            "text-allow-overlap": true,
+            "text-ignore-placement": true,
+            "text-max-width": 8
+          },
+          paint: {
+            "text-color": "#0f172a",
+            "text-halo-color": "#ffffff",
+            "text-halo-width": 1.2
           }
         });
 
@@ -192,6 +395,24 @@ export default function MapView({
             "line-opacity": 0.9
           }
         });
+
+        if (!mapInstance.getSource("direction-line")) {
+          mapInstance.addSource("direction-line", {
+            type: "geojson",
+            data: { type: "FeatureCollection", features: [] }
+          });
+          mapInstance.addLayer({
+            id: "direction-line-layer",
+            type: "line",
+            source: "direction-line",
+            layout: { "line-join": "round", "line-cap": "round" },
+            paint: {
+              "line-color": "#3b82f6",
+              "line-width": 4,
+              "line-dasharray": [0.2, 1.5]
+            }
+          });
+        }
 
         // Click handler for polygons
         mapInstance.on("click", "campus-buildings-fill", (e) => {
@@ -212,8 +433,41 @@ export default function MapView({
       }
     };
 
+    // Hide the schematic building polygons whenever the satellite imagery
+    // basemap is active, since the hand-traced shapes don't line up
+    // precisely with the real photo underneath.
+    const applyBuildingVisibility = () => {
+      const visibility = isSatelliteRef.current ? "none" : "visible";
+      ["campus-buildings-fill", "campus-buildings-line", "campus-buildings-label", "campus-buildings-highlight"].forEach((layerId) => {
+        if (mapInstance.getLayer(layerId)) {
+          mapInstance.setLayoutProperty(layerId, "visibility", visibility);
+        }
+      });
+    };
+
     mapInstance.on("load", () => {
       addBuildingLayers();
+      applyBuildingVisibility();
+      if (!mapInstance.getSource("campus-roads")) {
+        fetchRoads();
+      }
+
+      // Fit view tightly to the campus buildings so the schematic fills
+      // the screen instead of showing surrounding city streets.
+      const allCoords: [number, number][] = [];
+      buildingsRef.current.forEach((b) => {
+        b.geometry.coordinates[0].forEach((coord) => {
+          allCoords.push([coord[0], coord[1]]);
+        });
+      });
+      if (allCoords.length > 0) {
+        const bounds = allCoords.reduce(
+          (acc, coord) => acc.extend(coord),
+          new maplibregl.LngLatBounds(allCoords[0], allCoords[0])
+        );
+        mapInstance.fitBounds(bounds, { padding: 100, duration: 0, pitch: 55, bearing: -17 });
+      }
+
       setMap(mapInstance);
       mapInstance.resize();
     });
@@ -221,6 +475,10 @@ export default function MapView({
     mapInstance.on("styledata", () => {
       if (mapInstance.isStyleLoaded()) {
         addBuildingLayers();
+        applyBuildingVisibility();
+        if (!mapInstance.getSource("campus-roads")) {
+          fetchRoads();
+        }
       }
     });
 
@@ -236,6 +494,7 @@ export default function MapView({
     const targetStyle = isSatellite
       ? {
           version: 8,
+          glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
           sources: {
             "esri-satellite": {
               type: "raster",
@@ -256,10 +515,21 @@ export default function MapView({
             }
           ]
         }
-      : isDarkMode
-        ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-        : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
-    
+      : {
+          version: 8,
+          glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+          sources: {},
+          layers: [
+            {
+              id: "schematic-background",
+              type: "background",
+              paint: {
+                "background-color": isDarkMode ? "#0f172a" : "#FAFAF9"
+              }
+            }
+          ]
+        };
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     map.setStyle(targetStyle as any);
   }, [isDarkMode, isSatellite, map]);
@@ -277,9 +547,12 @@ export default function MapView({
     if (!map) return;
     const source = map.getSource("campus-buildings") as maplibregl.GeoJSONSource;
     if (source) {
-      const geojsonFeatures = buildings.map(b => ({
+      const visibleBuildings = activeBuildingIds
+        ? buildings.filter(b => activeBuildingIds.has(b.id))
+        : buildings;
+      const geojsonFeatures = visibleBuildings.map(b => ({
         type: "Feature",
-        properties: { id: b.id, name: b.name, category: b.category },
+        properties: { id: b.id, name: b.name, shortName: b.shortName, category: b.category },
         geometry: b.geometry
       }));
       source.setData({
@@ -288,7 +561,7 @@ export default function MapView({
         features: geojsonFeatures as any
       });
     }
-  }, [buildings, map]);
+  }, [buildings, activeBuildingIds, map]);
 
   // Handle panel and sidebar resize events
   useEffect(() => {
@@ -305,10 +578,38 @@ export default function MapView({
     map?.flyTo({
       center: [77.5898, 13.1264],
       zoom: 15.5,
-      bearing: 0,
-      pitch: 0,
+      bearing: is3D ? -17 : 0,
+      pitch: is3D ? 55 : 0,
       duration: 1000,
     });
+  };
+
+  const handleToggle3D = () => {
+    if (!map) return;
+    const next = !is3D;
+    setIs3D(next);
+    map.easeTo({
+      pitch: next ? 55 : 0,
+      bearing: next ? -17 : 0,
+      duration: 800,
+    });
+  };
+
+  const handleToggleRoads = () => {
+    const next = !showRoads;
+    setShowRoads(next);
+
+    if (!map) return;
+
+    if (map.getLayer("campus-roads-line")) {
+      map.setLayoutProperty("campus-roads-line", "visibility", next ? "visible" : "none");
+    } else if (next) {
+      // Roads never successfully loaded (e.g. Overpass mirrors were all
+      // down) — allow a fresh retry now that the person explicitly asked.
+      roadsFetchStartedRef.current = false;
+      setToastMessage("Loading roads...");
+      fetchRoadsRef.current?.().finally(() => setToastMessage(null));
+    }
   };
 
   const handleLocateUser = () => {
@@ -375,6 +676,129 @@ export default function MapView({
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const drawDirectionLine = async (lat: number, lng: number, building: typeof selectedBuilding, follow: boolean = false) => {
+    if (!map || !building) return;
+    const source = map.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    let routeCoords: [number, number][] = [
+      [lng, lat],
+      [building.longitude, building.latitude]
+    ];
+
+    try {
+      if (!follow) setToastMessage("Finding route...");
+      const url = `https://router.project-osrm.org/route/v1/foot/${lng},${lat};${building.longitude},${building.latitude}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const route = data?.routes?.[0];
+        const coords = route?.geometry?.coordinates;
+        if (Array.isArray(coords) && coords.length > 1) {
+          routeCoords = coords;
+        }
+        if (route) {
+          setRouteInfo({ distanceM: route.distance, durationS: route.duration });
+        }
+      }
+    } catch (err) {
+      console.error("[directions] OSRM fetch failed, using straight line:", err);
+    } finally {
+      if (!follow) setToastMessage(null);
+    }
+
+    source.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates: routeCoords
+          }
+        }
+      ]
+    });
+
+    if (follow) {
+      // Live guidance: keep the camera centered on the walker rather than
+      // re-framing the whole route every update.
+      map.easeTo({ center: [lng, lat], duration: 600 });
+    } else {
+      const bounds = routeCoords.reduce(
+        (acc, coord) => acc.extend(coord as [number, number]),
+        new maplibregl.LngLatBounds(routeCoords[0], routeCoords[0])
+      );
+      map.fitBounds(bounds, { padding: 120, pitch: is3D ? 55 : 0, bearing: is3D ? -17 : 0, duration: 800 });
+    }
+  };
+
+  const startWatchingLocation = (onFirstFix?: (lat: number, lng: number) => void) => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+    }
+    let firstFix = true;
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setUserLoc({ lat, lng });
+        if (firstFix) {
+          firstFix = false;
+          onFirstFix?.(lat, lng);
+        }
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setToastMessage("Location access denied. Please enable it in browser settings.");
+        } else {
+          setToastMessage("Unable to retrieve your location.");
+        }
+        setTimeout(() => setToastMessage(null), 4000);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+    );
+  };
+
+  const handleShowDirections = () => {
+    if (!selectedBuilding) return;
+    navigatingBuildingRef.current = selectedBuilding;
+    setIsNavigating(true);
+
+    if (userLoc) {
+      drawDirectionLine(userLoc.lat, userLoc.lng, selectedBuilding);
+      startWatchingLocation();
+      return;
+    }
+
+    setToastMessage("Getting your location...");
+    startWatchingLocation((lat, lng) => {
+      setToastMessage(null);
+      drawDirectionLine(lat, lng, selectedBuilding);
+    });
+  };
+
+  const handleStopNavigation = () => {
+    setIsNavigating(false);
+    setRouteInfo(null);
+    navigatingBuildingRef.current = null;
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    const source = map?.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
+    source?.setData({ type: "FeatureCollection", features: [] });
+  };
+
+  // While navigating, re-fetch the route every time the live GPS position
+  // updates, so the guidance line and ETA stay accurate as the person walks.
+  useEffect(() => {
+    if (!isNavigating || !userLoc || !navigatingBuildingRef.current) return;
+    drawDirectionLine(userLoc.lat, userLoc.lng, navigatingBuildingRef.current, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userLoc, isNavigating]);
+
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
@@ -388,17 +812,6 @@ export default function MapView({
           {userLoc && (
             <UserLocation map={map} latitude={userLoc.lat} longitude={userLoc.lng} />
           )}
-
-          {/* Dynamically looped building markers */}
-          {buildings.map((building) => (
-            <BuildingMarker
-              key={building.id}
-              map={map}
-              building={building}
-              onClick={() => onSelectBuilding(building)}
-              isSelected={selectedBuilding?.id === building.id}
-            />
-          ))}
 
           {/* Building detail Popups on Map */}
           {selectedBuilding && (
@@ -421,6 +834,10 @@ export default function MapView({
         onZoomOut={handleZoomOut}
         onResetCompass={handleResetCompass}
         onLocateUser={handleLocateUser}
+        onToggle3D={handleToggle3D}
+        is3D={is3D}
+        onToggleRoads={handleToggleRoads}
+        showRoads={showRoads}
         hasBottomNav={!showTabsInHeader}
       />
       
@@ -486,8 +903,8 @@ export default function MapView({
               </div>
               <div className="mt-auto pt-4 border-t border-slate-200 dark:border-outline-variant/20 flex gap-2">
                 <button
-                  onClick={() => handleShowToast("Directions", "2")}
-                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-label-md text-label-md font-semibold rounded-lg shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  onClick={handleShowDirections}
+                  className="flex-1 py-2.5 bg-[#22B8CF] hover:bg-[#1A94A6] text-white font-label-md text-label-md font-semibold rounded-lg shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[20px]">directions</span>
                   Directions
@@ -517,6 +934,29 @@ export default function MapView({
         <div className="fixed top-[88px] left-1/2 transform -translate-x-1/2 bg-surface-bright/95 text-on-surface px-4 py-2 rounded-xl border border-outline-variant/30 shadow-2xl z-[120] text-sm font-body-md animate-fade-in flex items-center gap-2">
           <span className="material-symbols-outlined text-primary text-[18px]">info</span>
           {toastMessage}
+        </div>
+      )}
+
+      {/* Live Navigation Guidance Banner */}
+      {isNavigating && (
+        <div className="fixed top-[88px] left-1/2 transform -translate-x-1/2 bg-primary text-on-primary px-5 py-3 rounded-2xl shadow-2xl z-[125] flex items-center gap-4">
+          <span className="material-symbols-outlined text-[22px]">directions_walk</span>
+          <div className="flex flex-col leading-tight">
+            <span className="font-medium text-sm">
+              {navigatingBuildingRef.current?.name || "Navigating"}
+            </span>
+            <span className="text-xs opacity-90">
+              {routeInfo
+                ? `${Math.round(routeInfo.distanceM)} m • ${Math.max(1, Math.round(routeInfo.durationS / 60))} min walk`
+                : "Calculating route..."}
+            </span>
+          </div>
+          <button
+            onClick={handleStopNavigation}
+            className="ml-2 px-3 py-1.5 rounded-lg bg-on-primary/15 hover:bg-on-primary/25 text-xs font-medium transition-colors"
+          >
+            Stop
+          </button>
         </div>
       )}
 
