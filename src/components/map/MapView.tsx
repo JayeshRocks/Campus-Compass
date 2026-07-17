@@ -69,7 +69,6 @@ export default function MapView({
   const [isWeatherVisible, setIsWeatherVisible] = useState(true);
   
   const watchIdRef = useRef<number | null>(null);
-  const roadsFetchStartedRef = useRef(false);
   const weatherTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Clean up location watch on unmount
@@ -471,6 +470,14 @@ export default function MapView({
             const id = e.features[0].properties.id;
             const b = buildingsRef.current.find(x => x.id === id);
             if (b) onSelectRef.current(b);
+          }
+        });
+
+        // Click on empty map to clear selection
+        mapInstance.on("click", (e) => {
+          const features = mapInstance.queryRenderedFeatures(e.point, { layers: ["campus-buildings-fill"] });
+          if (features.length === 0) {
+            onSelectRef.current(null);
           }
         });
 
@@ -892,9 +899,6 @@ export default function MapView({
               map={map}
               building={selectedBuilding}
               onClose={() => onSelectBuilding(null)}
-              onViewDetails={() => {
-                // Clicking "View Details" focus or handles slide card visibility
-              }}
             />
           )}
         </>
@@ -922,12 +926,16 @@ export default function MapView({
 
       {/* Slide-in Building Info Card */}
       <aside
-        className={`liquid-glass fixed right-4 md:right-[24px] top-[140px] md:top-[88px] w-[calc(100vw-32px)] md:w-[360px] rounded-2xl z-[85] overflow-hidden flex flex-col transition-all duration-300 transform ${
+        className={`bg-white dark:bg-surface-container-high border border-slate-200 dark:border-white/10 shadow-2xl fixed right-4 md:right-[24px] top-[140px] md:top-[88px] w-[calc(100vw-32px)] md:w-[360px] rounded-2xl z-[85] overflow-hidden flex flex-col transition-all duration-300 transform ${
           selectedBuilding ? "translate-x-0 opacity-100" : "translate-x-[110%] opacity-0 pointer-events-none"
         }`}
       >
+        {/* Ambient Corner Hues */}
+        <div className="absolute top-[150px] -left-20 w-64 h-64 bg-[#FDE047]/80 dark:bg-red-500/50 blur-[60px] rounded-full pointer-events-none z-0 mix-blend-multiply dark:mix-blend-screen" />
+        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#7DD3FC]/80 dark:bg-cyan-500/50 blur-[60px] rounded-full pointer-events-none z-0 mix-blend-multiply dark:mix-blend-screen" />
+
         {selectedBuilding && (
-          <>
+          <div className="relative z-10 flex flex-col h-full w-full">
             <div className="h-48 w-full relative">
               <img
                 alt={selectedBuilding.name}
@@ -940,12 +948,7 @@ export default function MapView({
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
-              <div className="absolute bottom-4 left-4 flex gap-2">
-                <span className="px-2 py-1 bg-white/80 dark:bg-surface-container-lowest/80 backdrop-blur-md rounded text-slate-900 dark:text-on-surface font-label-sm text-label-sm border border-slate-200 dark:border-outline-variant/30 flex items-center gap-1 shadow-sm">
-                  <span className={`w-2 h-2 rounded-full ${selectedBuilding.busyColor}`}></span>
-                  {selectedBuilding.busyStatus}
-                </span>
-              </div>
+
             </div>
             <div className="p-panel_padding flex-1 flex flex-col">
               <h3 className="font-headline-md text-headline-md text-slate-900 dark:text-on-surface mb-1">
@@ -959,12 +962,6 @@ export default function MapView({
                   <span className="material-symbols-outlined text-[20px]">schedule</span>
                   <span className="font-label-md text-label-md text-sm">
                     {selectedBuilding.details.hours}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-slate-600 dark:text-on-surface-variant">
-                  <span className="material-symbols-outlined text-[20px]">directions_walk</span>
-                  <span className="font-label-md text-label-md text-sm">
-                    {selectedBuilding.details.distance}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-slate-600 dark:text-on-surface-variant">
@@ -983,13 +980,6 @@ export default function MapView({
                   Directions
                 </button>
                 <button
-                  onClick={() => handleShowToast("Bookmarks", "2")}
-                  className="w-12 py-2.5 glass-panel text-slate-700 hover:bg-slate-100 border border-slate-200 dark:text-on-surface dark:hover:bg-surface-container-high dark:border-outline-variant/30 rounded-lg transition-colors flex items-center justify-center cursor-pointer shadow-sm"
-                  title="Bookmark"
-                >
-                  <span className="material-symbols-outlined text-[20px]">bookmark_border</span>
-                </button>
-                <button
                   onClick={() => handleShowToast("Sharing", "2")}
                   className="w-12 py-2.5 glass-panel text-slate-700 hover:bg-slate-100 border border-slate-200 dark:text-on-surface dark:hover:bg-surface-container-high dark:border-outline-variant/30 rounded-lg transition-colors flex items-center justify-center cursor-pointer shadow-sm"
                   title="Share"
@@ -998,7 +988,7 @@ export default function MapView({
                 </button>
               </div>
             </div>
-          </>
+          </div>
         )}
       </aside>
 

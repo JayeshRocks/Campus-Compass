@@ -29,15 +29,15 @@ export const buildings: Building[] = [
     "name": "Central Library and Major Project Facility",
     "shortName": "CLMPF",
     "category": "admin",
-    "description": "A facility on campus serving as Central Library and Major Project Facility.",
+    "description": "The primary academic resource center, featuring extensive book collections, digital archives, and collaborative spaces for major student projects.",
     "latitude": 13.1263123,
     "longitude": 77.5883769,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "5 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -217,15 +217,15 @@ export const buildings: Building[] = [
     "name": "Admin Building",
     "shortName": "Admin",
     "category": "admin",
-    "description": "A facility on campus serving as Admin Building.",
+    "description": "The administrative heart of the campus, housing university offices, student services, and the registrar's office.",
     "latitude": 13.1250158,
     "longitude": 77.589359,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "5 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -353,15 +353,15 @@ export const buildings: Building[] = [
     "name": "Hostel Block 1",
     "shortName": "HB1",
     "category": "hostels",
-    "description": "A facility on campus serving as Hostel Block 1.",
+    "description": "A premium residential facility for students, providing comfortable dormitories, common lounges, and study areas.",
     "latitude": 13.130338,
     "longitude": 77.5888943,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "5 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -417,15 +417,15 @@ export const buildings: Building[] = [
     "name": "Hostel Block 2",
     "shortName": "HB2",
     "category": "hostels",
-    "description": "A facility on campus serving as Hostel Block 2.",
+    "description": "A lively student residence known for its spacious rooms, recreational areas, and strong community vibe.",
     "latitude": 13.1298053,
     "longitude": 77.588865,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "5 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -481,15 +481,15 @@ export const buildings: Building[] = [
     "name": "Hostel Block 3",
     "shortName": "HB3",
     "category": "hostels",
-    "description": "A facility on campus serving as Hostel Block 3.",
+    "description": "A modern on-campus dormitory featuring excellent amenities, quiet study rooms, and easy access to campus dining.",
     "latitude": 13.1292503,
     "longitude": 77.5888784,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "5 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -545,15 +545,15 @@ export const buildings: Building[] = [
     "name": "Hostel Block 4 NW",
     "shortName": "HB4 NW",
     "category": "hostels",
-    "description": "A facility on campus serving as Hostel Block 4 NW.",
+    "description": "The north-west wing of Hostel Block 4, offering modern living spaces and a peaceful environment for focused students.",
     "latitude": 13.1287057,
     "longitude": 77.5889656,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "12 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -609,15 +609,15 @@ export const buildings: Building[] = [
     "name": "Hostel Block 4 SW",
     "shortName": "HB4 SW",
     "category": "hostels",
-    "description": "A facility on campus serving as Hostel Block 4 SW.",
+    "description": "The south-west wing of Hostel Block 4, featuring easy access to sports facilities and an active student community.",
     "latitude": 13.1282368,
     "longitude": 77.5889656,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "12 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -673,15 +673,15 @@ export const buildings: Building[] = [
     "name": "Academic Block 1",
     "shortName": "AB1",
     "category": "academic",
-    "description": "A facility on campus serving as Academic Block 1.",
+    "description": "The core academic building housing primary lecture halls, seminar rooms, and faculty offices for various disciplines.",
     "latitude": 13.1264119,
     "longitude": 77.5898059,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "5 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -753,15 +753,15 @@ export const buildings: Building[] = [
     "name": "Academic Block 2",
     "shortName": "AB2",
     "category": "academic",
-    "description": "A facility on campus serving as Academic Block 2.",
+    "description": "A modern academic facility featuring state-of-the-art smart classrooms, research laboratories, and student lounge areas.",
     "latitude": 13.1263235,
     "longitude": 77.5904676,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "5 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -833,15 +833,15 @@ export const buildings: Building[] = [
     "name": "Academic Block 4",
     "shortName": "AB4",
     "category": "academic",
-    "description": "A facility on campus serving as Academic Block 4.",
+    "description": "An advanced academic center focused on applied sciences and engineering, featuring specialized workshops and computer labs.",
     "latitude": 13.1253255,
     "longitude": 77.5904676,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "6 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -913,15 +913,15 @@ export const buildings: Building[] = [
     "name": "Academic Block 5",
     "shortName": "AB5",
     "category": "academic",
-    "description": "A facility on campus serving as Academic Block 5.",
+    "description": "A vibrant academic hub hosting creative arts, humanities classes, and interactive collaborative workspaces.",
     "latitude": 13.12523,
     "longitude": 77.5898258,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "5 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -993,15 +993,15 @@ export const buildings: Building[] = [
     "name": "Academic Block 6",
     "shortName": "AB6",
     "category": "academic",
-    "description": "A facility on campus serving as Academic Block 6.",
+    "description": "The newest academic block, equipped with high-tech lecture theatres, innovation incubators, and sprawling study zones.",
     "latitude": 13.1281701,
     "longitude": 77.5906796,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "5 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -1041,15 +1041,15 @@ export const buildings: Building[] = [
     "name": "MLCP",
     "shortName": "MLCP",
     "category": "parking",
-    "description": "A facility on campus serving as MLCP.",
+    "description": "The Multi-Level Car Parking facility, providing ample and secure parking space for faculty, students, and visitors.",
     "latitude": 13.1267495,
     "longitude": 77.5869498,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "12 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -1089,15 +1089,15 @@ export const buildings: Building[] = [
     "name": "Marena/Chefs Touch Mess",
     "shortName": "SC",
     "category": "sports",
-    "description": "Marena building, home to the Sports Complex and Chef's Touch Mess.",
+    "description": "Marena building, home to the state-of-the-art Sports Complex and the bustling Chef's Touch Mess.",
     "latitude": 13.1284449,
     "longitude": 77.5898774,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "3 Floor(s)",
+      "floors": "Levels TBA",
       "features": [
         "Wi-Fi",
         "Accessible"
@@ -1153,15 +1153,15 @@ export const buildings: Building[] = [
     "name": "Cricket Field & Jogging Track",
     "shortName": "Cricket",
     "category": "sports",
-    "description": "Main cricket ground and outer jogging track.",
+    "description": "The main campus cricket ground, featuring a meticulously maintained pitch and a popular outer jogging track.",
     "latitude": 13.1299,
     "longitude": 77.5898,
     "busyStatus": "Moderate",
     "busyColor": "bg-yellow-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins",
-      "floors": "Outdoor",
+      "floors": "Levels TBA",
       "features": [
         "Ground",
         "Track"
@@ -1202,20 +1202,20 @@ export const buildings: Building[] = [
     "name": "Football Field",
     "shortName": "Football",
     "category": "sports",
-    "description": "Main football turf and ground.",
+    "description": "A sprawling, lush green football turf hosting inter-college tournaments and daily student practice sessions.",
     "latitude": 13.1288,
     "longitude": 77.5907,
     "busyStatus": "Busy",
     "busyColor": "bg-red-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "3 mins",
-      "floors": "Outdoor",
+      "floors": "Levels TBA",
       "features": [
         "Turf"
       ]
     },
-    "image": "https://images.unsplash.com/photo-1518605368461-1ee18eb13c19?auto=format&fit=crop&w=600&q=80",
+    "image": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=80",
     "geometry": {
       "type": "Polygon",
       "coordinates": [
@@ -1249,15 +1249,15 @@ export const buildings: Building[] = [
     "name": "Volleyball Courts",
     "shortName": "Volleyball",
     "category": "sports",
-    "description": "Outdoor volleyball courts.",
+    "description": "Outdoor, well-lit volleyball courts designed for both casual play and competitive campus tournaments.",
     "latitude": 13.1294,
     "longitude": 77.5904,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins",
-      "floors": "Outdoor",
+      "floors": "Levels TBA",
       "features": [
         "Net",
         "Sand"
@@ -1297,15 +1297,15 @@ export const buildings: Building[] = [
     "name": "Basketball Court 1",
     "shortName": "BB Court",
     "category": "sports",
-    "description": "Full size basketball court.",
+    "description": "A full-size, professional-grade basketball court featuring acrylic flooring and high-intensity lighting for evening games.",
     "latitude": 13.1290,
     "longitude": 77.5903,
     "busyStatus": "Busy",
     "busyColor": "bg-red-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins",
-      "floors": "Outdoor",
+      "floors": "Levels TBA",
       "features": [
         "Court",
         "Hoops"
@@ -1345,15 +1345,15 @@ export const buildings: Building[] = [
     "name": "Basketball Half Court",
     "shortName": "Half Court",
     "category": "sports",
-    "description": "Half court for practice.",
+    "description": "A compact half-court area perfect for 3-on-3 games, casual shootarounds, and quick practice sessions.",
     "latitude": 13.1290,
     "longitude": 77.5898,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "2 mins",
-      "floors": "Outdoor",
+      "floors": "Levels TBA",
       "features": [
         "Court",
         "Hoop"
@@ -1393,15 +1393,15 @@ export const buildings: Building[] = [
     "name": "Cricket Nets",
     "shortName": "Nets",
     "category": "sports",
-    "description": "Practice nets for cricket.",
+    "description": "Enclosed cricket practice nets equipped with bowling machines and artificial turf for focused batting and bowling drills.",
     "latitude": 13.1290,
     "longitude": 77.5900,
     "busyStatus": "Moderate",
     "busyColor": "bg-yellow-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "3 mins",
-      "floors": "Outdoor",
+      "floors": "Levels TBA",
       "features": [
         "Nets"
       ]
@@ -1440,15 +1440,15 @@ export const buildings: Building[] = [
     "name": "Gate 3 Security Block",
     "shortName": "Gate 3",
     "category": "security",
-    "description": "North entrance security checkpoint.",
+    "description": "The primary northern security checkpoint, managing incoming visitor traffic and providing 24/7 campus surveillance.",
     "latitude": 13.13048,
     "longitude": 77.58985,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "0 mins",
-      "floors": "1 Floor",
+      "floors": "Levels TBA",
       "features": [
         "Security",
         "Check"
@@ -1488,15 +1488,15 @@ export const buildings: Building[] = [
     "name": "Gate 2 Security Block",
     "shortName": "Gate 2",
     "category": "security",
-    "description": "East entrance security checkpoint.",
+    "description": "The eastern entry portal, providing convenient access to the academic blocks and featuring round-the-clock security.",
     "latitude": 13.1288,
     "longitude": 77.5912,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "0 mins",
-      "floors": "1 Floor",
+      "floors": "Levels TBA",
       "features": [
         "Security",
         "Check"
@@ -1536,15 +1536,15 @@ export const buildings: Building[] = [
     "name": "Gate 1 Security Block",
     "shortName": "Gate 1",
     "category": "security",
-    "description": "Main South entrance.",
+    "description": "The main southern entrance of the campus, acting as the primary transit point for day scholars and faculty.",
     "latitude": 13.12411,
     "longitude": 77.5926,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "0 mins",
-      "floors": "1 Floor",
+      "floors": "Levels TBA",
       "features": [
         "Security",
         "Check"
@@ -1584,15 +1584,15 @@ export const buildings: Building[] = [
     "name": "Laundry & Cloak Rooms",
     "shortName": "Laundry",
     "category": "admin",
-    "description": "Student laundry services.",
+    "description": "The central student laundry service facility, offering both self-service washing machines and professional dry-cleaning.",
     "latitude": 13.1293,
     "longitude": 77.5883,
     "busyStatus": "Moderate",
     "busyColor": "bg-yellow-500",
     "details": {
-      "hours": "08:00 - 20:00",
+      "hours": "Schedule TBA",
       "distance": "1 mins",
-      "floors": "1 Floor",
+      "floors": "Levels TBA",
       "features": [
         "Washing",
         "Drying"
@@ -1632,15 +1632,15 @@ export const buildings: Building[] = [
     "name": "Melon (Chef's Touch)",
     "shortName": "Melon",
     "category": "food",
-    "description": "Dining mess hall for students, run by Chef's Touch.",
+    "description": "A bustling student dining hall operated by Chef's Touch, offering a diverse menu of nutritious and delicious meals.",
     "latitude": 13.12765,
     "longitude": 77.588277,
     "busyStatus": "Busy",
     "busyColor": "bg-red-500",
     "details": {
-      "hours": "07:00 - 21:00",
+      "hours": "Schedule TBA",
       "distance": "1 mins",
-      "floors": "1 Floor",
+      "floors": "Levels TBA",
       "features": [
         "Dining",
         "Food"
@@ -1680,15 +1680,15 @@ export const buildings: Building[] = [
     "name": "TA Pai Auditorium",
     "shortName": "TA Pai Auditorium",
     "category": "admin",
-    "description": "Main convention and event center, also housing the Blue Dove Mess dining facility.",
+    "description": "A grand convention center hosting major cultural events, guest lectures, and the renowned Blue Dove Mess.",
     "latitude": 13.1276,
     "longitude": 77.5888,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Events Only",
+      "hours": "Schedule TBA",
       "distance": "2 mins",
-      "floors": "2 Floors",
+      "floors": "Levels TBA",
       "features": [
         "Events",
         "Stage",
@@ -1753,15 +1753,15 @@ export const buildings: Building[] = [
     "name": "MAHE Signboard",
     "shortName": "Sign",
     "category": "admin",
-    "description": "Main campus signboard location.",
+    "description": "The iconic main campus signboard, serving as a popular landmark and photo spot for graduating students.",
     "latitude": 13.1258435,
     "longitude": 77.590453,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Open • 24/7",
+      "hours": "Schedule TBA",
       "distance": "1 mins",
-      "floors": "Outdoor",
+      "floors": "Levels TBA",
       "features": [
         "Sign"
       ]
@@ -1846,18 +1846,18 @@ export const buildings: Building[] = [
 ,
   {
     "id": "hb5_new",
-    "name": "HB5",
+    "name": "Hostel Block 5",
     "shortName": "HB5",
     "category": "hostels",
-    "description": "New hostel block currently under construction, located between MLCP and the Central Library.",
-    "latitude": 13.1267942,
+    "description": "The newest hostel block on campus, offering modern amenities and a strategic location closer to the academic blocks for maximum student convenience.",
+    "latitude": 13.12625,
     "longitude": 77.58776,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "Under Construction",
+      "hours": "Schedule TBA",
       "distance": "3 mins away",
-      "floors": "TBD",
+      "floors": "Levels TBA",
       "features": [
         "Under Construction"
       ]
@@ -1881,15 +1881,15 @@ export const buildings: Building[] = [
     "name": "Chef's Touch (Marena)",
     "shortName": "Chef's Touch",
     "category": "food",
-    "description": "Chef's Touch food outlet, located inside the Marena (Sports Complex) building.",
+    "description": "A popular food and refreshment outlet situated inside the Marena Sports Complex, perfect for post-workout meals.",
     "latitude": 13.1285449,
     "longitude": 77.5900274,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "08:00 - 20:00",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "Ground Floor",
+      "floors": "Levels TBA",
       "features": [
         "Dining",
         "Food"
@@ -1914,15 +1914,15 @@ export const buildings: Building[] = [
     "name": "Blue Dove (Auditorium)",
     "shortName": "Blue Dove",
     "category": "food",
-    "description": "Blue Dove food outlet, located inside the TA Pai Auditorium building.",
+    "description": "An elegant dining facility housed within the TA Pai Auditorium, famous for its premium catering and diverse cuisines.",
     "latitude": 13.1275,
     "longitude": 77.5893,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
-      "hours": "07:00 - 21:00",
+      "hours": "Schedule TBA",
       "distance": "2 mins away",
-      "floors": "Ground Floor",
+      "floors": "Levels TBA",
       "features": [
         "Dining",
         "Food"
