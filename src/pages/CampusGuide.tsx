@@ -169,14 +169,16 @@ export default function CampusGuide() {
             <p className="text-body-md text-slate-600 dark:text-on-surface-variant text-lg">Quick guides to help you navigate campus life.</p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: 'apartment', title: 'Hostel Guide', desc: 'Everything you need to know about hostel life.', accent: '#F5A356', tint: '#FBEADC' },
-              { icon: 'wifi', title: 'Wi-Fi Setup', desc: 'Connect your laptop and phone to campus Wi-Fi.', accent: '#5B6EF5', tint: '#E3E6FD' },
-              { icon: 'app_registration', title: 'Registration', desc: 'Steps for academic registration and orientation.', accent: '#9B8AFB', tint: '#ECE8FB' },
-              { icon: 'menu_book', title: 'Campus Rules', desc: 'Important rules and student guidelines.', accent: '#E8574F', tint: '#FBE1DF' },
-              { icon: 'restaurant', title: 'Mess Timings', desc: 'Daily breakfast, lunch and dinner timings.', accent: '#4CAF7D', tint: '#E1F5EA' },
-              { icon: 'groups', title: 'Student Clubs', desc: 'Explore technical, cultural and sports clubs.', accent: '#F06BA8', tint: '#FCE4EF' }
+              { icon: 'apartment', title: 'Hostel Guide', desc: 'Everything you need to know about hostel life.', accent: '#F5A356', tint: '#FBEADC', link: '/pdfs/Hostel Guide.pdf' },
+              { icon: 'wifi', title: 'Wi-Fi Setup', desc: 'Connect your laptop and phone to campus Wi-Fi.', accent: '#5B6EF5', tint: '#E3E6FD', link: '/pdfs/iBus Wi-Fi Registration.pdf' },
+              { icon: 'school', title: 'Academic Guide', desc: 'Detailed academic guidelines and procedures.', accent: '#9B8AFB', tint: '#ECE8FB', link: '/pdfs/Academic Guide.pdf' },
+              { icon: 'menu_book', title: 'Campus Rules', desc: 'Important rules and transport guidelines.', accent: '#E8574F', tint: '#FBE1DF', link: '/pdfs/Campus Rules and Transport.pdf' },
+              { icon: 'restaurant', title: 'Mess Timings', desc: 'Daily breakfast, lunch and dinner timings.', accent: '#4CAF7D', tint: '#E1F5EA', link: '/pdfs/Mess Timings.pdf' },
+              { icon: 'groups', title: 'Student Clubs', desc: 'Explore technical, cultural and sports clubs.', accent: '#F06BA8', tint: '#FCE4EF', link: '/pdfs/Student Clubs.pdf' },
+              { icon: 'help', title: 'Freshers FAQs', desc: 'Frequently asked questions for incoming freshers.', accent: '#22B8CF', tint: '#EAFBFC', link: '/pdfs/Freshers FAQs.pdf' },
+              { icon: 'explore', title: 'Hidden Gems', desc: 'Discover secret spots and hidden campus gems.', accent: '#F3C93A', tint: '#FEF8E6', link: '/pdfs/Hidden Gems.pdf' }
             ].map((resource, idx) => (
               <div key={idx} className="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest/80 backdrop-blur-md border border-slate-200 dark:border-outline-variant/30 hover:border-[#5DCBDA] dark:hover:border-primary/50 transition-all flex flex-col group shadow-md hover:shadow-lg hover:-translate-y-1">
                 <div
@@ -187,8 +189,8 @@ export default function CampusGuide() {
                 </div>
                 <h3 className="font-headline-md text-xl font-bold text-slate-900 dark:text-on-surface mb-2">{resource.title}</h3>
                 <p className="text-body-md text-slate-600 dark:text-on-surface-variant text-sm mb-6 flex-1">{resource.desc}</p>
-                <a href="#" className="flex items-center gap-1 font-label-md font-semibold hover:gap-2 transition-all w-max mt-auto" style={{ color: resource.accent }}>
-                  Learn More <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                <a href={resource.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 font-label-md font-semibold hover:gap-2 transition-all w-max mt-auto" style={{ color: resource.accent }}>
+                  Read PDF <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                 </a>
               </div>
             ))}
@@ -204,13 +206,17 @@ export default function CampusGuide() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              "Academic Calendar", "Hostel Rules", "Student Portal",
-              "Exam Schedule", "Library", "Campus Directory"
-            ].map((link, idx) => (
-              <a href="#" key={idx} className="liquid-glass p-5 rounded-xl border border-slate-200 dark:border-outline-variant/30 hover:border-[#5DCBDA] dark:hover:border-primary/50 transition-all flex items-center justify-between group shadow-sm hover:shadow-md cursor-pointer">
+              { title: "SLCM Portal", desc: "Student Life Cycle Management", link: "https://maheslcm.manipal.edu/login/" },
+              { title: "Counseling Page", desc: "Student counseling and support", link: "https://counseling.manipal.edu" },
+              { title: "MAHE Portal", desc: "Main Manipal university portal", link: "https://apply.manipal.edu" },
+              { title: "EduVerify", desc: "Document verification portal", link: "https://maheblreduverify.manipal.edu" },
+              { title: "Aarambh Portal", desc: "Get your orientation pass", link: "https://red-desert-068b4bb00.7.azurestaticapps.net/index.html" },
+              { title: "iBus Wi-Fi", desc: "Campus Wi-Fi login portal", link: "https://wificustomer.ibustech.com/" }
+            ].map((item, idx) => (
+              <a href={item.link} target="_blank" rel="noopener noreferrer" key={idx} className="liquid-glass p-5 rounded-xl border border-slate-200 dark:border-outline-variant/30 hover:border-[#5DCBDA] dark:hover:border-primary/50 transition-all flex items-center justify-between group shadow-sm hover:shadow-md cursor-pointer">
                 <div>
-                  <h3 className="font-label-lg font-bold text-slate-900 dark:text-on-surface mb-1">{link}</h3>
-                  <p className="text-label-sm text-slate-500 dark:text-on-surface-variant/70">Open resource</p>
+                  <h3 className="font-label-lg font-bold text-slate-900 dark:text-on-surface mb-1">{item.title}</h3>
+                  <p className="text-label-sm text-slate-500 dark:text-on-surface-variant/70">{item.desc}</p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-surface-container-high flex items-center justify-center text-slate-600 dark:text-on-surface-variant group-hover:bg-[#22B8CF] group-hover:text-white dark:group-hover:bg-primary dark:group-hover:text-on-primary transition-colors">
                   <span className="material-symbols-outlined text-[18px]">open_in_new</span>
