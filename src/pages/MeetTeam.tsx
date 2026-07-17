@@ -184,22 +184,37 @@ export default function MeetTeam() {
         ))}
 
         {/* Call to Action */}
-        <div className="mt-12 p-12 bg-white/60 dark:bg-surface-container-high/30 rounded-3xl border border-slate-200 dark:border-outline-variant/20 max-w-4xl w-full text-center relative overflow-hidden animate-fade-in">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-container/10 blur-[80px] rounded-full -mr-32 -mt-32 pointer-events-none" />
-          <h2 className="font-headline-lg text-3xl font-bold text-slate-900 dark:text-on-surface mb-4 relative z-10">Want to join the mission?</h2>
-          <p className="font-body-md text-slate-600 dark:text-on-surface-variant mb-8 relative z-10">
-            We're always looking for talented MIT Bengaluru students to help expand our navigation ecosystem.
-          </p>
-          <div className="flex flex-col items-center gap-3 mt-2">
-            <div className="bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-400 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest border border-red-200 dark:border-red-500/20">
-              Currently Not Available
+        <div tabIndex={0} className="mt-16 relative max-w-4xl w-full mx-auto animate-fade-in group mb-12 outline-none">
+          {/* Glowing Aura Background */}
+          <div className="absolute -inset-2 bg-gradient-to-r from-primary via-secondary to-primary rounded-[3rem] blur-xl opacity-60 group-hover:opacity-100 transition duration-1000 group-hover:duration-500" />
+          
+          {/* Premium Glass Card */}
+          <div className="relative p-12 sm:p-16 bg-white/80 dark:bg-surface/90 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 dark:border-white/10 text-center overflow-hidden shadow-2xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.6)]">
+            
+            {/* Internal Ambient Glows */}
+            <div className="absolute -top-32 -left-32 w-80 h-80 bg-primary/40 dark:bg-primary/40 blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-secondary/40 dark:bg-secondary/40 blur-[80px] rounded-full pointer-events-none" />
+
+            {/* Content */}
+            <h2 className="font-headline-lg text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-4 relative z-10 tracking-tight">
+              Want to join the mission?
+            </h2>
+            <p className="font-body-md text-lg text-slate-600 dark:text-slate-300 mb-10 relative z-10 max-w-2xl mx-auto">
+              We're always looking for talented MIT Bengaluru students to help expand our navigation ecosystem.
+            </p>
+            
+            {/* Buttons */}
+            <div className="flex flex-col items-center gap-4 relative z-10">
+              <div className="bg-red-50 text-red-600 dark:bg-error/10 dark:text-error text-xs font-bold px-5 py-2 rounded-full uppercase tracking-widest border border-red-200 dark:border-error/20 shadow-sm backdrop-blur-md">
+                Currently Not Available
+              </div>
+              <button 
+                disabled
+                className="bg-slate-100/50 text-slate-400 dark:bg-white/5 dark:text-white/40 font-headline-md text-lg px-10 py-4 rounded-2xl cursor-not-allowed font-medium border border-slate-200/50 dark:border-white/5 backdrop-blur-md transition-all shadow-inner"
+              >
+                Apply for Internship
+              </button>
             </div>
-            <button 
-              disabled
-              className="bg-slate-100 text-slate-400 dark:bg-slate-800/50 dark:text-slate-500 font-headline-md text-lg px-8 py-3.5 rounded-xl cursor-not-allowed font-medium border border-slate-200 dark:border-slate-700/50 transition-all"
-            >
-              Apply for Internship
-            </button>
           </div>
         </div>
       </div>
