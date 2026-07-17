@@ -20,7 +20,9 @@ interface MapViewProps {
   showTabsInHeader: boolean;
 }
 
-
+const isWithinBangalore = (lat: number, lng: number) => {
+  return lng >= 77.40 && lng <= 77.75 && lat >= 12.80 && lat <= 13.25;
+};
 
 export default function MapView({
   buildings,
@@ -39,36 +41,20 @@ export default function MapView({
   const [isNavigating, setIsNavigating] = useState(false);
   const [is3D, setIs3D] = useState(true);
   const [bearing, setBearing] = useState(-17);
-  const [showRoads, setShowRoads] = useState(true);
-  const showRoadsRef = useRef(showRoads);
-  useEffect(() => { showRoadsRef.current = showRoads; }, [showRoads]);
 
   const prevIs3DRef = useRef(is3D);
-  const prevShowRoadsRef = useRef(showRoads);
+  const prevDarkRef = useRef(isDarkMode);
+  const prevSatRef = useRef(isSatellite);
 
   useEffect(() => {
     if (!map) return;
     if (isSatellite) {
       prevIs3DRef.current = is3D;
-      prevShowRoadsRef.current = showRoads;
-      
-      if (showRoads) {
-        setShowRoads(false);
-        if (map.getLayer("campus-roads-line")) {
-          map.setLayoutProperty("campus-roads-line", "visibility", "none");
-        }
-      }
       if (is3D) {
         setIs3D(false);
         map.easeTo({ pitch: 0, bearing: 0, duration: 800 });
       }
     } else {
-      if (prevShowRoadsRef.current && !showRoads) {
-        setShowRoads(true);
-        if (map.getLayer("campus-roads-line")) {
-          map.setLayoutProperty("campus-roads-line", "visibility", "visible");
-        }
-      }
       if (prevIs3DRef.current && !is3D) {
         setIs3D(true);
         map.easeTo({ pitch: 55, bearing: -17, duration: 800 });
@@ -176,14 +162,25 @@ export default function MapView({
       // just a flat background so campus building shapes read like a diagram.
       version: 8,
       glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
-      sources: {},
+      sources: {
+        "carto-basemap": {
+          type: "raster",
+          tiles: [
+            isDarkMode 
+              ? "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+              : "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+          ],
+          tileSize: 256,
+          maxzoom: 19
+        }
+      },
       layers: [
         {
-          id: "schematic-background",
-          type: "background",
-          paint: {
-            "background-color": isDarkMode ? "#0f172a" : "#FAFAF9"
-          }
+          id: "carto-layer",
+          type: "raster",
+          source: "carto-basemap",
+          minzoom: 0,
+          maxzoom: 22
         }
       ]
     };
@@ -194,6 +191,8 @@ export default function MapView({
       style: initialStyle as any,
       center: [77.5898, 13.1264], // MAHE Bengaluru Center
       zoom: 15.5,
+      minZoom: 10,
+      maxBounds: [[77.40, 12.80], [77.75, 13.25]], // Greater Bangalore Bounds
       pitch: 55,
       bearing: -17,
       dragRotate: true,
@@ -206,8 +205,6 @@ export default function MapView({
     // Fetch real road/path geometry from OpenStreetMap (Overpass API) for the
     // campus bounding box and render it as a road layer under the buildings.
     const fetchRoads = async () => {
-      if (roadsFetchStartedRef.current) return;
-      roadsFetchStartedRef.current = true;
       console.log("[roads] fetchRoads() called");
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -217,17 +214,19 @@ export default function MapView({
           return;
         }
         try {
-          if (mapInstance.getSource("campus-roads")) {
-            (mapInstance.getSource("campus-roads") as maplibregl.GeoJSONSource).setData({
-              type: "FeatureCollection",
-              features: features as any,
-            });
-            console.log("[roads] updated existing source");
-          } else {
+          if (!mapInstance.getSource("campus-roads")) {
             mapInstance.addSource("campus-roads", {
               type: "geojson",
               data: { type: "FeatureCollection", features },
             });
+          } else {
+            (mapInstance.getSource("campus-roads") as maplibregl.GeoJSONSource).setData({
+              type: "FeatureCollection",
+              features: features as any,
+            });
+          }
+
+          if (!mapInstance.getLayer("campus-roads-line")) {
             mapInstance.addLayer(
               {
                 id: "campus-roads-line",
@@ -236,7 +235,7 @@ export default function MapView({
                 layout: {
                   "line-join": "round",
                   "line-cap": "round",
-                  visibility: showRoadsRef.current ? "visible" : "none",
+                  visibility: "visible",
                 },
                 paint: {
                   "line-color": isDarkMode ? "#64748b" : "#94a3b8",
@@ -246,7 +245,7 @@ export default function MapView({
               },
               mapInstance.getLayer("campus-buildings-fill") ? "campus-buildings-fill" : undefined
             );
-            console.log("[roads] added new source + layer");
+            console.log("[roads] added/re-added road layer");
           }
         } catch (err) {
           console.error("[roads] error adding layer:", err);
@@ -279,7 +278,6 @@ export default function MapView({
         tryAddLayer(features);
       } catch (err) {
         console.error("[roads] processing failed:", err);
-        roadsFetchStartedRef.current = false;
       }
     };
 
@@ -491,14 +489,10 @@ export default function MapView({
       mapInstance.resize();
     });
 
-    mapInstance.on("styledata", () => {
-      if (mapInstance.isStyleLoaded()) {
-        addBuildingLayers();
-        applyBuildingVisibility();
-        if (!mapInstance.getSource("campus-roads")) {
-          fetchRoads();
-        }
-      }
+    mapInstance.on("style.load", () => {
+      addBuildingLayers();
+      applyBuildingVisibility();
+      fetchRoadsRef.current?.();
     });
 
     return () => {
@@ -510,6 +504,9 @@ export default function MapView({
   // Handle live theme background color swaps by changing style completely
   useEffect(() => {
     if (!map) return;
+    if (prevDarkRef.current === isDarkMode && prevSatRef.current === isSatellite) return;
+    prevDarkRef.current = isDarkMode;
+    prevSatRef.current = isSatellite;
     const targetStyle = isSatellite
       ? {
           version: 8,
@@ -537,20 +534,31 @@ export default function MapView({
       : {
           version: 8,
           glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
-          sources: {},
+          sources: {
+            "carto-basemap": {
+              type: "raster",
+              tiles: [
+                isDarkMode 
+                  ? "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+                  : "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+              ],
+              tileSize: 256,
+              maxzoom: 19
+            }
+          },
           layers: [
             {
-              id: "schematic-background",
-              type: "background",
-              paint: {
-                "background-color": isDarkMode ? "#0f172a" : "#FAFAF9"
-              }
+              id: "carto-layer",
+              type: "raster",
+              source: "carto-basemap",
+              minzoom: 0,
+              maxzoom: 22
             }
           ]
         };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    map.setStyle(targetStyle as any);
+    map.setStyle(targetStyle as any, { diff: false });
   }, [isDarkMode, isSatellite, map]);
 
   // Update Highlight filter when selection changes
@@ -614,22 +622,7 @@ export default function MapView({
     });
   };
 
-  const handleToggleRoads = () => {
-    const next = !showRoads;
-    setShowRoads(next);
 
-    if (!map) return;
-
-    if (map.getLayer("campus-roads-line")) {
-      map.setLayoutProperty("campus-roads-line", "visibility", next ? "visible" : "none");
-    } else if (next) {
-      // Roads never successfully loaded (e.g. Overpass mirrors were all
-      // down) — allow a fresh retry now that the person explicitly asked.
-      roadsFetchStartedRef.current = false;
-      setToastMessage("Loading roads...");
-      fetchRoadsRef.current?.().finally(() => setToastMessage(null));
-    }
-  };
 
   const handleLocateUser = () => {
     if (!("geolocation" in navigator)) {
@@ -661,6 +654,17 @@ export default function MapView({
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
+        
+        if (!isWithinBangalore(lat, lng)) {
+          setToastMessage("You must be in Bangalore to use this feature.");
+          setTimeout(() => setToastMessage(null), 4000);
+          if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+          }
+          return;
+        }
+
         setUserLoc({ lat, lng });
         
         // Only jump the camera on the very first location lock
@@ -762,6 +766,18 @@ export default function MapView({
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
+        
+        if (!isWithinBangalore(lat, lng)) {
+          setToastMessage("Navigation unavailable outside Bangalore.");
+          setTimeout(() => setToastMessage(null), 4000);
+          if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+          }
+          setIsNavigating(false);
+          return;
+        }
+
         setUserLoc({ lat, lng });
         if (firstFix) {
           firstFix = false;
@@ -855,8 +871,6 @@ export default function MapView({
         onLocateUser={handleLocateUser}
         onToggle3D={handleToggle3D}
         is3D={is3D}
-        onToggleRoads={handleToggleRoads}
-        showRoads={showRoads}
         isSatellite={isSatellite}
         hasBottomNav={!showTabsInHeader}
         bearing={bearing}
