@@ -77,7 +77,11 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
               <select name="category" className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface outline-none appearance-none">
                 <option value="missing_place">Missing Place / Room</option>
                 <option value="incorrect_location">Incorrect Location</option>
+                <option value="incorrect_info">Incorrect Building Info / Timings</option>
+                <option value="routing_error">Navigation / Routing Issue</option>
+                <option value="accessibility">Accessibility Issue / Missing Ramps</option>
                 <option value="bug">App Bug / Glitch</option>
+                <option value="feature_request">Feature Request</option>
                 <option value="feedback">General Feedback</option>
               </select>
             </div>
