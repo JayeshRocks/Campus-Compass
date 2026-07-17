@@ -52,7 +52,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
             Found a missing shortcut? Noticed a floor plan error? Campus Compass is a community-driven project that thrives on your input. Together, we can build the most accurate map of MIT Bengaluru.
           </p>
           <div className="flex flex-wrap gap-3">
-            <a href="https://github.com/JayeshRocks/Campus-Compass" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-3 bg-[#22B8CF] text-white rounded-xl font-label-md font-bold hover:bg-[#1A94A6] transition-all group shadow-sm">
+            <a href="https://github.com/JayeshRocks/Campus-Compass" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-3 bg-white text-slate-900 border border-slate-200 dark:border-transparent rounded-xl font-label-md font-bold hover:bg-slate-50 transition-all group shadow-sm">
               <span className="material-symbols-outlined text-[18px]">terminal</span>
               GitHub Repository
             </a>
