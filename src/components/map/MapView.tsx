@@ -218,7 +218,6 @@ export default function MapView({
       pitch: cachedMapState ? cachedMapState.pitch : (is3D ? 55 : 0),
       bearing: cachedMapState ? cachedMapState.bearing : (is3D ? -17 : 0),
       dragRotate: true,
-      attributionControl: true,
     });
 
     mapInstance.on('rotate', () => {
