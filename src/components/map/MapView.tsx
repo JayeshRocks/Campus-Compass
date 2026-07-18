@@ -920,7 +920,7 @@ export default function MapView({
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
       {/* Live Map Canvas container */}
-      <div ref={mapContainerRef} className="absolute top-0 left-0 w-full h-[calc(100%-28px)] z-0 !overflow-visible" />
+      <div ref={mapContainerRef} className="absolute top-0 left-0 w-full h-full z-0 !overflow-visible" />
 
       {/* Render subcomponents when map instance is ready */}
       {map && (

@@ -387,12 +387,8 @@ html.dark .liquid-glass,
 }
 
 .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
-  position: absolute !important;
-  bottom: -28px !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100vw !important;
-  height: 28px !important;
+  width: 100% !important;
+  min-height: 28px !important;
   background: rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(12px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
@@ -402,6 +398,7 @@ html.dark .liquid-glass,
   font-size: 11px !important;
   font-weight: 500 !important;
   display: flex !important;
+  flex-wrap: wrap !important;
   justify-content: center !important;
   align-items: center !important;
   text-align: center !important;
