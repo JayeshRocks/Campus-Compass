@@ -176,7 +176,7 @@ export default function App() {
       />
 
       {activePage === "map" ? (
-        <main className={`pt-[64px] ${!showTabsInHeader ? 'pb-[90px]' : ''} relative h-[100dvh] w-full overflow-hidden`}>
+        <main className="pt-[64px] relative h-[100dvh] w-full overflow-hidden">
           <Sidebar
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(false)}
@@ -196,7 +196,7 @@ export default function App() {
           />
         </main>
       ) : (
-        <main className={`${!showTabsInHeader ? 'pb-[90px]' : ''} relative h-[100dvh] w-full overflow-hidden`}>
+        <main className="relative h-[100dvh] w-full overflow-hidden">
           {activePage === "home" && <Home />}
           {activePage === "about" && <About />}
           {activePage === "campus-guide" && <CampusGuide />}

@@ -185,6 +185,13 @@ html.dark .page-blobs {
   background-color: rgba(148, 163, 184, 0.6);
 }
 
+/* Ensure content on scrollable pages isn't hidden behind the mobile bottom nav */
+@media (max-width: 767px) {
+  .page-blobs, .page-scroll {
+    padding-bottom: 110px !important;
+  }
+}
+
 /* MapLibre custom popup style (Tinted Black Glass UI for all themes) */
 .campus-custom-popup .maplibregl-popup-content {
   border-radius: 12px !important;
@@ -389,10 +396,10 @@ html.dark .liquid-glass,
 .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
   width: 100% !important;
   min-height: 28px !important;
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(12px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  color: #334155 !important;
   border-radius: 0 !important;
   padding: 4px 16px !important;
   font-size: 11px !important;
@@ -403,14 +410,14 @@ html.dark .liquid-glass,
   align-items: center !important;
   text-align: center !important;
   margin: 0 !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.8) !important;
   box-shadow: none !important;
   pointer-events: auto !important;
   line-height: 1.4 !important;
 }
 
 .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib a {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: #0f172a !important;
   text-decoration: none !important;
   font-weight: 600 !important;
   margin: 0 4px !important;
@@ -418,8 +425,23 @@ html.dark .liquid-glass,
 }
 
 .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib a:hover {
-  color: #ffffff !important;
+  color: #0ea5e9 !important;
   text-decoration: underline !important;
+}
+
+/* Dark theme overrides for map attribution */
+html.dark .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: #ffffff !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib a {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html.dark .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib a:hover {
+  color: #ffffff !important;
 }
 
 /* Hide MapLibre extra toggle button since we use full text */
