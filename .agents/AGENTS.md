@@ -29,3 +29,11 @@ These rules apply to any AI agent working on the Campus Compass codebase.
 ## 7. Licensing & Compliance
 - **Rule**: The project is strictly licensed under AGPL-3.0. Any new dependencies must be compatible with AGPL-3.0 (e.g., MIT, ISC, BSD). 
 - **Context**: Do not introduce proprietary, non-commercial, or copyleft-incompatible libraries. Always maintain visible attributions for map data (OpenStreetMap, CARTO, Esri) in the UI.
+
+## 8. Tailwind CSS Hover States
+- **Rule**: When adding hover styles to an element that has dark mode variants, explicitly declare the dark mode hover state (e.g., dark:hover:bg-primary). When styling disabled elements, use enabled:hover: to prevent overriding styles inappropriately.
+- **Context**: Relying only on hover: without a dark:hover: equivalent can cause light mode hover backgrounds to override dark mode backgrounds, making text invisible.
+
+## 9. Hidden UI Elements (Ghosting)
+- **Rule**: When hiding UI elements contextually (e.g., on non-map pages), use opacity-0 pointer-events-none instead of hidden or visually disabling them.
+- **Context**: This "ghosting" technique maintains the exact layout space of the elements without causing UI shifting, while completely hiding them from view and disabling interactions.
