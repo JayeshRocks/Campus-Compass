@@ -37,3 +37,7 @@ These rules apply to any AI agent working on the Campus Compass codebase.
 ## 9. Hidden UI Elements (Ghosting)
 - **Rule**: When hiding UI elements contextually (e.g., on non-map pages), use opacity-0 pointer-events-none instead of hidden or visually disabling them.
 - **Context**: This "ghosting" technique maintains the exact layout space of the elements without causing UI shifting, while completely hiding them from view and disabling interactions.
+
+## 10. Map Attributions
+- **Rule**: Never truncate or hide map attribution text with CSS (e.g., text-overflow: ellipsis). Attributions must be fully legible and wrap to multiple lines if necessary.
+- **Context**: Map providers like Esri and OpenStreetMap have strict licensing terms requiring full visibility of their attribution strings. Hiding parts of the attribution string can violate these terms. Map container layouts and floating UI must accommodate dynamic footer heights.
