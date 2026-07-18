@@ -123,6 +123,25 @@ export default function MapView({
     };
   }, [map]);
 
+  // Dynamic MapLibre footer height
+  useEffect(() => {
+    if (!map || !mapContainerRef.current) return;
+    const attribCtrl = mapContainerRef.current.querySelector('.maplibregl-ctrl-bottom-right');
+    if (!attribCtrl) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        document.documentElement.style.setProperty('--map-footer-height', `${entry.target.getBoundingClientRect().height}px`);
+      }
+    });
+    observer.observe(attribCtrl);
+
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.setProperty('--map-footer-height', '0px');
+    };
+  }, [map]);
+
   const selectedBuildingRef = useRef(selectedBuilding);
   useEffect(() => { selectedBuildingRef.current = selectedBuilding; }, [selectedBuilding]);
 

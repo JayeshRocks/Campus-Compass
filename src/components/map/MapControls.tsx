@@ -22,7 +22,10 @@ export default function MapControls({
   hasBottomNav = false,
 }: MapControlsProps) {
   return (
-    <div className={`fixed right-[24px] z-[80] flex flex-col gap-3 transition-all duration-300 ${hasBottomNav ? 'bottom-[143px]' : 'bottom-[52px]'}`}>
+    <div 
+      className="fixed right-[24px] z-[80] flex flex-col gap-3 transition-all duration-300"
+      style={{ bottom: `calc(var(--map-footer-height, 0px) + ${hasBottomNav ? '104px' : '24px'})` }}
+    >
       {/* Locate User */}
       <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-full shadow-lg ghost-border w-12 h-12 flex mx-auto">
         <button
