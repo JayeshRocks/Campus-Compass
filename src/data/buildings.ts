@@ -1850,8 +1850,8 @@ export const buildings: Building[] = [
     "shortName": "HB5",
     "category": "hostels",
     "description": "The newest hostel block on campus, offering modern amenities and a strategic location closer to the academic blocks for maximum student convenience.",
-    "latitude": 13.12625,
-    "longitude": 77.58776,
+    "latitude": 13.12645,
+    "longitude": 77.58768,
     "busyStatus": "Quiet",
     "busyColor": "bg-green-500",
     "details": {
@@ -1867,11 +1867,11 @@ export const buildings: Building[] = [
       "type": "Polygon",
       "coordinates": [
         [
-          [77.5876459, 13.1264476],
-          [77.5879577, 13.1263662],
-          [77.5878741, 13.1260625],
-          [77.5875623, 13.1261439],
-          [77.5876459, 13.1264476]
+          [77.5875659, 13.1266476],
+          [77.5878777, 13.1265662],
+          [77.5877941, 13.1262625],
+          [77.5874823, 13.1263439],
+          [77.5875659, 13.1266476]
         ]
       ]
     }
