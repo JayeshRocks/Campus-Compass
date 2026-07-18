@@ -124,7 +124,7 @@ export default function Header({
           <button
             onClick={onMenuToggle}
             disabled={activePage !== "map"}
-            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant flex-shrink-0 -ml-[2px] lg:ml-0 ${activePage !== "map" ? "opacity-30 pointer-events-none" : ""}`}
+            className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant flex-shrink-0 -ml-[2px] lg:ml-0 ${activePage !== "map" ? "opacity-0 pointer-events-none" : ""}`}
           >
             <span className="material-symbols-outlined transition-transform group-hover:rotate-180" style={{ fontVariationSettings: "'FILL' 0" }}>menu</span>
           </button>
@@ -201,7 +201,7 @@ export default function Header({
             disabled={activePage !== "map"}
             className={`${glassyButtonClass} ${
               activePage !== "map"
-                ? "opacity-40 cursor-not-allowed text-slate-400 dark:text-on-surface-variant/40"
+                ? "opacity-0 pointer-events-none"
                 : isSearchOpen
                   ? "text-[#22B8CF] dark:text-[#5DCBDA] bg-[#EAFBFC]/50 dark:bg-[#22B8CF]/10 hover:bg-[#D7F3F6] dark:hover:bg-[#22B8CF]/20 shadow-[0_0_15px_rgba(37,99,235,0.2)] border-[#B7E9ED] dark:border-[#22B8CF]/30"
                   : "text-slate-600 dark:text-on-surface-variant hover:text-[#22B8CF] dark:hover:text-primary"
@@ -211,22 +211,22 @@ export default function Header({
           </button>
           
           <button
+            onClick={onSatelliteToggle}
+            disabled={activePage !== "map"}
+            className={`glitch-btn relative overflow-hidden ${glassyButtonClass} ${isSatellite ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-500 dark:text-cyan-400 dark:border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:bg-cyan-500/20' : 'text-slate-600 dark:text-on-surface-variant hover:border-[#22B8CF]/50 dark:hover:border-primary/50'} ${activePage !== "map" ? "opacity-0 pointer-events-none" : ""}`}
+            data-icon="satellite_alt"
+          >
+            <span className={`material-symbols-outlined text-[20px] transition-colors ${isSatellite ? '' : 'group-hover:text-[#22B8CF] dark:group-hover:text-primary'}`} style={{ fontVariationSettings: "'FILL' 1" }}>satellite_alt</span>
+            <div className="absolute inset-0 bg-[#22B8CF]/5 dark:bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </button>
+          
+          <button
             onClick={onThemeToggle}
             className={`${glassyButtonClass} text-slate-600 dark:text-on-surface-variant hover:text-[#22B8CF] dark:hover:text-primary`}
           >
             <span className="material-symbols-outlined group-hover:rotate-12 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>
               {isDarkMode ? "light_mode" : "dark_mode"}
             </span>
-          </button>
-
-          <button
-            onClick={onSatelliteToggle}
-            disabled={activePage !== "map"}
-            className={`glitch-btn relative overflow-hidden ${glassyButtonClass} ${isSatellite ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-500 dark:text-cyan-400 dark:border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:bg-cyan-500/20' : 'text-slate-600 dark:text-on-surface-variant hover:border-[#22B8CF]/50 dark:hover:border-primary/50'} ${activePage !== "map" ? "opacity-30 pointer-events-none" : ""}`}
-            data-icon="satellite_alt"
-          >
-            <span className={`material-symbols-outlined text-[20px] transition-colors ${isSatellite ? '' : 'group-hover:text-[#22B8CF] dark:group-hover:text-primary'}`} style={{ fontVariationSettings: "'FILL' 1" }}>satellite_alt</span>
-            <div className="absolute inset-0 bg-[#22B8CF]/5 dark:bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </button>
         </div>
       </header>
