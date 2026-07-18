@@ -3,6 +3,13 @@ import { useEffect, useRef, useState } from "react";
 export default function CampusGuide() {
   const ctaRef = useRef<HTMLDivElement>(null);
   const [isCtaVisible, setIsCtaVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const handleCopy = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    setToastMessage(`${type} copied to clipboard!`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -86,27 +93,31 @@ export default function CampusGuide() {
                 <h4 className="font-headline-md text-xl font-bold mb-6">{contact.title}</h4>
                 <div className="space-y-4 flex-1 mb-8">
                   {contact.phone1 && (
-                    <div className="flex items-center gap-3 text-slate-600 dark:text-on-surface-variant font-label-md text-sm">
-                      <span className="material-symbols-outlined text-[18px]">call</span>
-                      <span className={contact.isEmergency ? "text-red-600 dark:text-error font-bold" : ""}>{contact.phone1}</span>
+                    <div onClick={() => handleCopy(contact.phone1, 'Phone number')} className="flex items-start gap-3 text-slate-600 dark:text-on-surface-variant font-label-md text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors group/copy">
+                      <span className="material-symbols-outlined text-[18px] mt-0.5">call</span>
+                      <span className={`flex-1 ${contact.isEmergency ? "text-red-600 dark:text-error font-bold" : ""}`}>{contact.phone1}</span>
+                      <span className="material-symbols-outlined text-[16px] opacity-0 group-hover/copy:opacity-100 transition-opacity">content_copy</span>
                     </div>
                   )}
                   {contact.phone2 && (
-                    <div className="flex items-center gap-3 text-slate-600 dark:text-on-surface-variant font-label-md text-sm">
-                      <span className="material-symbols-outlined text-[18px]">call</span>
-                      <span>{contact.phone2}</span>
+                    <div onClick={() => handleCopy(contact.phone2!, 'Phone number')} className="flex items-start gap-3 text-slate-600 dark:text-on-surface-variant font-label-md text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors group/copy">
+                      <span className="material-symbols-outlined text-[18px] mt-0.5">call</span>
+                      <span className="flex-1">{contact.phone2}</span>
+                      <span className="material-symbols-outlined text-[16px] opacity-0 group-hover/copy:opacity-100 transition-opacity">content_copy</span>
                     </div>
                   )}
                   {contact.email && (
-                    <div className="flex items-center gap-3 text-slate-600 dark:text-on-surface-variant font-label-md text-sm">
-                      <span className="material-symbols-outlined text-[18px]">mail</span>
-                      <span className="truncate">{contact.email}</span>
+                    <div onClick={() => handleCopy(contact.email!, 'Email address')} className="flex items-start gap-3 text-slate-600 dark:text-on-surface-variant font-label-md text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors group/copy">
+                      <span className="material-symbols-outlined text-[18px] mt-0.5">mail</span>
+                      <span className="break-all flex-1">{contact.email}</span>
+                      <span className="material-symbols-outlined text-[16px] opacity-0 group-hover/copy:opacity-100 transition-opacity">content_copy</span>
                     </div>
                   )}
                   {contact.location && (
-                    <div className="flex items-center gap-3 text-slate-600 dark:text-on-surface-variant font-label-md text-sm">
-                      <span className="material-symbols-outlined text-[18px]">location_on</span>
-                      <span className="truncate">{contact.location}</span>
+                    <div onClick={() => handleCopy(contact.location!, 'Address')} className="flex items-start gap-3 text-slate-600 dark:text-on-surface-variant font-label-md text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors group/copy">
+                      <span className="material-symbols-outlined text-[18px] mt-0.5">location_on</span>
+                      <span className="flex-1 whitespace-normal break-words">{contact.location}</span>
+                      <span className="material-symbols-outlined text-[16px] opacity-0 group-hover/copy:opacity-100 transition-opacity">content_copy</span>
                     </div>
                   )}
                 </div>
@@ -235,6 +246,12 @@ export default function CampusGuide() {
           </div>
         </section>
       </div>
+      {toastMessage && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900/90 dark:bg-white/90 text-white dark:text-slate-900 px-6 py-3 rounded-full shadow-lg font-label-md z-[200] animate-fade-in flex items-center gap-2 backdrop-blur-md whitespace-nowrap">
+          <span className="material-symbols-outlined text-[18px]">content_copy</span>
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
