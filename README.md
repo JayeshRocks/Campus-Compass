@@ -13,7 +13,7 @@
 <div align="center">
   <!-- Replace with your actual deployment link once launched -->
   <a href="https://your-campus-compass-link.com" target="_blank">
-    <img src="https://img.shields.io/badge/🚀_Live_Demo-Click_Here-22B8CF?style=for-the-badge" alt="Live Demo" />
+    <img src="https://img.shields.io/badge/🚀_Live_Demo-Click_Here-22B8CF?style=for-the-badge" alt="[Live Demo](https://campuscompass-mitblr.vercel.app/)" />
   </a>
 </div>
 
