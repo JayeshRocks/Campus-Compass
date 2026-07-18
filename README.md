@@ -37,7 +37,7 @@ Any references to MIT Bengaluru are solely for the purpose of helping students n
 
 ## 📸 Screenshots
 
-*(Before public release, drop a few high-quality screenshots or a GIF here to showcase your beautiful glassmorphism UI and the 3D map!)*
+*To be displayed soon!*
 
 ---
 
