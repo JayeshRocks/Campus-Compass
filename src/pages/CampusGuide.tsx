@@ -154,19 +154,19 @@ export default function CampusGuide() {
               { icon: 'help', title: 'Freshers FAQs', desc: 'Frequently asked questions for incoming freshers.', accent: '#22B8CF', tint: '#EAFBFC', link: '/pdfs/Freshers FAQs.pdf' },
               { icon: 'explore', title: 'Hidden Gems', desc: 'Discover secret spots and hidden campus gems.', accent: '#F3C93A', tint: '#FEF8E6', link: '/pdfs/Hidden Gems.pdf' }
             ].map((resource, idx) => (
-              <div key={idx} className="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest/80 backdrop-blur-md border border-slate-200 dark:border-outline-variant/30 hover:border-[#5DCBDA] dark:hover:border-primary/50 transition-all flex flex-col group shadow-md hover:shadow-lg hover:-translate-y-1">
+              <a href={resource.link} target="_blank" rel="noopener noreferrer" key={idx} className="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest/80 backdrop-blur-md border border-slate-200 dark:border-outline-variant/30 hover:border-[#5DCBDA] dark:hover:border-primary/50 transition-all flex flex-col group shadow-md hover:shadow-lg hover:-translate-y-1 cursor-pointer block text-left">
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-transform group-hover:scale-110 group-hover:rotate-3"
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-transform group-hover:scale-110"
                   style={{ backgroundColor: resource.tint, color: resource.accent }}
                 >
                   <span className="material-symbols-outlined text-[24px]">{resource.icon}</span>
                 </div>
                 <h3 className="font-headline-md text-xl font-bold text-slate-900 dark:text-on-surface mb-2">{resource.title}</h3>
                 <p className="text-body-md text-slate-600 dark:text-on-surface-variant text-sm mb-6 flex-1">{resource.desc}</p>
-                <a href={resource.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 font-label-md font-semibold hover:gap-2 transition-all w-max mt-auto" style={{ color: resource.accent }}>
+                <div className="flex items-center gap-1 font-label-md font-semibold group-hover:gap-2 transition-all w-max mt-auto" style={{ color: resource.accent }}>
                   Read PDF <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </a>
-              </div>
+                </div>
+              </a>
             ))}
           </div>
         </section>
@@ -225,7 +225,7 @@ export default function CampusGuide() {
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-                  <a href="mailto:CampusCompass.mitblr@gmail.com" className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-primary hover:bg-slate-50 dark:hover:brightness-110 text-[#1A94A6] dark:text-on-primary rounded-xl font-label-lg font-bold transition-all shadow-lg flex items-center justify-center gap-2 group/btn">
+                  <a href="mailto:CampusCompass.mitblr@gmail.com" className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-primary hover:bg-slate-50 dark:hover:bg-primary dark:hover:brightness-110 text-[#1A94A6] dark:text-on-primary rounded-xl font-label-lg font-bold transition-all shadow-lg flex items-center justify-center gap-2 group/btn">
                     <span className="material-symbols-outlined text-[20px] group-hover/btn:scale-110 transition-transform">chat</span>
                     Contact Team
                   </a>
