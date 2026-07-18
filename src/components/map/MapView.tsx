@@ -218,7 +218,13 @@ export default function MapView({
       pitch: cachedMapState ? cachedMapState.pitch : (is3D ? 55 : 0),
       bearing: cachedMapState ? cachedMapState.bearing : (is3D ? -17 : 0),
       dragRotate: true,
+      attributionControl: false, // Disable default to add a custom one below
     });
+
+    // Add full-text custom attribution control (styled as a thin footer in CSS)
+    mapInstance.addControl(new maplibregl.AttributionControl({
+      compact: false,
+    }), 'bottom-right');
 
     mapInstance.on('rotate', () => {
       setBearing(mapInstance.getBearing());
@@ -914,7 +920,7 @@ export default function MapView({
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
       {/* Live Map Canvas container */}
-      <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
+      <div ref={mapContainerRef} className="absolute top-0 left-0 w-full h-[calc(100%-28px)] z-0 !overflow-visible" />
 
       {/* Render subcomponents when map instance is ready */}
       {map && (

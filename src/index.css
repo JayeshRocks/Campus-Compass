@@ -3,8 +3,6 @@
 @variant dark (&:where(.dark, .dark *));
 
 /* Map hover to also trigger on active (touch) globally for mobile devices */
-@variant hover (@media (hover: hover) { &:hover } @media (hover: none) { &:active });
-@variant group-hover (@media (hover: hover) { :merge(.group):hover & } @media (hover: none) { :merge(.group):active & });
 
 @theme {
   --color-on-secondary-fixed-variant: #38485d;
@@ -128,7 +126,7 @@ body {
   border: 1px solid rgba(226, 232, 240, 1); /* Slate 200 */
 }
 
-/* Soft, airy page background with pastel blob accents — used on content
+/* Soft, airy page background with pastel blob accents â€” used on content
  * pages (Freshers Guide, Contact Us, About, etc.) for a fresh, welcoming feel. */
 .page-blobs {
   background-color: #F7F7F5;
@@ -380,5 +378,54 @@ html.dark .liquid-glass,
     inset 0 -1px 1px rgba(0,0,0,0.5), 
     0 8px 32px rgba(0, 0, 0, 0.4);
 }
-@ v a r i a n t   h o v e r   ( @ m e d i a   ( h o v e r :   h o v e r )   {   & : h o v e r   }   @ m e d i a   ( h o v e r :   n o n e )   {   & : a c t i v e   } ) ;  
- 
+
+/* Custom MapLibre Attribution Footer - Full width glass morphic */
+.maplibregl-ctrl-bottom-right {
+  z-index: 40 !important; /* Ensure it's above the map but below modals/popups */
+  width: 100% !important;
+  pointer-events: none; /* Let clicks pass through empty space */
+}
+
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+  position: absolute !important;
+  bottom: -28px !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  height: 28px !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  color: #ffffff !important;
+  border-radius: 0 !important;
+  padding: 4px 16px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  margin: 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+  line-height: 1.4 !important;
+}
+
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib a {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  margin: 0 4px !important;
+  transition: color 0.2s ease !important;
+}
+
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib a:hover {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
+/* Hide MapLibre extra toggle button since we use full text */
+.maplibregl-ctrl-attrib-button {
+  display: none !important;
+}

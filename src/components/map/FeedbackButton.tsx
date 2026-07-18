@@ -5,7 +5,7 @@ interface FeedbackButtonProps {
 
 export default function FeedbackButton({ onClick, hasBottomNav = false }: FeedbackButtonProps) {
   return (
-    <div className={`fixed z-[80] transition-all duration-300 ${hasBottomNav ? 'bottom-[100px] left-[24px]' : 'bottom-[24px] left-[24px] md:left-auto md:right-[96px]'}`}>
+    <div className={`fixed z-[80] transition-all duration-300 ${hasBottomNav ? 'bottom-[128px] left-[24px]' : 'bottom-[52px] left-[24px] md:left-auto md:right-[96px]'}`}>
       <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-full shadow-lg ghost-border shadow-[0_0_20px_rgba(239,68,68,0.2)]">
         <button
           onClick={onClick}
