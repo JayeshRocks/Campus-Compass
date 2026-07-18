@@ -4,8 +4,17 @@
 
 <div align="center">
   <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge&color=22B8CF" alt="Status" />
-  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge&color=22B8CF" alt="License" />
+  <img src="https://img.shields.io/badge/License-AGPL_v3-blue?style=for-the-badge&color=22B8CF" alt="License" />
   <img src="https://img.shields.io/badge/Version-1.0.0-purple?style=for-the-badge&color=22B8CF" alt="Version" />
+</div>
+
+<br />
+
+<div align="center">
+  <!-- Replace with your actual deployment link once launched -->
+  <a href="https://your-campus-compass-link.com" target="_blank">
+    <img src="https://img.shields.io/badge/🚀_Live_Demo-Click_Here-22B8CF?style=for-the-badge" alt="Live Demo" />
+  </a>
 </div>
 
 <br />
@@ -17,6 +26,20 @@
 </div>
 
 <hr />
+
+## 🎓 Independent Project
+
+Campus Compass is an independent student-led open-source project.
+It is not affiliated with, endorsed by, or officially maintained by MIT Bengaluru or the Manipal Academy of Higher Education (MAHE).
+Any references to MIT Bengaluru are solely for the purpose of helping students navigate and access campus resources.
+
+---
+
+## 📸 Screenshots
+
+*(Before public release, drop a few high-quality screenshots or a GIF here to showcase your beautiful glassmorphism UI and the 3D map!)*
+
+---
 
 ## 📖 The Vision
 
@@ -112,6 +135,8 @@ To get a local development environment up and running, follow these steps:
 
 Campus Compass thrives on open-source contributions. Whether you're fixing a typo, mapping a new building, or optimizing a React hook—your help is **greatly appreciated**!
 
+Please read our [Contributing Guidelines](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md) before submitting pull requests.
+
 1. **Fork** the Project
 2. **Create** your Feature Branch (`git checkout -b feature/AmazingFeature`)
 3. **Commit** your Changes (`git commit -m 'feat: Add some AmazingFeature'`)
@@ -119,6 +144,12 @@ Campus Compass thrives on open-source contributions. Whether you're fixing a typ
 5. **Open** a Pull Request
 
 *Please ensure your code follows the existing Tailwind architecture and passes all TypeScript checks.*
+
+---
+
+## 🛡️ Security
+
+If you discover a security vulnerability within Campus Compass, please refer to our [Security Policy](SECURITY.md) for reporting instructions. Do not disclose vulnerabilities publicly until patched.
 
 ---
 
@@ -132,9 +163,18 @@ Campus Compass thrives on open-source contributions. Whether you're fixing a typ
 
 ---
 
-## 📄 License
+## 📄 License & Copyright
 
-Distributed under the MIT License. See `LICENSE` for more information.
+**Copyright (C) 2026 Campus Compass Contributors**
+
+Campus Compass is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+
+**Important:** Anyone modifying and deploying Campus Compass as a network service must make their source code available under AGPL-3.0.
+
+See [`LICENSE`](LICENSE) for more information.
+
+### Third-Party Licenses
+This project uses several open-source libraries. Please see [`THIRDPARTY-LICENSES.md`](THIRDPARTY-LICENSES.md) for full attribution and license details.
 
 ---
 

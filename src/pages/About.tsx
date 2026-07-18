@@ -121,7 +121,40 @@ export default function About() {
             </div>
           </div>
 
-          {/* Row 4: Open Source */}
+          {/* Row 4: Licenses, Credits & Disclaimer */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Legal Disclaimer */}
+            <div className="liquid-glass p-8 rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-lg relative overflow-hidden group">
+              <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-6 border border-amber-200 dark:border-amber-500/20">
+                <span className="material-symbols-outlined text-[24px]">gavel</span>
+              </div>
+              <h4 className="font-headline-md text-xl font-bold text-slate-900 dark:text-white mb-3">Independent Initiative</h4>
+              <p className="text-body-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Campus Compass is an independent student initiative and is not affiliated with, endorsed by, or officially maintained by MIT Bengaluru or MAHE.
+              </p>
+            </div>
+
+            {/* License & Tech */}
+            <div className="liquid-glass p-8 rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-lg relative overflow-hidden group">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6 border border-blue-200 dark:border-blue-500/20">
+                <span className="material-symbols-outlined text-[24px]">verified</span>
+              </div>
+              <h4 className="font-headline-md text-xl font-bold text-slate-900 dark:text-white mb-3">Licenses & Credits</h4>
+              <p className="text-body-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                Campus Compass is licensed under the <strong className="text-slate-900 dark:text-white">GNU Affero General Public License v3.0</strong>.
+              </p>
+              <p className="text-body-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                Built with open-source technologies including React, TypeScript, Vite, Tailwind CSS, MapLibre GL JS, and Supabase.
+              </p>
+              <p className="text-body-sm text-slate-600 dark:text-slate-400 leading-relaxed text-sm italic">
+                Map data &copy; <a href="https://www.openstreetmap.org/copyright" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors. 
+                Basemap rendering by <a href="https://carto.com/" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">CARTO</a>. 
+                Satellite imagery provided by <a href="https://www.esri.com/" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">Esri</a>.
+              </p>
+            </div>
+          </div>
+
+          {/* Row 5: Open Source */}
           <div ref={ctaRef} tabIndex={0} className="relative w-full mx-auto group outline-none">
             {/* Glowing Aura Background */}
             <div className={`absolute -inset-2 bg-gradient-to-r from-primary via-secondary to-primary rounded-[2.5rem] blur-xl transition duration-1000 group-hover:duration-500 ${isCtaVisible ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`} />

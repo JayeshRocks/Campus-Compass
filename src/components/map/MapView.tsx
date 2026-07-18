@@ -171,7 +171,8 @@ export default function MapView({
           type: "raster",
           tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?blankTile=false"],
           tileSize: 256,
-          maxzoom: 19
+          maxzoom: 19,
+          attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
         }
       },
       layers: [
@@ -191,7 +192,8 @@ export default function MapView({
               : "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
           ],
           tileSize: 256,
-          maxzoom: 19
+          maxzoom: 19,
+          attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/attributions'>CARTO</a>"
         }
       },
       layers: [
@@ -216,7 +218,7 @@ export default function MapView({
       pitch: cachedMapState ? cachedMapState.pitch : (is3D ? 55 : 0),
       bearing: cachedMapState ? cachedMapState.bearing : (is3D ? -17 : 0),
       dragRotate: true,
-      attributionControl: false,
+      attributionControl: true,
     });
 
     mapInstance.on('rotate', () => {
@@ -587,7 +589,8 @@ export default function MapView({
                 "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?blankTile=false"
               ],
               tileSize: 256,
-              maxzoom: 19
+              maxzoom: 19,
+              attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
             }
           },
           layers: [
@@ -612,7 +615,8 @@ export default function MapView({
                   : "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
               ],
               tileSize: 256,
-              maxzoom: 19
+              maxzoom: 19,
+              attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/attributions'>CARTO</a>"
             }
           },
           layers: [

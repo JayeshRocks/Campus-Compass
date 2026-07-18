@@ -25,3 +25,7 @@ These rules apply to any AI agent working on the Campus Compass codebase.
 ## 6. Supabase & Feedback System
 - **Rule**: Feedback forms submit directly to the Supabase `feedback` table. GitHub issues are generated via a Supabase Edge Function.
 - **Context**: Do not try to write GitHub API logic in the frontend React code. The GitHub Fine-grained PAT is securely stored in the Supabase Edge Function Secrets vault.
+
+## 7. Licensing & Compliance
+- **Rule**: The project is strictly licensed under AGPL-3.0. Any new dependencies must be compatible with AGPL-3.0 (e.g., MIT, ISC, BSD). 
+- **Context**: Do not introduce proprietary, non-commercial, or copyleft-incompatible libraries. Always maintain visible attributions for map data (OpenStreetMap, CARTO, Esri) in the UI.
