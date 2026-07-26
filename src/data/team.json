@@ -1,0 +1,68 @@
+[
+  {
+    "id": "1",
+    "name": "Jayesh Yadav",
+    "role": "Founder & Chief Architect",
+    "bio": "Responsible for the overall architecture, frontend development, UI direction, backend database and feedback system development, and project coordination.",
+    "github": "https://github.com/JayeshRocks",
+    "linkedin": "https://linkedin.com/in/jayesh-yadav-a33b5941a/",
+    "avatar": "/images/team/JayeshYadav.jpg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  },
+  {
+    "id": "2",
+    "name": "G. Rishikesh",
+    "role": "Founder & Schematic Architect",
+    "bio": "Responsible for designing and maintaining the campus schematic, mapping buildings, pathways, and key landmarks to create an accurate digital representation of the MIT Bengaluru campus.",
+    "github": "https://github.com/Ritz-y-bot",
+    "linkedin": "https://linkedin.com/in/rishikesh-g-717058247",
+    "avatar": "/images/team/GRishikesh.jpeg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  },
+  {
+    "id": "3",
+    "name": "Rudra Patel",
+    "role": "Founder & Product Head",
+    "bio": "Responsible for product planning, wireframing, creative ideation, frontend development, user & content research, resource development, and collaborations for Campus Compass.",
+    "github": "https://github.com/rudrapatelco",
+    "linkedin": "https://linkedin.com/in/rudraaa/",
+    "avatar": "/images/team/RudraPatel.png",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  },
+  {
+    "id": "4",
+    "name": "Adhya Agrawal",
+    "role": "Co-Founder & Content Lead",
+    "bio": "Responsible for content strategy, information architecture, and UX design for Campus Compass, including the Resources section, and campus content research, while growing into frontend development.",
+    "github": "https://github.com/adhyaagrawal0",
+    "linkedin": "https://linkedin.com/in/adhya-agrawal-987a713ab/",
+    "avatar": "/images/team/AdhyaAgarwal.jpeg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  },
+  {
+    "id": "5",
+    "name": "Anirudhan P. M.",
+    "role": "Co-Founder & User Research Lead",
+    "bio": "Responsible for understanding the needs of students through research, collecting campus information, and contributing feature ideas that improve the Campus Compass experience.",
+    "github": "https://github.com/ALDO-beep",
+    "linkedin": "https://linkedin.com/in/anirudhan-p-m-0142b6365/",
+    "avatar": "/images/team/Anirudh.jpeg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  },
+  {
+    "id": "6",
+    "name": "Pranav Biju",
+    "role": "Co-Founder & Concept Designer",
+    "bio": "Responsible for product ideation, concept development, usability testing, and validating new features to ensure Campus Compass remains intuitive, practical, and student-focused.",
+    "github": "https://github.com/voltix808",
+    "linkedin": "https://linkedin.com/in/pranav-b-806522417/",
+    "avatar": "/images/team/Pranav.jpeg",
+    "batch": "2026",
+    "batchTitle": "Core Team"
+  }
+]
