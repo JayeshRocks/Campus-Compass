@@ -58,9 +58,15 @@ export default function Sidebar({
       <nav
         className={`liquid-glass fixed flex flex-col z-[95] transition-transform duration-300 overflow-hidden ${
           !showTabsInHeader 
-            ? `left-0 top-[68px] h-[calc(100dvh-161px)] w-[85vw] max-w-[320px] rounded-r-2xl ${isOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"}`
-            : `left-4 top-[80px] h-[calc(100dvh-96px)] w-sidebar_width rounded-2xl ${isOpen ? "translate-x-0" : "-translate-x-[110%] pointer-events-none"}`
+            ? `left-0 w-[85vw] max-w-[320px] rounded-r-2xl ${isOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"}`
+            : `left-4 w-sidebar_width rounded-2xl ${isOpen ? "translate-x-0" : "-translate-x-[110%] pointer-events-none"}`
         }`}
+        style={{
+          top: !showTabsInHeader ? "68px" : "80px",
+          bottom: !showTabsInHeader 
+            ? "calc(var(--map-footer-height, 0px) + 92px)" 
+            : "calc(var(--map-footer-height, 0px) + 16px)"
+        }}
       >
       {/* Scrollable Categories */}
       <div className="flex-1 overflow-y-auto sidebar-scroll py-4 px-2">
@@ -101,9 +107,9 @@ export default function Sidebar({
       </div>
 
       {/* Bottom Footer Section */}
-      <div className="p-2.5 border-t border-slate-200/50 dark:border-white/10 bg-white/40 dark:bg-black/20 backdrop-blur-md flex flex-col items-center justify-center gap-0.5">
-        <span className="font-label-sm text-[10px] font-medium text-slate-500 dark:text-on-surface-variant/70 tracking-widest uppercase text-center">© 2026 Campus Compass</span>
-        <span className="font-label-sm text-[9px] text-slate-400 dark:text-on-surface-variant/50 text-center">Made by students for students</span>
+      <div className="p-3 border-t border-slate-200/50 dark:border-white/10 bg-white/40 dark:bg-black/20 backdrop-blur-md flex flex-col items-center justify-center gap-1 flex-shrink-0">
+        <span className="font-label-sm text-[10px] font-semibold text-slate-600 dark:text-on-surface-variant tracking-wider uppercase text-center">© 2026 Campus Compass</span>
+        <span className="font-label-sm text-[10px] text-slate-500 dark:text-on-surface-variant/70 text-center">Made by students for students</span>
       </div>
     </nav>
     </>
