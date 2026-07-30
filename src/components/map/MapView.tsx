@@ -905,22 +905,17 @@ export default function MapView({
       map.flyTo({
         center: [userLoc.lng, userLoc.lat],
         zoom: 17,
-        duration: 1200,
+        duration: 1000,
       });
-      setToastMessage("Centered on your location");
-      setTimeout(() => setToastMessage(null), 2500);
+      return;
     }
 
-    setToastMessage("Acquiring GPS signal...");
-
     startWatchingLocation((lat, lng) => {
-      setToastMessage("Located your position");
-      setTimeout(() => setToastMessage(null), 2500);
       if (map) {
         map.flyTo({
           center: [lng, lat],
           zoom: 17,
-          duration: 1500,
+          duration: 1200,
         });
       }
     });
@@ -1035,7 +1030,27 @@ export default function MapView({
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
     }
+
     let firstFix = true;
+
+    // Instant coarse location fix (< 0.5s response)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const rawLat = position.coords.latitude;
+        const rawLng = position.coords.longitude;
+        const acc = position.coords.accuracy;
+        setUserAccuracy(acc);
+        setUserLoc({ lat: rawLat, lng: rawLng });
+        if (firstFix) {
+          firstFix = false;
+          onFirstFix?.(rawLat, rawLng);
+        }
+      },
+      () => {},
+      { enableHighAccuracy: false, maximumAge: 60000, timeout: 2500 }
+    );
+
+    // Continuous high-precision GPS stream
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const rawLat = position.coords.latitude;
@@ -1065,10 +1080,8 @@ export default function MapView({
       (error) => {
         if (error.code === error.PERMISSION_DENIED) {
           setToastMessage("Location permission denied. Enable GPS in browser settings.");
-        } else {
-          setToastMessage("Acquiring high-accuracy GPS fix...");
+          setTimeout(() => setToastMessage(null), 4000);
         }
-        setTimeout(() => setToastMessage(null), 4000);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
@@ -1089,9 +1102,7 @@ export default function MapView({
       return;
     }
 
-    setToastMessage("Acquiring GPS for directions...");
     startWatchingLocation((lat, lng) => {
-      setToastMessage(null);
       drawDirectionLine(lat, lng, target, false);
     });
   };

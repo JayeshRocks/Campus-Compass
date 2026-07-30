@@ -21,13 +21,14 @@ export default function UserLocation({
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const headingElRef = useRef<HTMLDivElement | null>(null);
   const accuracyElRef = useRef<HTMLDivElement | null>(null);
+  const cumulativeAngleRef = useRef<number>(0);
 
   const updateAccuracyCircle = (acc: number | null | undefined, lat: number) => {
     if (!accuracyElRef.current || !map) return;
     const effectiveAcc = typeof acc === "number" && acc > 0 ? acc : 15;
     const zoom = map.getZoom();
     const metersPerPixel = (156543.03392 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, zoom);
-    const radiusPx = Math.max(14, Math.min(280, effectiveAcc / metersPerPixel));
+    const radiusPx = Math.max(14, Math.min(260, effectiveAcc / metersPerPixel));
     const diameterPx = radiusPx * 2;
     accuracyElRef.current.style.width = `${diameterPx}px`;
     accuracyElRef.current.style.height = `${diameterPx}px`;
@@ -37,8 +38,20 @@ export default function UserLocation({
     if (!headingElRef.current) return;
     if (typeof h === "number" && !isNaN(h)) {
       headingElRef.current.style.display = "flex";
-      const visualAngle = (h - b + 360) % 360;
-      headingElRef.current.style.transform = `rotate(${visualAngle}deg)`;
+      const targetVisualAngle = (h - b + 360) % 360;
+      
+      const currentContinuous = cumulativeAngleRef.current;
+      const currentModulo = ((currentContinuous % 360) + 360) % 360;
+      
+      // Calculate shortest angular difference (-180 to 180)
+      const diff = ((targetVisualAngle - currentModulo + 540) % 360) - 180;
+      
+      // Filter out micro-jitter under 1.8 degrees
+      if (Math.abs(diff) > 1.8) {
+        const nextContinuous = currentContinuous + diff;
+        cumulativeAngleRef.current = nextContinuous;
+        headingElRef.current.style.transform = `rotate(${nextContinuous}deg)`;
+      }
     } else {
       headingElRef.current.style.display = "none";
     }
@@ -51,7 +64,7 @@ export default function UserLocation({
 
       // Heading directional beam (SVG fan originating at center)
       const cone = document.createElement("div");
-      cone.className = "absolute -top-10 w-20 h-20 pointer-events-none transition-transform duration-150 ease-out flex items-center justify-center";
+      cone.className = "absolute -top-10 w-20 h-20 pointer-events-none flex items-center justify-center transition-transform duration-300 ease-out";
       cone.style.transformOrigin = "50% 75%";
       cone.style.display = "none";
       cone.innerHTML = `
