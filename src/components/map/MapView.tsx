@@ -24,9 +24,6 @@ interface MapViewProps {
   showTabsInHeader: boolean;
 }
 
-const isWithinBangalore = (lat: number, lng: number) => {
-  return lng >= 77.40 && lng <= 77.75 && lat >= 12.80 && lat <= 13.25;
-};
 
 export default function MapView({
   buildings,
@@ -42,11 +39,15 @@ export default function MapView({
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
+  const [userAccuracy, setUserAccuracy] = useState<number | null>(null);
   const [heading, setHeading] = useState<number | null>(null);
   const headingListenerRef = useRef<((e: DeviceOrientationEvent) => void) | null>(null);
   const hasOrientationRef = useRef(false);
   const prevPositionRef = useRef<{ lat: number; lng: number } | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isAutoFollow, setIsAutoFollow] = useState(true);
+  const [routeSteps, setRouteSteps] = useState<Array<{ instruction: string; distanceM: number; icon: string }>>([]);
+  const [showAllSteps, setShowAllSteps] = useState(false);
   const [is3D, setIs3D] = useState(() => {
     const saved = localStorage.getItem("campusCompass_is3D");
     return saved !== null ? JSON.parse(saved) : true;
@@ -115,15 +116,21 @@ export default function MapView({
     const handleOrientation = (event: DeviceOrientationEvent) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const anyEvent = event as any;
-      let newHeading: number | null = null;
+      let rawHeading: number | null = null;
       if (typeof anyEvent.webkitCompassHeading === "number") {
-        newHeading = anyEvent.webkitCompassHeading;
-      } else if (event.absolute && event.alpha !== null) {
-        newHeading = (360 - event.alpha) % 360;
+        rawHeading = anyEvent.webkitCompassHeading;
+      } else if (event.alpha !== null) {
+        rawHeading = (360 - event.alpha) % 360;
       }
-      if (newHeading !== null) {
+      if (rawHeading !== null) {
+        // Compensate for screen orientation angle (0 portrait, 90/270 landscape)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const screenAngle = typeof window.orientation !== "undefined"
+          ? Number(window.orientation)
+          : (screen.orientation?.angle || 0);
+        const correctedHeading = (rawHeading + screenAngle + 360) % 360;
         hasOrientationRef.current = true;
-        setHeading(newHeading);
+        setHeading(correctedHeading);
       }
     };
 
@@ -174,7 +181,7 @@ export default function MapView({
     }
 
     const gpsHeading = position.coords.heading;
-    if (typeof gpsHeading === "number" && !Number.isNaN(gpsHeading)) {
+    if (typeof gpsHeading === "number" && !Number.isNaN(gpsHeading) && gpsHeading >= 0) {
       setHeading(gpsHeading);
       prevPositionRef.current = { lat, lng };
       return;
@@ -183,8 +190,13 @@ export default function MapView({
     const prev = prevPositionRef.current;
     if (prev) {
       const moved = distanceMeters(prev.lat, prev.lng, lat, lng);
-      if (moved > 3) {
-        setHeading(bearingBetween(prev.lat, prev.lng, lat, lng));
+      if (moved > 1.2) {
+        const calcHeading = bearingBetween(prev.lat, prev.lng, lat, lng);
+        setHeading((prevHeading) => {
+          if (prevHeading === null) return calcHeading;
+          const diff = (calcHeading - prevHeading + 540) % 360 - 180;
+          return (prevHeading + diff * 0.45 + 360) % 360;
+        });
         prevPositionRef.current = { lat, lng };
       }
     } else {
@@ -938,7 +950,7 @@ export default function MapView({
     if (shouldFetchOSRM) {
       try {
         lastRouteCalcRef.current = { lat, lng, bId: building.id };
-        const url = `https://router.project-osrm.org/route/v1/foot/${lng},${lat};${building.longitude},${building.latitude}?overview=full&geometries=geojson`;
+        const url = `https://router.project-osrm.org/route/v1/foot/${lng},${lat};${building.longitude},${building.latitude}?overview=full&geometries=geojson&steps=true`;
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
@@ -949,6 +961,43 @@ export default function MapView({
           }
           if (route) {
             setRouteInfo({ distanceM: route.distance, durationS: route.duration });
+          }
+
+          // Parse Turn-by-Turn Steps
+          const rawSteps = route?.legs?.[0]?.steps;
+          if (Array.isArray(rawSteps) && rawSteps.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const steps = rawSteps.map((s: any) => {
+              const type = s.maneuver?.type || "";
+              const modifier = s.maneuver?.modifier || "";
+              const name = s.name ? ` onto ${s.name}` : "";
+              let icon = "navigation";
+              let text = `Walk towards ${building.name}`;
+
+              if (type === "arrive") {
+                icon = "location_on";
+                text = `Arrive at ${building.name}`;
+              } else if (type === "depart") {
+                icon = "navigation";
+                text = `Head towards ${building.name}`;
+              } else if (modifier.includes("left")) {
+                icon = modifier.includes("slight") ? "turn_slight_left" : "turn_left";
+                text = `Turn ${modifier}${name}`;
+              } else if (modifier.includes("right")) {
+                icon = modifier.includes("slight") ? "turn_slight_right" : "turn_right";
+                text = `Turn ${modifier}${name}`;
+              } else if (modifier.includes("straight")) {
+                icon = "straight";
+                text = `Continue straight${name}`;
+              }
+              return { instruction: text, distanceM: Math.round(s.distance || 0), icon };
+            });
+            setRouteSteps(steps);
+          } else {
+            setRouteSteps([
+              { instruction: `Walk directly to ${building.name}`, distanceM: Math.round(distM), icon: "directions_walk" },
+              { instruction: `Arrive at ${building.name}`, distanceM: 0, icon: "location_on" }
+            ]);
           }
         }
       } catch (err) {
@@ -989,31 +1038,39 @@ export default function MapView({
     let firstFix = true;
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
+        const rawLat = position.coords.latitude;
+        const rawLng = position.coords.longitude;
+        const acc = position.coords.accuracy;
 
-        if (!isWithinBangalore(lat, lng)) {
-          setToastMessage("Note: Location is outside standard campus region");
-          setTimeout(() => setToastMessage(null), 3500);
-        }
+        setUserAccuracy(acc);
 
-        setUserLoc({ lat, lng });
-        updateHeadingFromPosition(position, lat, lng);
+        setUserLoc((prevLoc) => {
+          if (!prevLoc) return { lat: rawLat, lng: rawLng };
+          const d = distanceMeters(prevLoc.lat, prevLoc.lng, rawLat, rawLng);
+          if (d < 0.3) return prevLoc; // Suppress stationary jitter
+          const alpha = d > 8 ? 0.85 : 0.45;
+          return {
+            lat: prevLoc.lat + alpha * (rawLat - prevLoc.lat),
+            lng: prevLoc.lng + alpha * (rawLng - prevLoc.lng)
+          };
+        });
+
+        updateHeadingFromPosition(position, rawLat, rawLng);
 
         if (firstFix) {
           firstFix = false;
-          onFirstFix?.(lat, lng);
+          onFirstFix?.(rawLat, rawLng);
         }
       },
       (error) => {
         if (error.code === error.PERMISSION_DENIED) {
-          setToastMessage("Location access denied. Please enable it in browser settings.");
+          setToastMessage("Location permission denied. Enable GPS in browser settings.");
         } else {
-          setToastMessage("Unable to retrieve GPS location.");
+          setToastMessage("Acquiring high-accuracy GPS fix...");
         }
         setTimeout(() => setToastMessage(null), 4000);
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -1023,6 +1080,7 @@ export default function MapView({
     setNavigatingBuilding(target);
     navigatingBuildingRef.current = target;
     setIsNavigating(true);
+    setIsAutoFollow(true);
     setupHeadingListener();
 
     if (userLoc) {
@@ -1042,6 +1100,8 @@ export default function MapView({
     setIsNavigating(false);
     setNavigatingBuilding(null);
     setRouteInfo(null);
+    setRouteSteps([]);
+    setShowAllSteps(false);
     navigatingBuildingRef.current = null;
     lastRouteCalcRef.current = null;
     const source = map?.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
@@ -1049,10 +1109,26 @@ export default function MapView({
   };
 
   useEffect(() => {
+    if (!map) return;
+    const onDragStart = () => {
+      if (isNavigating) {
+        setIsAutoFollow(false);
+      }
+    };
+    map.on("dragstart", onDragStart);
+    return () => {
+      map.off("dragstart", onDragStart);
+    };
+  }, [map, isNavigating]);
+
+  useEffect(() => {
     if (!isNavigating || !userLoc || !navigatingBuildingRef.current) return;
     drawDirectionLine(userLoc.lat, userLoc.lng, navigatingBuildingRef.current, true);
+    if (isAutoFollow && map) {
+      map.easeTo({ center: [userLoc.lng, userLoc.lat], duration: 500 });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userLoc, isNavigating]);
+  }, [userLoc, isNavigating, isAutoFollow]);
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
@@ -1061,7 +1137,14 @@ export default function MapView({
       {map && (
         <>
           {userLoc && (
-            <UserLocation map={map} latitude={userLoc.lat} longitude={userLoc.lng} heading={heading} />
+            <UserLocation
+              map={map}
+              latitude={userLoc.lat}
+              longitude={userLoc.lng}
+              accuracy={userAccuracy}
+              heading={heading}
+              bearing={bearing}
+            />
           )}
 
           {selectedBuilding && (
@@ -1071,6 +1154,70 @@ export default function MapView({
             />
           )}
         </>
+      )}
+
+      {/* Floating Live Turn-by-Turn Navigation Banner */}
+      {isNavigating && (
+        <div className="fixed top-[76px] left-1/2 transform -translate-x-1/2 w-[calc(100%-32px)] max-w-[420px] bg-slate-900/90 dark:bg-surface-bright/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-2xl z-[130] flex flex-col gap-2 border border-white/10 animate-fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#22B8CF] text-slate-900 flex items-center justify-center flex-shrink-0 shadow-md">
+              <span className="material-symbols-outlined text-[24px]">
+                {routeSteps[0]?.icon || "navigation"}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-sm truncate leading-tight">
+                {routeSteps[0]?.instruction || `Head towards ${navigatingBuilding?.name || "Destination"}`}
+              </div>
+              <div className="text-xs text-cyan-300 font-medium mt-0.5">
+                {routeInfo ? `${routeInfo.distanceM >= 1000 ? `${(routeInfo.distanceM / 1000).toFixed(1)} km` : `${Math.round(routeInfo.distanceM)} m`} • ${Math.max(1, Math.round(routeInfo.durationS / 60))} min walk` : "Calculating path..."}
+              </div>
+            </div>
+            {routeSteps.length > 0 && (
+              <button
+                onClick={() => setShowAllSteps(!showAllSteps)}
+                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                title="View Turn Steps"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showAllSteps ? "expand_less" : "list"}
+                </span>
+              </button>
+            )}
+          </div>
+
+          {showAllSteps && routeSteps.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-white/10 max-h-48 overflow-y-auto space-y-2 pr-1">
+              {routeSteps.map((step, idx) => (
+                <div key={idx} className="flex items-start gap-2.5 text-xs">
+                  <span className="material-symbols-outlined text-[16px] text-cyan-400 mt-0.5 flex-shrink-0">
+                    {step.icon}
+                  </span>
+                  <div className="flex-1 text-slate-200">
+                    <span>{step.instruction}</span>
+                    {step.distanceM > 0 && (
+                      <span className="text-slate-400 ml-1.5">({step.distanceM} m)</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Floating Recenter GPS Navigation Button */}
+      {isNavigating && !isAutoFollow && userLoc && (
+        <button
+          onClick={() => {
+            setIsAutoFollow(true);
+            map?.easeTo({ center: [userLoc.lng, userLoc.lat], zoom: 17, duration: 600 });
+          }}
+          className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-[#22B8CF] hover:bg-[#1A94A6] text-white px-4 py-2 rounded-full shadow-2xl z-[120] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer border border-white/20 animate-fade-in"
+        >
+          <span className="material-symbols-outlined text-[18px]">my_location</span>
+          Recenter GPS
+        </button>
       )}
 
       <MapControls
@@ -1166,7 +1313,7 @@ export default function MapView({
           <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-outline-variant/20">
             <button
               onClick={handleStopNavigation}
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-surface-container-high/60 transition-colors"
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-surface-container-high/60 transition-colors cursor-pointer"
               aria-label="Close directions"
             >
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -1197,7 +1344,7 @@ export default function MapView({
               <button
                 key={mode.icon}
                 onClick={() => !mode.active && handleShowToast(`${mode.label} directions`)}
-                className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors ${
+                className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors cursor-pointer ${
                   mode.active
                     ? "bg-[#22B8CF]/15 text-[#22B8CF]"
                     : "text-slate-400 dark:text-on-surface-variant/50 hover:bg-slate-100 dark:hover:bg-surface-container-high/60"
@@ -1237,9 +1384,31 @@ export default function MapView({
             </button>
           </div>
 
-          <div className="flex-1" />
+          {/* Turn-by-Turn Steps List in Side Panel */}
+          {routeSteps.length > 0 && (
+            <div className="px-4 py-2 border-t border-slate-200 dark:border-outline-variant/20 flex-1 overflow-y-auto">
+              <div className="text-xs font-semibold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
+                Route Instructions
+              </div>
+              <div className="space-y-3">
+                {routeSteps.map((step, idx) => (
+                  <div key={idx} className="flex items-start gap-3 text-xs">
+                    <div className="w-6 h-6 rounded-full bg-[#22B8CF]/15 text-[#22B8CF] flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="material-symbols-outlined text-[14px]">{step.icon}</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-slate-800 dark:text-on-surface">{step.instruction}</div>
+                      {step.distanceM > 0 && (
+                        <div className="text-[11px] text-slate-500 dark:text-on-surface-variant">{step.distanceM} meters</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <div className="px-4 py-3 border-t border-slate-200 dark:border-outline-variant/20">
+          <div className="px-4 py-3 border-t border-slate-200 dark:border-outline-variant/20 mt-auto">
             <button
               onClick={handleStopNavigation}
               className="w-full py-2.5 rounded-full bg-[#E8574F]/10 text-[#E8574F] font-medium text-sm hover:bg-[#E8574F]/20 transition-colors cursor-pointer"
