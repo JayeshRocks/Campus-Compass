@@ -5,6 +5,7 @@ interface UserLocationProps {
   map: maplibregl.Map;
   latitude: number;
   longitude: number;
+  heading?: number | null;
 }
 
 export default function UserLocation({ map, latitude, longitude }: UserLocationProps) {

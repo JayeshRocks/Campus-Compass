@@ -42,6 +42,10 @@ export default function MapView({
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
+  const [heading, setHeading] = useState<number | null>(null);
+  const headingListenerRef = useRef<((e: DeviceOrientationEvent) => void) | null>(null);
+  const hasOrientationRef = useRef(false);
+  const prevPositionRef = useRef<{ lat: number; lng: number } | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [is3D, setIs3D] = useState(() => {
     const saved = localStorage.getItem("campusCompass_is3D");
@@ -91,8 +95,96 @@ export default function MapView({
       if (weatherTimerRef.current) {
         clearTimeout(weatherTimerRef.current);
       }
+      if (headingListenerRef.current) {
+        window.removeEventListener("deviceorientationabsolute", headingListenerRef.current, true);
+        window.removeEventListener("deviceorientation", headingListenerRef.current, true);
+        headingListenerRef.current = null;
+      }
     };
   }, []);
+
+  const setupHeadingListener = () => {
+    if (headingListenerRef.current) return;
+
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const anyEvent = event as any;
+      let newHeading: number | null = null;
+      if (typeof anyEvent.webkitCompassHeading === "number") {
+        newHeading = anyEvent.webkitCompassHeading;
+      } else if (event.absolute && event.alpha !== null) {
+        newHeading = (360 - event.alpha) % 360;
+      }
+      if (newHeading !== null) {
+        hasOrientationRef.current = true;
+        setHeading(newHeading);
+      }
+    };
+
+    headingListenerRef.current = handleOrientation;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const DeviceOrientationEventAny = (window as any).DeviceOrientationEvent;
+    if (DeviceOrientationEventAny && typeof DeviceOrientationEventAny.requestPermission === "function") {
+      DeviceOrientationEventAny.requestPermission()
+        .then((state: string) => {
+          if (state === "granted") {
+            window.addEventListener("deviceorientation", handleOrientation, true);
+          }
+        })
+        .catch(() => {});
+    } else {
+      window.addEventListener("deviceorientationabsolute", handleOrientation, true);
+      window.addEventListener("deviceorientation", handleOrientation, true);
+    }
+  };
+
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const toDeg = (rad: number) => (rad * 180) / Math.PI;
+
+  const bearingBetween = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+    const dLng = toRad(lng2 - lng1);
+    const y = Math.sin(dLng) * Math.cos(toRad(lat2));
+    const x =
+      Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+      Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLng);
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
+  };
+
+  const distanceMeters = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+    const R = 6371000;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  };
+
+  const updateHeadingFromPosition = (position: GeolocationPosition, lat: number, lng: number) => {
+    if (hasOrientationRef.current) {
+      prevPositionRef.current = { lat, lng };
+      return;
+    }
+
+    const gpsHeading = position.coords.heading;
+    if (typeof gpsHeading === "number" && !Number.isNaN(gpsHeading)) {
+      setHeading(gpsHeading);
+      prevPositionRef.current = { lat, lng };
+      return;
+    }
+
+    const prev = prevPositionRef.current;
+    if (prev) {
+      const moved = distanceMeters(prev.lat, prev.lng, lat, lng);
+      if (moved > 3) {
+        setHeading(bearingBetween(prev.lat, prev.lng, lat, lng));
+        prevPositionRef.current = { lat, lng };
+      }
+    } else {
+      prevPositionRef.current = { lat, lng };
+    }
+  };
 
   // Weather Widget Visibility Logic
   useEffect(() => {
@@ -145,15 +237,13 @@ export default function MapView({
   const selectedBuildingRef = useRef(selectedBuilding);
   useEffect(() => { selectedBuildingRef.current = selectedBuilding; }, [selectedBuilding]);
 
-  // Fly to the selected building whenever it changes — covers selection via
-  // search results as well as clicking a marker/polygon directly.
   useEffect(() => {
     if (!selectedBuilding) {
       lastFlewToBuildingId = null;
       return;
     }
     if (!map) return;
-    if (lastFlewToBuildingId === selectedBuilding.id) return; // Skip flyTo if we just restored from a tab switch
+    if (lastFlewToBuildingId === selectedBuilding.id) return;
 
     lastFlewToBuildingId = selectedBuilding.id;
     map.flyTo({
@@ -198,8 +288,6 @@ export default function MapView({
         { id: "satellite-layer", type: "raster", source: "esri-satellite", minzoom: 0, maxzoom: 22 }
       ]
     } : {
-      // Clean blank "schematic" canvas — no street tiles/city clutter,
-      // just a flat background so campus building shapes read like a diagram.
       version: 8,
       glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
       sources: {
@@ -230,17 +318,40 @@ export default function MapView({
       container: mapContainerRef.current,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       style: initialStyle as any,
-      center: cachedMapState ? cachedMapState.center : [77.5898, 13.1264], // MAHE Bengaluru Center
+      center: cachedMapState ? cachedMapState.center : [77.5898, 13.1264],
       zoom: cachedMapState ? cachedMapState.zoom : 15.5,
       minZoom: 10,
-      maxBounds: [[77.40, 12.80], [77.75, 13.25]], // Greater Bangalore Bounds
+      maxBounds: [[77.40, 12.80], [77.75, 13.25]],
       pitch: cachedMapState ? cachedMapState.pitch : (is3D ? 55 : 0),
       bearing: cachedMapState ? cachedMapState.bearing : (is3D ? -17 : 0),
       dragRotate: true,
-      attributionControl: false, // Disable default to add a custom one below
+      antialias: true,
+      attributionControl: false,
+    } as any);
+
+    mapInstance.on("style.load", () => {
+      try {
+        mapInstance.setLight({
+          anchor: "viewport",
+          color: "#fff7ec",
+          intensity: 0.55,
+          position: [1.8, 120, 25]
+        });
+      } catch {}
+
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (mapInstance as any).setSky?.({
+          "sky-color": isDarkMode ? "#0b1220" : "#cfe8ff",
+          "sky-horizon-blend": 0.5,
+          "horizon-color": isDarkMode ? "#1e293b" : "#e6f1ff",
+          "horizon-fog-blend": 0.6,
+          "fog-color": isDarkMode ? "#0b1220" : "#e6f1ff",
+          "fog-ground-blend": 0.5
+        });
+      } catch {}
     });
 
-    // Add full-text custom attribution control (styled as a thin footer in CSS)
     mapInstance.addControl(new maplibregl.AttributionControl({
       compact: false,
     }), 'bottom-right');
@@ -258,11 +369,7 @@ export default function MapView({
       };
     });
 
-    // Fetch real road/path geometry from OpenStreetMap (Overpass API) for the
-    // campus bounding box and render it as a road layer under the buildings.
     const fetchRoads = async () => {
-      console.log("[roads] fetchRoads() called");
-
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const tryAddLayer = (features: any) => {
         if (!mapInstance.isStyleLoaded()) {
@@ -301,7 +408,6 @@ export default function MapView({
               },
               mapInstance.getLayer("campus-buildings-fill") ? "campus-buildings-fill" : undefined
             );
-            console.log("[roads] added/re-added road layer");
           }
         } catch (err) {
           console.error("[roads] error adding layer:", err);
@@ -312,7 +418,6 @@ export default function MapView({
         const cached = localStorage.getItem("campus-roads-cache");
         if (cached) {
           const features = JSON.parse(cached);
-          console.log("[roads] loaded from cache instantly");
           tryAddLayer(features);
           return;
         }
@@ -321,15 +426,12 @@ export default function MapView({
       }
 
       try {
-        console.log("[roads] fetching local static roads");
         const res = await fetch("/roads.geojson");
         if (!res.ok) {
           throw new Error(`Local fetch failed: ${res.status}`);
         }
         const data = await res.json();
         const features = data.features || [];
-        console.log("[roads] features loaded:", features.length);
-        
         localStorage.setItem("campus-roads-cache", JSON.stringify(features));
         tryAddLayer(features);
       } catch (err) {
@@ -344,10 +446,10 @@ export default function MapView({
         const isFiltering = activeBuildingIdsRef.current && activeBuildingIdsRef.current.size < buildingsRef.current.length;
         const geojsonFeatures = buildingsRef.current.map(b => ({
           type: "Feature",
-          properties: { 
-            id: b.id, 
-            name: b.name, 
-            shortName: b.shortName, 
+          properties: {
+            id: b.id,
+            name: b.name,
+            shortName: b.shortName,
             category: b.category,
             isActive: isFiltering ? activeBuildingIdsRef.current?.has(b.id) : true
           },
@@ -363,10 +465,12 @@ export default function MapView({
           }
         });
 
+        // 3D Extrusion Buildings Layer (Excludes Campus Boundary)
         mapInstance.addLayer({
           id: "campus-buildings-fill",
           type: "fill-extrusion",
           source: "campus-buildings",
+          filter: ["!=", ["get", "id"], "campus_boundary"],
           paint: {
             "fill-extrusion-color": [
               "case",
@@ -413,7 +517,7 @@ export default function MapView({
               "basketball_court_1", 1,
               "basketball_half_court", 1,
               "cricket_nets", 1,
-              "mlcp_15", 10,
+              "mlcp_15", 24,
               "gate_1", 6,
               "gate_2", 6,
               "gate_3", 6,
@@ -422,6 +526,8 @@ export default function MapView({
               "cub_13", 10,
               "cub_14", 10,
               "laundry", 6,
+              "hb4_nw_6", 26,
+              "hb4_sw_7", 26,
               [
                 "match",
                 ["get", "category"],
@@ -436,49 +542,66 @@ export default function MapView({
               ]
             ],
             "fill-extrusion-base": 0,
-            "fill-extrusion-opacity": 0.92
+            "fill-extrusion-opacity": 0.92,
+            "fill-extrusion-vertical-gradient": true
           }
         });
 
+        // Building Outline Layer
         mapInstance.addLayer({
           id: "campus-buildings-line",
           type: "line",
           source: "campus-buildings",
+          filter: ["!=", ["get", "id"], "campus_boundary"],
           paint: {
             "line-color": [
               "case",
               ["==", ["get", "isActive"], false],
               isDarkMode ? "#475569" : "#cbd5e1",
-              "#0ea5e9"
+              isDarkMode ? "rgba(148, 163, 184, 0.25)" : "rgba(15, 23, 42, 0.15)"
             ],
-            "line-width": 1.5,
+            "line-width": 1,
             "line-opacity": 1
           }
         });
 
+        // Building Label Layer
         mapInstance.addLayer({
           id: "campus-buildings-label",
           type: "symbol",
           source: "campus-buildings",
+          filter: ["!=", ["get", "id"], "campus_boundary"],
           layout: {
             "text-field": ["upcase", ["get", "shortName"]],
-            "text-size": 10.5,
+            "text-size": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              14, 9,
+              16, 12,
+              18, 16,
+              20, 20
+            ],
             "text-font": ["Noto Sans Bold"],
-            "text-letter-spacing": 0.15,
-            "text-allow-overlap": true,
-            "text-ignore-placement": true,
-            "text-max-width": 10
+            "text-letter-spacing": 0.02,
+            "text-rotation-alignment": "map",
+            "text-pitch-alignment": "map",
+            "text-allow-overlap": false,
+            "text-ignore-placement": false,
+            "text-optional": true,
+            "text-padding": 2,
+            "text-max-width": 6
           },
           paint: {
             "text-color": [
               "case",
               ["==", ["get", "isActive"], false],
-              isDarkMode ? "#64748b" : "#94a3b8",
-              isDarkMode ? "#ffffff" : "#0f172a"
+              isDarkMode ? "#94a3b8" : "#94a3b8",
+              isDarkMode ? "#f8fafc" : "rgba(15, 23, 42, 0.75)"
             ],
-            "text-halo-color": isDarkMode ? "rgba(15, 23, 42, 0.85)" : "rgba(255, 255, 255, 0.85)",
-            "text-halo-width": 1.5,
-            "text-halo-blur": 1,
+            "text-halo-color": isDarkMode ? "#0f172a" : "rgba(255, 255, 255, 0.35)",
+            "text-halo-width": isDarkMode ? 1.6 : 1,
+            "text-halo-blur": isDarkMode ? 1.2 : 0.5,
             "text-opacity": [
               "case",
               ["==", ["get", "isActive"], false],
@@ -494,7 +617,7 @@ export default function MapView({
           source: "campus-buildings",
           filter: ["==", "id", selectedBuildingRef.current?.id || ""],
           paint: {
-            "line-color": "#3b82f6", // Bright solid blue highlight
+            "line-color": "#3b82f6",
             "line-width": 4,
             "line-opacity": 0.9
           }
@@ -518,7 +641,7 @@ export default function MapView({
           });
         }
 
-        // Click handler for polygons
+        // Click handler for building polygons
         mapInstance.on("click", "campus-buildings-fill", (e) => {
           if (e.features && e.features[0]) {
             const id = e.features[0].properties.id;
@@ -527,7 +650,6 @@ export default function MapView({
           }
         });
 
-        // Click on empty map to clear selection
         mapInstance.on("click", (e) => {
           const features = mapInstance.queryRenderedFeatures(e.point, { layers: ["campus-buildings-fill"] });
           if (features.length === 0) {
@@ -535,7 +657,6 @@ export default function MapView({
           }
         });
 
-        // Pointer cursor
         mapInstance.on("mouseenter", "campus-buildings-fill", () => {
           mapInstance.getCanvas().style.cursor = "pointer";
         });
@@ -543,14 +664,34 @@ export default function MapView({
           mapInstance.getCanvas().style.cursor = "";
         });
       }
+
+      // Render Clean Perimeter Boundary Line Layer (2D/3D Pitch Aligned)
+// Render Clean Perimeter Boundary Line Layer (Inserted BEFORE 3D buildings so extrusions occlude it)
+      if (!mapInstance.getLayer("campus-boundary-wall")) {
+        mapInstance.addLayer(
+          {
+            id: "campus-boundary-wall",
+            type: "line",
+            source: "campus-buildings",
+            filter: ["==", ["get", "id"], "campus_boundary"],
+            layout: {
+              "line-join": "round",
+              "line-cap": "round"
+            },
+            paint: {
+              "line-color": "#eb4034", // Crisp accent perimeter color
+              "line-width": 4.5,       // Width in pixels
+              "line-opacity": 0.9,
+            }
+          },
+          "campus-buildings-fill" // <-- Passing "campus-buildings-fill" as 'beforeId' places boundary UNDER 3D building extrusions
+        );
+      }
     };
 
-    // Hide the schematic building polygons whenever the satellite imagery
-    // basemap is active, since the hand-traced shapes don't line up
-    // precisely with the real photo underneath.
     const applyBuildingVisibility = () => {
       const visibility = isSatelliteRef.current ? "none" : "visible";
-      ["campus-buildings-fill", "campus-buildings-line", "campus-buildings-label", "campus-buildings-highlight"].forEach((layerId) => {
+      ["campus-buildings-fill", "campus-buildings-line", "campus-buildings-label", "campus-buildings-highlight", "campus-boundary-wall"].forEach((layerId) => {
         if (mapInstance.getLayer(layerId)) {
           mapInstance.setLayoutProperty(layerId, "visibility", visibility);
         }
@@ -564,13 +705,16 @@ export default function MapView({
         fetchRoads();
       }
 
-      // Fit view tightly to the campus buildings so the schematic fills
-      // the screen instead of showing surrounding city streets.
       const allCoords: [number, number][] = [];
       buildingsRef.current.forEach((b) => {
-        b.geometry.coordinates[0].forEach((coord) => {
-          allCoords.push([coord[0], coord[1]]);
-        });
+        if (b.geometry.coordinates && b.geometry.coordinates[0]) {
+          const coords = Array.isArray(b.geometry.coordinates[0][0])
+            ? (b.geometry.coordinates[0] as number[][])
+            : (b.geometry.coordinates as number[][]);
+          coords.forEach((coord) => {
+            allCoords.push([coord[0], coord[1]]);
+          });
+        }
       });
       if (allCoords.length > 0 && !cachedMapState) {
         const bounds = allCoords.reduce(
@@ -596,7 +740,6 @@ export default function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle live theme background color swaps by changing style completely
   useEffect(() => {
     if (!map) return;
     if (prevDarkRef.current === isDarkMode && prevSatRef.current === isSatellite) return;
@@ -658,7 +801,6 @@ export default function MapView({
     map.setStyle(targetStyle as any, { diff: false });
   }, [isDarkMode, isSatellite, map]);
 
-  // Update Highlight filter when selection changes
   useEffect(() => {
     if (!map) return;
     if (map.getStyle() && map.getLayer("campus-buildings-highlight")) {
@@ -666,7 +808,6 @@ export default function MapView({
     }
   }, [selectedBuilding, map]);
 
-  // Update GeoJSON when filtered buildings change
   useEffect(() => {
     if (!map) return;
     const source = map.getSource("campus-buildings") as maplibregl.GeoJSONSource;
@@ -691,7 +832,6 @@ export default function MapView({
     }
   }, [buildings, activeBuildingIds, map]);
 
-  // Handle panel and sidebar resize events
   useEffect(() => {
     if (!map) return;
     const timer = setTimeout(() => {
@@ -723,8 +863,6 @@ export default function MapView({
     });
   };
 
-
-
   const handleLocateUser = () => {
     if (!("geolocation" in navigator)) {
       setToastMessage("Geolocation is not supported by your browser.");
@@ -732,8 +870,9 @@ export default function MapView({
       return;
     }
 
+    setupHeadingListener();
+
     if (userLoc && map) {
-      // If we already have a location, just jump to it
       map.flyTo({
         center: [userLoc.lng, userLoc.lat],
         zoom: 17,
@@ -744,7 +883,6 @@ export default function MapView({
 
     setToastMessage("Acquiring GPS signal...");
 
-    // Clear existing watch if present
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
     }
@@ -767,10 +905,10 @@ export default function MapView({
         }
 
         setUserLoc({ lat, lng });
+        updateHeadingFromPosition(position, lat, lng);
         
-        // Only jump the camera on the very first location lock
         if (firstLock && map) {
-          setToastMessage(null); // Clear loading toast
+          setToastMessage(null);
           map.flyTo({
             center: [lng, lat],
             zoom: 17,
@@ -790,7 +928,7 @@ export default function MapView({
       { 
         enableHighAccuracy: true, 
         timeout: 10000, 
-        maximumAge: 10000 // Allow a 10-second old cached location to speed up lock
+        maximumAge: 10000
       }
     );
   };
@@ -846,8 +984,6 @@ export default function MapView({
     });
 
     if (follow) {
-      // Live guidance: keep the camera centered on the walker rather than
-      // re-framing the whole route every update.
       map.easeTo({ center: [lng, lat], duration: 600 });
     } else {
       const bounds = routeCoords.reduce(
@@ -880,6 +1016,7 @@ export default function MapView({
         }
 
         setUserLoc({ lat, lng });
+        updateHeadingFromPosition(position, lat, lng);
         if (firstFix) {
           firstFix = false;
           onFirstFix?.(lat, lng);
@@ -901,6 +1038,7 @@ export default function MapView({
     if (!selectedBuilding) return;
     navigatingBuildingRef.current = selectedBuilding;
     setIsNavigating(true);
+    setupHeadingListener();
 
     if (userLoc) {
       drawDirectionLine(userLoc.lat, userLoc.lng, selectedBuilding);
@@ -927,29 +1065,22 @@ export default function MapView({
     source?.setData({ type: "FeatureCollection", features: [] });
   };
 
-  // While navigating, re-fetch the route every time the live GPS position
-  // updates, so the guidance line and ETA stay accurate as the person walks.
   useEffect(() => {
     if (!isNavigating || !userLoc || !navigatingBuildingRef.current) return;
     drawDirectionLine(userLoc.lat, userLoc.lng, navigatingBuildingRef.current, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLoc, isNavigating]);
 
-
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
-      {/* Live Map Canvas container */}
       <div ref={mapContainerRef} className="absolute top-0 left-0 w-full h-full z-0 !overflow-visible" />
 
-      {/* Render subcomponents when map instance is ready */}
       {map && (
         <>
-          {/* Geolocation blue dot coordinates */}
           {userLoc && (
-            <UserLocation map={map} latitude={userLoc.lat} longitude={userLoc.lng} />
+            <UserLocation map={map} latitude={userLoc.lat} longitude={userLoc.lng} heading={heading} />
           )}
 
-          {/* Building detail Popups on Map */}
           {selectedBuilding && (
             <BuildingPopup
               map={map}
@@ -959,8 +1090,6 @@ export default function MapView({
         </>
       )}
 
-
-      {/* Map Controls */}
       <MapControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
@@ -973,19 +1102,15 @@ export default function MapView({
         bearing={bearing}
       />
       
-      {/* Weather Widget */}
       <WeatherWidget isVisible={isWeatherVisible} isSidebarOpen={isSidebarOpen} />
 
-      {/* Feedback Button Component */}
       <FeedbackButton onClick={() => setShowReportIssue(true)} hasBottomNav={!showTabsInHeader} />
 
-      {/* Slide-in Building Info Card */}
       <aside
         className={`bg-white dark:bg-surface-container-high border border-slate-200 dark:border-white/10 shadow-2xl fixed right-4 md:right-[24px] top-[140px] md:top-[88px] w-[calc(100vw-32px)] md:w-[360px] rounded-2xl z-[85] overflow-hidden flex flex-col transition-all duration-300 transform ${
           selectedBuilding ? "translate-x-0 opacity-100" : "translate-x-[110%] opacity-0 pointer-events-none"
         }`}
       >
-        {/* Ambient Corner Hues */}
         <div className="absolute top-[150px] -left-20 w-64 h-64 bg-[#FDE047]/80 dark:bg-red-500/50 blur-[60px] rounded-full pointer-events-none z-0 mix-blend-multiply dark:mix-blend-screen" />
         <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#7DD3FC]/80 dark:bg-cyan-500/50 blur-[60px] rounded-full pointer-events-none z-0 mix-blend-multiply dark:mix-blend-screen" />
 
@@ -1003,7 +1128,6 @@ export default function MapView({
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
-
             </div>
             <div className="p-panel_padding flex-1 flex flex-col">
               <h3 className="font-headline-md text-headline-md text-slate-900 dark:text-on-surface mb-1">
@@ -1047,7 +1171,6 @@ export default function MapView({
         )}
       </aside>
 
-      {/* Floating Toast Notification */}
       {toastMessage && (
         <div className="fixed top-[88px] left-1/2 transform -translate-x-1/2 bg-surface-bright/95 text-on-surface px-4 py-2 rounded-xl border border-outline-variant/30 shadow-2xl z-[120] text-sm font-body-md animate-fade-in flex items-center gap-2">
           <span className="material-symbols-outlined text-primary text-[18px]">info</span>
@@ -1055,31 +1178,83 @@ export default function MapView({
         </div>
       )}
 
-      {/* Live Navigation Guidance Banner */}
       {isNavigating && (
-        <div className="fixed top-[88px] left-1/2 transform -translate-x-1/2 bg-primary text-on-primary px-5 py-3 rounded-2xl shadow-2xl z-[125] flex items-center gap-4">
-          <span className="material-symbols-outlined text-[22px]">directions_walk</span>
-          <div className="flex flex-col leading-tight">
-            <span className="font-medium text-sm">
-              {navigatingBuildingRef.current?.name || "Navigating"}
-            </span>
-            <span className="text-xs opacity-90">
-              {routeInfo
-                ? `${Math.round(routeInfo.distanceM)} m • ${Math.max(1, Math.round(routeInfo.durationS / 60))} min walk`
-                : "Calculating route..."}
-            </span>
+        <div className="fixed top-[72px] left-0 h-[calc(100%-72px)] w-full sm:w-[380px] bg-white dark:bg-surface-bright text-slate-900 dark:text-on-surface z-[125] shadow-2xl flex flex-col border-r border-slate-200 dark:border-outline-variant/20 animate-fade-in">
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-outline-variant/20">
+            <button
+              onClick={handleStopNavigation}
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-surface-container-high/60 transition-colors"
+              aria-label="Close directions"
+            >
+              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+            </button>
+            <span className="font-medium text-base">Directions</span>
           </div>
-          <button
-            onClick={handleStopNavigation}
-            className="ml-2 px-3 py-1.5 rounded-lg bg-on-primary/15 hover:bg-on-primary/25 text-xs font-medium transition-colors"
-          >
-            Stop
-          </button>
+
+          <div className="px-4 py-3 space-y-2 border-b border-slate-200 dark:border-outline-variant/20">
+            <div className="flex items-center gap-3 bg-slate-50 dark:bg-surface-container-high rounded-lg px-3 py-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#22B8CF] flex-shrink-0" />
+              <span className="text-sm truncate">Your location</span>
+            </div>
+            <div className="flex items-center gap-3 bg-slate-50 dark:bg-surface-container-high rounded-lg px-3 py-2.5">
+              <span className="material-symbols-outlined text-[18px] text-[#EA4335] flex-shrink-0">location_on</span>
+              <span className="text-sm truncate">
+                {navigatingBuildingRef.current?.name || "Destination"}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 px-3 py-2 border-b border-slate-200 dark:border-outline-variant/20">
+            {[
+              { icon: "directions_car", label: "Drive" },
+              { icon: "directions_walk", label: "Walk", active: true },
+              { icon: "directions_bike", label: "Cycle" },
+              { icon: "directions_transit", label: "Transit" }
+            ].map((mode) => (
+              <button
+                key={mode.icon}
+                onClick={() => !mode.active && handleShowToast(`${mode.label} directions`)}
+                className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors ${
+                  mode.active
+                    ? "bg-[#22B8CF]/15 text-[#22B8CF]"
+                    : "text-slate-400 dark:text-on-surface-variant/50 hover:bg-slate-100 dark:hover:bg-surface-container-high/60"
+                }`}
+                aria-label={mode.label}
+              >
+                <span className="material-symbols-outlined text-[20px]">{mode.icon}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="px-4 py-3">
+            <div className="rounded-xl border-2 border-[#22B8CF] bg-[#22B8CF]/5 px-4 py-3 flex items-center gap-3">
+              <span className="material-symbols-outlined text-[#22B8CF] text-[24px]">directions_walk</span>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm">
+                  {routeInfo ? `${Math.max(1, Math.round(routeInfo.durationS / 60))} min` : "Calculating..."}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-on-surface-variant">
+                  {routeInfo
+                    ? `${Math.round(routeInfo.distanceM)} m • Fastest route on foot`
+                    : "Finding the best path"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1" />
+
+          <div className="px-4 py-3 border-t border-slate-200 dark:border-outline-variant/20">
+            <button
+              onClick={handleStopNavigation}
+              className="w-full py-2.5 rounded-full bg-[#E8574F]/10 text-[#E8574F] font-medium text-sm hover:bg-[#E8574F]/20 transition-colors"
+            >
+              Stop navigation
+            </button>
+          </div>
         </div>
       )}
 
-
-      {/* Report Issue Floating Modal */}
       {showReportIssue && (
         <ReportIssueForm onClose={() => setShowReportIssue(false)} />
       )}
