@@ -79,12 +79,18 @@ export default function MapView({
   }, [isSatellite, map]);
   const fetchRoadsRef = useRef<(() => Promise<void>) | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distanceM: number; durationS: number } | null>(null);
-  const navigatingBuildingRef = useRef<typeof selectedBuilding>(null);
+  const [navigatingBuilding, setNavigatingBuilding] = useState<Building | null>(null);
+  const navigatingBuildingRef = useRef<Building | null>(null);
+  const lastRouteCalcRef = useRef<{ lat: number; lng: number; bId: string } | null>(null);
   const [showReportIssue, setShowReportIssue] = useState(false);
   const [isWeatherVisible, setIsWeatherVisible] = useState(true);
   
   const watchIdRef = useRef<number | null>(null);
   const weatherTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    navigatingBuildingRef.current = navigatingBuilding;
+  }, [navigatingBuilding]);
   
   // Clean up location watch on unmount
   useEffect(() => {
@@ -629,14 +635,25 @@ export default function MapView({
             data: { type: "FeatureCollection", features: [] }
           });
           mapInstance.addLayer({
+            id: "direction-line-casing",
+            type: "line",
+            source: "direction-line",
+            layout: { "line-join": "round", "line-cap": "round" },
+            paint: {
+              "line-color": isDarkMode ? "#0284c7" : "#0284c7",
+              "line-width": 8,
+              "line-opacity": 0.45
+            }
+          });
+          mapInstance.addLayer({
             id: "direction-line-layer",
             type: "line",
             source: "direction-line",
             layout: { "line-join": "round", "line-cap": "round" },
             paint: {
-              "line-color": "#3b82f6",
-              "line-width": 4,
-              "line-dasharray": [0.2, 1.5]
+              "line-color": "#22b8cf",
+              "line-width": 4.5,
+              "line-opacity": 0.95
             }
           });
         }
@@ -876,61 +893,25 @@ export default function MapView({
       map.flyTo({
         center: [userLoc.lng, userLoc.lat],
         zoom: 17,
-        duration: 1500,
+        duration: 1200,
       });
-      return;
+      setToastMessage("Centered on your location");
+      setTimeout(() => setToastMessage(null), 2500);
     }
 
     setToastMessage("Acquiring GPS signal...");
 
-    if (watchIdRef.current !== null) {
-      navigator.geolocation.clearWatch(watchIdRef.current);
-    }
-
-    let firstLock = true;
-
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        
-        if (!isWithinBangalore(lat, lng)) {
-          setToastMessage("You must be in Bangalore to use this feature.");
-          setTimeout(() => setToastMessage(null), 4000);
-          if (watchIdRef.current !== null) {
-            navigator.geolocation.clearWatch(watchIdRef.current);
-            watchIdRef.current = null;
-          }
-          return;
-        }
-
-        setUserLoc({ lat, lng });
-        updateHeadingFromPosition(position, lat, lng);
-        
-        if (firstLock && map) {
-          setToastMessage(null);
-          map.flyTo({
-            center: [lng, lat],
-            zoom: 17,
-            duration: 1500,
-          });
-          firstLock = false;
-        }
-      },
-      (error) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          setToastMessage("Location access denied. Please enable it in browser settings.");
-        } else {
-          setToastMessage("Unable to retrieve your location.");
-        }
-        setTimeout(() => setToastMessage(null), 4000);
-      },
-      { 
-        enableHighAccuracy: true, 
-        timeout: 10000, 
-        maximumAge: 10000
+    startWatchingLocation((lat, lng) => {
+      setToastMessage("Located your position");
+      setTimeout(() => setToastMessage(null), 2500);
+      if (map) {
+        map.flyTo({
+          center: [lng, lat],
+          zoom: 17,
+          duration: 1500,
+        });
       }
-    );
+    });
   };
 
   const handleShowToast = (featureName: string, version: string = "2") => {
@@ -938,54 +919,61 @@ export default function MapView({
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const drawDirectionLine = async (lat: number, lng: number, building: typeof selectedBuilding, follow: boolean = false) => {
+  const drawDirectionLine = async (lat: number, lng: number, building: Building, follow: boolean = false) => {
     if (!map || !building) return;
-    const source = map.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
-    if (!source) return;
+
+    // Direct distance calculation
+    const distM = distanceMeters(lat, lng, building.latitude, building.longitude);
+    const durS = Math.round(distM / 1.2); // ~1.2 m/s walking speed
+    setRouteInfo({ distanceM: distM, durationS: durS });
 
     let routeCoords: [number, number][] = [
       [lng, lat],
       [building.longitude, building.latitude]
     ];
 
-    try {
-      if (!follow) setToastMessage("Finding route...");
-      const url = `https://router.project-osrm.org/route/v1/foot/${lng},${lat};${building.longitude},${building.latitude}?overview=full&geometries=geojson`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        const route = data?.routes?.[0];
-        const coords = route?.geometry?.coordinates;
-        if (Array.isArray(coords) && coords.length > 1) {
-          routeCoords = coords;
-        }
-        if (route) {
-          setRouteInfo({ distanceM: route.distance, durationS: route.duration });
-        }
-      }
-    } catch (err) {
-      console.error("[directions] OSRM fetch failed, using straight line:", err);
-    } finally {
-      if (!follow) setToastMessage(null);
-    }
+    const last = lastRouteCalcRef.current;
+    const shouldFetchOSRM = !last || last.bId !== building.id || distanceMeters(last.lat, last.lng, lat, lng) > 15;
 
-    source.setData({
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "LineString",
-            coordinates: routeCoords
+    if (shouldFetchOSRM) {
+      try {
+        lastRouteCalcRef.current = { lat, lng, bId: building.id };
+        const url = `https://router.project-osrm.org/route/v1/foot/${lng},${lat};${building.longitude},${building.latitude}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          const route = data?.routes?.[0];
+          const coords = route?.geometry?.coordinates;
+          if (Array.isArray(coords) && coords.length > 1) {
+            routeCoords = coords;
+          }
+          if (route) {
+            setRouteInfo({ distanceM: route.distance, durationS: route.duration });
           }
         }
-      ]
-    });
+      } catch (err) {
+        console.warn("[directions] OSRM fetch failed, using direct line:", err);
+      }
+    }
 
-    if (follow) {
-      map.easeTo({ center: [lng, lat], duration: 600 });
-    } else {
+    const source = map.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
+    if (source) {
+      source.setData({
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "LineString",
+              coordinates: routeCoords
+            }
+          }
+        ]
+      });
+    }
+
+    if (!follow) {
       const bounds = routeCoords.reduce(
         (acc, coord) => acc.extend(coord as [number, number]),
         new maplibregl.LngLatBounds(routeCoords[0], routeCoords[0])
@@ -1003,20 +991,15 @@ export default function MapView({
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        
+
         if (!isWithinBangalore(lat, lng)) {
-          setToastMessage("Navigation unavailable outside Bangalore.");
-          setTimeout(() => setToastMessage(null), 4000);
-          if (watchIdRef.current !== null) {
-            navigator.geolocation.clearWatch(watchIdRef.current);
-            watchIdRef.current = null;
-          }
-          setIsNavigating(false);
-          return;
+          setToastMessage("Note: Location is outside standard campus region");
+          setTimeout(() => setToastMessage(null), 3500);
         }
 
         setUserLoc({ lat, lng });
         updateHeadingFromPosition(position, lat, lng);
+
         if (firstFix) {
           firstFix = false;
           onFirstFix?.(lat, lng);
@@ -1026,7 +1009,7 @@ export default function MapView({
         if (error.code === error.PERMISSION_DENIED) {
           setToastMessage("Location access denied. Please enable it in browser settings.");
         } else {
-          setToastMessage("Unable to retrieve your location.");
+          setToastMessage("Unable to retrieve GPS location.");
         }
         setTimeout(() => setToastMessage(null), 4000);
       },
@@ -1036,31 +1019,31 @@ export default function MapView({
 
   const handleShowDirections = () => {
     if (!selectedBuilding) return;
-    navigatingBuildingRef.current = selectedBuilding;
+    const target = selectedBuilding;
+    setNavigatingBuilding(target);
+    navigatingBuildingRef.current = target;
     setIsNavigating(true);
     setupHeadingListener();
 
     if (userLoc) {
-      drawDirectionLine(userLoc.lat, userLoc.lng, selectedBuilding);
+      drawDirectionLine(userLoc.lat, userLoc.lng, target, false);
       startWatchingLocation();
       return;
     }
 
-    setToastMessage("Getting your location...");
+    setToastMessage("Acquiring GPS for directions...");
     startWatchingLocation((lat, lng) => {
       setToastMessage(null);
-      drawDirectionLine(lat, lng, selectedBuilding);
+      drawDirectionLine(lat, lng, target, false);
     });
   };
 
   const handleStopNavigation = () => {
     setIsNavigating(false);
+    setNavigatingBuilding(null);
     setRouteInfo(null);
     navigatingBuildingRef.current = null;
-    if (watchIdRef.current !== null) {
-      navigator.geolocation.clearWatch(watchIdRef.current);
-      watchIdRef.current = null;
-    }
+    lastRouteCalcRef.current = null;
     const source = map?.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
     source?.setData({ type: "FeatureCollection", features: [] });
   };
@@ -1198,8 +1181,8 @@ export default function MapView({
             </div>
             <div className="flex items-center gap-3 bg-slate-50 dark:bg-surface-container-high rounded-lg px-3 py-2.5">
               <span className="material-symbols-outlined text-[18px] text-[#EA4335] flex-shrink-0">location_on</span>
-              <span className="text-sm truncate">
-                {navigatingBuildingRef.current?.name || "Destination"}
+              <span className="text-sm truncate font-medium">
+                {navigatingBuilding?.name || navigatingBuildingRef.current?.name || "Destination"}
               </span>
             </div>
           </div>
@@ -1226,7 +1209,7 @@ export default function MapView({
             ))}
           </div>
 
-          <div className="px-4 py-3">
+          <div className="px-4 py-3 space-y-2">
             <div className="rounded-xl border-2 border-[#22B8CF] bg-[#22B8CF]/5 px-4 py-3 flex items-center gap-3">
               <span className="material-symbols-outlined text-[#22B8CF] text-[24px]">directions_walk</span>
               <div className="flex-1 min-w-0">
@@ -1235,11 +1218,23 @@ export default function MapView({
                 </div>
                 <div className="text-xs text-slate-500 dark:text-on-surface-variant">
                   {routeInfo
-                    ? `${Math.round(routeInfo.distanceM)} m • Fastest route on foot`
+                    ? `${routeInfo.distanceM >= 1000 ? `${(routeInfo.distanceM / 1000).toFixed(1)} km` : `${Math.round(routeInfo.distanceM)} m`} • Walking route`
                     : "Finding the best path"}
                 </div>
               </div>
             </div>
+
+            <button
+              onClick={() => {
+                if (userLoc && (navigatingBuilding || navigatingBuildingRef.current)) {
+                  drawDirectionLine(userLoc.lat, userLoc.lng, (navigatingBuilding || navigatingBuildingRef.current)!, false);
+                }
+              }}
+              className="w-full py-2 rounded-lg bg-slate-100 dark:bg-surface-container-high text-slate-700 dark:text-on-surface font-medium text-xs hover:bg-slate-200 dark:hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">center_focus_strong</span>
+              Recenter Route
+            </button>
           </div>
 
           <div className="flex-1" />
@@ -1247,7 +1242,7 @@ export default function MapView({
           <div className="px-4 py-3 border-t border-slate-200 dark:border-outline-variant/20">
             <button
               onClick={handleStopNavigation}
-              className="w-full py-2.5 rounded-full bg-[#E8574F]/10 text-[#E8574F] font-medium text-sm hover:bg-[#E8574F]/20 transition-colors"
+              className="w-full py-2.5 rounded-full bg-[#E8574F]/10 text-[#E8574F] font-medium text-sm hover:bg-[#E8574F]/20 transition-colors cursor-pointer"
             >
               Stop navigation
             </button>
