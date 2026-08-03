@@ -114,7 +114,7 @@ export default function Header({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isSearchOpen, onSearchChange]);
 
-  const glassyButtonClass = "p-2 rounded-full border border-slate-200/60 dark:border-white/10 bg-white/50 dark:bg-white/10 backdrop-blur-md shadow-sm transition-all hover:bg-white/80 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md cursor-pointer active:scale-95 flex items-center justify-center group";
+  const glassyButtonClass = "p-2 rounded-full border border-slate-200/60 dark:border-white/15 bg-white/50 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm transition-all hover:bg-white/80 dark:hover:bg-slate-800/90 hover:border-slate-300 dark:hover:border-white/30 hover:shadow-md cursor-pointer active:scale-95 flex items-center justify-center group";
 
   return (
     <>

@@ -5,102 +5,109 @@ interface UserLocationProps {
   map: maplibregl.Map;
   latitude: number;
   longitude: number;
-  // Compass heading in degrees, 0 = north, clockwise. Null/undefined if the
-  // device orientation sensor isn't available yet.
+  accuracy?: number | null;
   heading?: number | null;
+  bearing?: number;
 }
 
-export default function UserLocation({ map, latitude, longitude, heading }: UserLocationProps) {
+export default function UserLocation({
+  map,
+  latitude,
+  longitude,
+  accuracy,
+  heading,
+  bearing = 0,
+}: UserLocationProps) {
   const markerRef = useRef<maplibregl.Marker | null>(null);
-  const coneRef = useRef<HTMLDivElement | null>(null);
-  const headingRef = useRef<number | null | undefined>(heading);
+  const headingElRef = useRef<HTMLDivElement | null>(null);
+  const accuracyElRef = useRef<HTMLDivElement | null>(null);
 
-  const updateConeRotation = () => {
-    const cone = coneRef.current;
-    if (!cone) return;
-    if (headingRef.current === null || headingRef.current === undefined) {
-      cone.style.opacity = "0";
-      return;
-    }
-    // The marker's DOM element stays screen-up, so counter the map's own
-    // bearing to keep the cone pointing at the true compass heading.
-    const bearing = map.getBearing();
-    const rotation = headingRef.current - bearing;
-    cone.style.opacity = "1";
-    cone.style.transform = `translate(-50%, -100%) rotate(${rotation}deg)`;
+  const updateAccuracyCircle = (acc: number | null | undefined, lat: number) => {
+    if (!accuracyElRef.current || !map) return;
+    const effectiveAcc = typeof acc === "number" && acc > 0 ? acc : 15;
+    const zoom = map.getZoom();
+    const metersPerPixel = (156543.03392 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, zoom);
+    const radiusPx = Math.max(14, Math.min(280, effectiveAcc / metersPerPixel));
+    const diameterPx = radiusPx * 2;
+    accuracyElRef.current.style.width = `${diameterPx}px`;
+    accuracyElRef.current.style.height = `${diameterPx}px`;
   };
 
-  // Keep the cone pointing the right way as the compass heading updates.
-  useEffect(() => {
-    headingRef.current = heading;
-    updateConeRotation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [heading]);
+  const updateHeadingCone = (h: number | null | undefined, b: number) => {
+    if (!headingElRef.current) return;
+    if (typeof h === "number" && !isNaN(h)) {
+      headingElRef.current.style.display = "flex";
+      const visualAngle = (h - b + 360) % 360;
+      headingElRef.current.style.transform = `rotate(${visualAngle}deg)`;
+    } else {
+      headingElRef.current.style.display = "none";
+    }
+  };
 
   useEffect(() => {
     if (!markerRef.current) {
-      // Create outer container element
       const el = document.createElement("div");
       el.className = "relative flex items-center justify-center pointer-events-none";
 
-      // Ripple accuracy circle
-      const ripple = document.createElement("div");
-      ripple.className = "absolute w-16 h-16 bg-[#22B8CF]/20 rounded-full animate-ping";
+      // Heading directional beam (SVG fan originating at center)
+      const cone = document.createElement("div");
+      cone.className = "absolute -top-10 w-20 h-20 pointer-events-none transition-transform duration-150 ease-out flex items-center justify-center";
+      cone.style.transformOrigin = "50% 75%";
+      cone.style.display = "none";
+      cone.innerHTML = `
+        <svg viewBox="0 0 100 100" class="w-full h-full text-[#22B8CF]/50 fill-current filter drop-shadow-[0_2px_8px_rgba(34,184,207,0.4)]">
+          <path d="M50 75 L18 10 A 50 50 0 0 1 82 10 Z" />
+        </svg>
+      `;
+      headingElRef.current = cone;
 
-      // Glow background
-      const glow = document.createElement("div");
-      glow.className = "absolute w-8 h-8 bg-[#22B8CF]/30 rounded-full";
+      // Real-time Accuracy Halo Circle
+      const accuracyCircle = document.createElement("div");
+      accuracyCircle.className = "absolute bg-[#22B8CF]/15 dark:bg-[#22B8CF]/20 border border-[#22B8CF]/40 rounded-full transition-all duration-300 ease-out pointer-events-none";
+      accuracyElRef.current = accuracyCircle;
+
+      // Subtle pulse glow
+      const pulse = document.createElement("div");
+      pulse.className = "absolute w-7 h-7 bg-[#22B8CF]/30 rounded-full animate-pulse blur-[1px]";
 
       // Core blue location dot
       const dot = document.createElement("div");
-      dot.className = "relative w-4 h-4 bg-[#22B8CF] border-2 border-white rounded-full shadow-[0_0_10px_rgba(37,99,235,0.8)]";
+      dot.className = "relative w-4 h-4 bg-[#22B8CF] border-2 border-white dark:border-slate-900 rounded-full shadow-[0_0_10px_rgba(34,184,207,1)] z-10";
 
-      // Direction cone: shows which way the user is facing, using the
-      // device's compass/gyro sensor. Hidden (opacity 0) until we have a
-      // heading reading.
-      const cone = document.createElement("div");
-      cone.className = "absolute left-1/2 top-1/2 origin-bottom pointer-events-none transition-opacity duration-300";
-      cone.style.opacity = "0";
-      cone.style.willChange = "transform";
-      cone.innerHTML =
-        '<svg width="26" height="32" viewBox="0 0 26 32" style="filter: drop-shadow(0 0 3px rgba(34,184,207,0.7))">' +
-        '<path d="M13 0 L24 28 L13 21 L2 28 Z" fill="#22B8CF" fill-opacity="0.85" />' +
-        "</svg>";
-
+      el.appendChild(accuracyCircle);
       el.appendChild(cone);
-      el.appendChild(ripple);
-      el.appendChild(glow);
+      el.appendChild(pulse);
       el.appendChild(dot);
 
-      coneRef.current = cone;
-
-      // Initialize and add Marker
-      const marker = new maplibregl.Marker({ element: el })
+      const marker = new maplibregl.Marker({ element: el, anchor: "center" })
         .setLngLat([longitude, latitude])
         .addTo(map);
 
       markerRef.current = marker;
-
-      // Re-orient the cone whenever the map is rotated, since the marker
-      // element itself stays screen-up rather than rotating with the map.
-      map.on("rotate", updateConeRotation);
-
-      updateConeRotation();
     } else {
-      // Just update position smoothly
       markerRef.current.setLngLat([longitude, latitude]);
     }
 
+    updateAccuracyCircle(accuracy, latitude);
+    updateHeadingCone(heading, bearing);
+
+    const handleMapZoomOrRotate = () => {
+      updateAccuracyCircle(accuracy, latitude);
+      updateHeadingCone(heading, map.getBearing());
+    };
+
+    map.on("zoom", handleMapZoomOrRotate);
+    map.on("rotate", handleMapZoomOrRotate);
+
     return () => {
-      // Cleanup on unmount
-      map.off("rotate", updateConeRotation);
+      map.off("zoom", handleMapZoomOrRotate);
+      map.off("rotate", handleMapZoomOrRotate);
       if (markerRef.current) {
         markerRef.current.remove();
         markerRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, latitude, longitude]);
+  }, [map, latitude, longitude, accuracy, heading, bearing]);
 
   return null;
 }

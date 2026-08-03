@@ -6,66 +6,66 @@
 
 @theme {
   --color-on-secondary-fixed-variant: #38485d;
-  --color-inverse-surface: #e1e2ed;
+  --color-inverse-surface: #f1f5f9;
   --color-on-secondary-fixed: #0b1c30;
-  --color-surface-container-highest: #32343d;
-  --color-secondary-container: #E3E6FD;
-  --color-secondary: #5B6EF5;
-  --color-on-primary-fixed: #16233F;
+  --color-surface-container-highest: #263147;
+  --color-secondary-container: #312e81;
+  --color-secondary: #6366f1;
+  --color-on-primary-fixed: #0f172a;
   --color-on-tertiary-fixed: #360f00;
-  --color-surface: #16233F;
-  --color-outline: #8d90a0;
-  --color-on-primary-container: #16233F;
-  --color-primary-container: #D7F3F6;
-  --color-surface-dim: #16233F;
-  --color-inverse-on-surface: #2e3039;
-  --color-surface-container-lowest: #0c0e16;
-  --color-on-tertiary-container: #1E2530;
-  --color-on-error-container: #1E2530;
-  --color-inverse-primary: #22B8CF;
-  --color-on-surface: #e1e2ed;
-  --color-background: #16233F;
-  --color-on-secondary-container: #1E2530;
-  --color-outline-variant: #434655;
-  --color-tertiary-fixed: #ECE8FB;
-  --color-surface-container-high: #282a32;
+  --color-surface: #0b0f19;
+  --color-outline: #475569;
+  --color-on-primary-container: #0f172a;
+  --color-primary-container: #155e75;
+  --color-surface-dim: #0b0f19;
+  --color-inverse-on-surface: #0f172a;
+  --color-surface-container-lowest: #060911;
+  --color-on-tertiary-container: #0f172a;
+  --color-on-error-container: #0f172a;
+  --color-inverse-primary: #06b6d4;
+  --color-on-surface: #f8fafc;
+  --color-background: #0b0f19;
+  --color-on-secondary-container: #0f172a;
+  --color-outline-variant: #1e293b;
+  --color-tertiary-fixed: #ece8fb;
+  --color-surface-container-high: #1e263b;
   --color-on-tertiary-fixed-variant: #7d2d00;
-  --color-primary-fixed-dim: #22B8CF;
+  --color-primary-fixed-dim: #06b6d4;
   --color-on-secondary: #ffffff;
-  --color-tertiary-fixed-dim: #9B8AFB;
-  --color-surface-variant: #32343d;
-  --color-primary: #22B8CF;
-  --color-surface-container: #1d1f27;
+  --color-tertiary-fixed-dim: #a855f7;
+  --color-surface-variant: #1e263b;
+  --color-primary: #22d3ee;
+  --color-surface-container: #161d2f;
   --color-on-error: #ffffff;
-  --color-tertiary-container: #ECE8FB;
-  --color-surface-bright: #373942;
-  --color-secondary-fixed-dim: #5B6EF5;
-  --color-error: #E8574F;
-  --color-tertiary: #9B8AFB;
-  --color-on-primary-fixed-variant: #16233F;
-  --color-on-background: #e1e2ed;
-  --color-error-container: #FBE1DF;
-  --color-secondary-fixed: #E3E6FD;
-  --color-on-surface-variant: #c3c6d7;
-  --color-surface-container-low: #191b23;
-  --color-primary-fixed: #D7F3F6;
-  --color-on-primary: #ffffff;
-  --color-surface-tint: #22B8CF;
+  --color-tertiary-container: #581c87;
+  --color-surface-bright: #2d3a54;
+  --color-secondary-fixed-dim: #6366f1;
+  --color-error: #f87171;
+  --color-tertiary: #c084fc;
+  --color-on-primary-fixed-variant: #0f172a;
+  --color-on-background: #f8fafc;
+  --color-error-container: #7f1d1d;
+  --color-secondary-fixed: #e3e6fd;
+  --color-on-surface-variant: #94a3b8;
+  --color-surface-container-low: #111625;
+  --color-primary-fixed: #cffafe;
+  --color-on-primary: #0f172a;
+  --color-surface-tint: #22d3ee;
   --color-on-tertiary: #ffffff;
 
-  /* Category accent colors (from the new brand palette) */
-  --color-accent-hostel: #F5A356;
-  --color-accent-hostel-tint: #FBEADC;
-  --color-accent-tech: #5B6EF5;
-  --color-accent-tech-tint: #E3E6FD;
-  --color-accent-admin: #9B8AFB;
-  --color-accent-admin-tint: #ECE8FB;
-  --color-accent-policy: #E8574F;
-  --color-accent-policy-tint: #FBE1DF;
-  --color-accent-food: #4CAF7D;
-  --color-accent-food-tint: #E1F5EA;
-  --color-accent-community: #F06BA8;
-  --color-accent-community-tint: #FCE4EF;
+  /* Category accent colors (Vibrant dark mode high-contrast brand palette) */
+  --color-accent-hostel: #fbbf24;
+  --color-accent-hostel-tint: #451a03;
+  --color-accent-tech: #38bdf8;
+  --color-accent-tech-tint: #0c4a6e;
+  --color-accent-admin: #c084fc;
+  --color-accent-admin-tint: #581c87;
+  --color-accent-policy: #f87171;
+  --color-accent-policy-tint: #7f1d1d;
+  --color-accent-food: #34d399;
+  --color-accent-food-tint: #064e3b;
+  --color-accent-community: #f472b6;
+  --color-accent-community-tint: #831843;
 
   --spacing-stack_gap_sm: 0.5rem;
   --spacing-stack_gap_lg: 2rem;
@@ -139,12 +139,12 @@ body {
 }
 
 html.dark .page-blobs {
-  background-color: #16233F;
+  background-color: #0b0f19;
   background-image:
-    radial-gradient(circle at 8% 12%, rgba(34, 184, 207, 0.10) 0%, rgba(34, 184, 207, 0) 38%),
-    radial-gradient(circle at 92% 8%, rgba(253, 243, 217, 0.06) 0%, rgba(253, 243, 217, 0) 35%),
-    radial-gradient(circle at 85% 88%, rgba(155, 138, 251, 0.10) 0%, rgba(155, 138, 251, 0) 40%),
-    radial-gradient(circle at 12% 90%, rgba(34, 184, 207, 0.06) 0%, rgba(34, 184, 207, 0) 32%);
+    radial-gradient(circle at 8% 12%, rgba(34, 211, 238, 0.12) 0%, transparent 38%),
+    radial-gradient(circle at 92% 8%, rgba(99, 102, 241, 0.10) 0%, transparent 35%),
+    radial-gradient(circle at 85% 88%, rgba(192, 132, 252, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 12% 90%, rgba(34, 211, 238, 0.08) 0%, transparent 32%);
   background-attachment: fixed;
 }
 
@@ -240,26 +240,29 @@ html.dark {
 }
 
 html.dark body {
-  background-color: #16233F;
+  background-color: #0b0f19;
   color: var(--color-on-surface);
 }
 
 html.dark .map-bg {
-  background-color: #16233F; /* Deep Navy base for map */
+  background-color: #0b0f19;
   background-image: 
-    radial-gradient(circle at 50% 50%, rgba(34, 184, 207, 0.08) 0%, transparent 50%),
-    linear-gradient(rgba(94, 115, 148, 0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(94, 115, 148, 0.3) 1px, transparent 1px);
+    radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.09) 0%, transparent 55%),
+    linear-gradient(rgba(30, 41, 59, 0.6) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 41, 59, 0.6) 1px, transparent 1px);
   background-size: 100% 100%, 40px 40px, 40px 40px;
 }
 
 html.dark .ghost-border {
-  border: 1px solid rgba(30, 41, 59, 1); /* Slate 800 */
+  border: 1px solid rgba(30, 41, 59, 0.8);
 }
 
 html.dark .glass-panel {
-  background-color: rgba(15, 23, 42, 0.85); /* Slate 900 */
-  backdrop-filter: blur(16px);
+  background-color: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
 }
 
 html.dark .sidebar-scroll::-webkit-scrollbar-thumb {
@@ -278,16 +281,16 @@ html.dark .page-scroll:hover::-webkit-scrollbar-thumb {
 
 /* MapLibre custom popup dark style override */
 html.dark .campus-custom-popup .maplibregl-popup-anchor-top .maplibregl-popup-tip {
-  border-bottom-color: rgba(15, 23, 42, 0.9) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.95) !important;
 }
 html.dark .campus-custom-popup .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
-  border-top-color: rgba(15, 23, 42, 0.9) !important;
+  border-top-color: rgba(15, 23, 42, 0.95) !important;
 }
 html.dark .campus-custom-popup .maplibregl-popup-anchor-left .maplibregl-popup-tip {
-  border-right-color: rgba(15, 23, 42, 0.9) !important;
+  border-right-color: rgba(15, 23, 42, 0.95) !important;
 }
 html.dark .campus-custom-popup .maplibregl-popup-anchor-right .maplibregl-popup-tip {
-  border-left-color: rgba(15, 23, 42, 0.9) !important;
+  border-left-color: rgba(15, 23, 42, 0.95) !important;
 }
 html.dark .campus-custom-popup .maplibregl-popup-close-button {
   color: #a9bad3 !important;
@@ -376,14 +379,16 @@ html.dark .campus-custom-popup .maplibregl-popup-close-button:hover {
 
 html.dark .liquid-glass,
 .dark .liquid-glass {
+  backdrop-filter: blur(28px) saturate(200%) contrast(1.15);
+  -webkit-backdrop-filter: blur(28px) saturate(200%) contrast(1.15);
   background: 
-    linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.02) 100%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
-  border: 1px solid rgba(255,255,255,0.15);
+    linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(11, 15, 25, 0.94) 100%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 
-    inset 0 1px 1px rgba(255,255,255,0.15),
-    inset 0 -1px 1px rgba(0,0,0,0.5), 
-    0 8px 32px rgba(0, 0, 0, 0.4);
+    inset 0 1px 1px rgba(255, 255, 255, 0.18),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.6), 
+    0 12px 36px rgba(0, 0, 0, 0.6);
 }
 
 /* Custom MapLibre Attribution Footer - Full width glass morphic */
