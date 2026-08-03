@@ -2,12 +2,64 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Building } from "../../data/buildings";
+import { photo360Locations, type Photo360Location } from "../../data/photo360Locations";
 import MapControls from "./MapControls";
 import UserLocation from "./UserLocation";
 import FeedbackButton from "./FeedbackButton";
 import BuildingPopup from "./BuildingPopup";
+import Photo360Popup from "./360PhotoPopUp";
 import ReportIssueForm from "./ReportIssueForm";
 import WeatherWidget from "./WeatherWidget";
+
+const PHOTO_360_NAME = "Campus 360 Spot";
+const PHOTO_360_AUTO_ROTATE = -4;
+const PHOTO_360_MARKER_SIZE_PX = 22;
+
+let pannellumLoaderPromise: Promise<void> | null = null;
+
+const loadPannellum = () => {
+  if (typeof window === "undefined") return Promise.resolve();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((window as any).pannellum) return Promise.resolve();
+
+  if (!pannellumLoaderPromise) {
+    pannellumLoaderPromise = new Promise((resolve, reject) => {
+      if (!document.querySelector('link[data-pannellum="true"]')) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css";
+        link.setAttribute("data-pannellum", "true");
+        document.head.appendChild(link);
+      }
+
+      const existingScript = document.querySelector('script[data-pannellum="true"]') as HTMLScriptElement | null;
+      const finish = () => resolve();
+
+      if (existingScript) {
+        if (existingScript.getAttribute("data-loaded") === "true") {
+          finish();
+          return;
+        }
+        existingScript.addEventListener("load", finish, { once: true });
+        existingScript.addEventListener("error", () => reject(new Error("Failed to load Pannellum")), { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js";
+      script.async = true;
+      script.setAttribute("data-pannellum", "true");
+      script.addEventListener("load", () => {
+        script.setAttribute("data-loaded", "true");
+        finish();
+      }, { once: true });
+      script.addEventListener("error", () => reject(new Error("Failed to load Pannellum")), { once: true });
+      document.head.appendChild(script);
+    });
+  }
+
+  return pannellumLoaderPromise;
+};
 
 // Cache state variables outside the component to survive React unmounts (tab switches)
 let cachedMapState: { center: [number, number]; zoom: number; pitch: number; bearing: number } | null = null;
@@ -24,6 +76,9 @@ interface MapViewProps {
   showTabsInHeader: boolean;
 }
 
+const isWithinBangalore = (lat: number, lng: number) => {
+  return lng >= 77.40 && lng <= 77.75 && lat >= 12.80 && lat <= 13.25;
+};
 
 export default function MapView({
   buildings,
@@ -39,15 +94,11 @@ export default function MapView({
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
-  const [userAccuracy, setUserAccuracy] = useState<number | null>(null);
   const [heading, setHeading] = useState<number | null>(null);
   const headingListenerRef = useRef<((e: DeviceOrientationEvent) => void) | null>(null);
   const hasOrientationRef = useRef(false);
   const prevPositionRef = useRef<{ lat: number; lng: number } | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [isAutoFollow, setIsAutoFollow] = useState(true);
-  const [routeSteps, setRouteSteps] = useState<Array<{ instruction: string; distanceM: number; icon: string }>>([]);
-  const [showAllSteps, setShowAllSteps] = useState(false);
   const [is3D, setIs3D] = useState(() => {
     const saved = localStorage.getItem("campusCompass_is3D");
     return saved !== null ? JSON.parse(saved) : true;
@@ -80,18 +131,19 @@ export default function MapView({
   }, [isSatellite, map]);
   const fetchRoadsRef = useRef<(() => Promise<void>) | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distanceM: number; durationS: number } | null>(null);
-  const [navigatingBuilding, setNavigatingBuilding] = useState<Building | null>(null);
-  const navigatingBuildingRef = useRef<Building | null>(null);
-  const lastRouteCalcRef = useRef<{ lat: number; lng: number; bId: string } | null>(null);
+  const navigatingBuildingRef = useRef<typeof selectedBuilding>(null);
   const [showReportIssue, setShowReportIssue] = useState(false);
   const [isWeatherVisible, setIsWeatherVisible] = useState(true);
+  const [isPhoto360Open, setIsPhoto360Open] = useState(false);
+  const [isPhoto360ViewerOpen, setIsPhoto360ViewerOpen] = useState(false);
+  const [selectedPhoto360Location, setSelectedPhoto360Location] = useState<Photo360Location | null>(null);
+  const photo360MarkersRef = useRef<maplibregl.Marker[]>([]);
+  const photo360DialogRef = useRef<HTMLDialogElement | null>(null);
+  const photo360ViewerContainerRef = useRef<HTMLDivElement | null>(null);
+  const photo360ViewerRef = useRef<{ resize?: () => void; startAutoRotate?: (speed?: number) => void; stopAutoRotate?: () => void; destroy?: () => void } | null>(null);
   
   const watchIdRef = useRef<number | null>(null);
   const weatherTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    navigatingBuildingRef.current = navigatingBuilding;
-  }, [navigatingBuilding]);
   
   // Clean up location watch on unmount
   useEffect(() => {
@@ -116,21 +168,15 @@ export default function MapView({
     const handleOrientation = (event: DeviceOrientationEvent) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const anyEvent = event as any;
-      let rawHeading: number | null = null;
+      let newHeading: number | null = null;
       if (typeof anyEvent.webkitCompassHeading === "number") {
-        rawHeading = anyEvent.webkitCompassHeading;
-      } else if (event.alpha !== null) {
-        rawHeading = (360 - event.alpha) % 360;
+        newHeading = anyEvent.webkitCompassHeading;
+      } else if (event.absolute && event.alpha !== null) {
+        newHeading = (360 - event.alpha) % 360;
       }
-      if (rawHeading !== null) {
-        // Compensate for screen orientation angle (0 portrait, 90/270 landscape)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const screenAngle = typeof window.orientation !== "undefined"
-          ? Number(window.orientation)
-          : (screen.orientation?.angle || 0);
-        const correctedHeading = (rawHeading + screenAngle + 360) % 360;
+      if (newHeading !== null) {
         hasOrientationRef.current = true;
-        setHeading(correctedHeading);
+        setHeading(newHeading);
       }
     };
 
@@ -181,7 +227,7 @@ export default function MapView({
     }
 
     const gpsHeading = position.coords.heading;
-    if (typeof gpsHeading === "number" && !Number.isNaN(gpsHeading) && gpsHeading >= 0) {
+    if (typeof gpsHeading === "number" && !Number.isNaN(gpsHeading)) {
       setHeading(gpsHeading);
       prevPositionRef.current = { lat, lng };
       return;
@@ -190,13 +236,8 @@ export default function MapView({
     const prev = prevPositionRef.current;
     if (prev) {
       const moved = distanceMeters(prev.lat, prev.lng, lat, lng);
-      if (moved > 1.2) {
-        const calcHeading = bearingBetween(prev.lat, prev.lng, lat, lng);
-        setHeading((prevHeading) => {
-          if (prevHeading === null) return calcHeading;
-          const diff = (calcHeading - prevHeading + 540) % 360 - 180;
-          return (prevHeading + diff * 0.45 + 360) % 360;
-        });
+      if (moved > 3) {
+        setHeading(bearingBetween(prev.lat, prev.lng, lat, lng));
         prevPositionRef.current = { lat, lng };
       }
     } else {
@@ -343,9 +384,8 @@ export default function MapView({
       pitch: cachedMapState ? cachedMapState.pitch : (is3D ? 55 : 0),
       bearing: cachedMapState ? cachedMapState.bearing : (is3D ? -17 : 0),
       dragRotate: true,
-      antialias: true,
       attributionControl: false,
-    } as any);
+    });
 
     mapInstance.on("style.load", () => {
       try {
@@ -647,25 +687,14 @@ export default function MapView({
             data: { type: "FeatureCollection", features: [] }
           });
           mapInstance.addLayer({
-            id: "direction-line-casing",
-            type: "line",
-            source: "direction-line",
-            layout: { "line-join": "round", "line-cap": "round" },
-            paint: {
-              "line-color": isDarkMode ? "#0284c7" : "#0284c7",
-              "line-width": 8,
-              "line-opacity": 0.45
-            }
-          });
-          mapInstance.addLayer({
             id: "direction-line-layer",
             type: "line",
             source: "direction-line",
             layout: { "line-join": "round", "line-cap": "round" },
             paint: {
-              "line-color": "#22b8cf",
-              "line-width": 4.5,
-              "line-opacity": 0.95
+              "line-color": "#3b82f6",
+              "line-width": 4,
+              "line-dasharray": [0.2, 1.5]
             }
           });
         }
@@ -675,13 +704,18 @@ export default function MapView({
           if (e.features && e.features[0]) {
             const id = e.features[0].properties.id;
             const b = buildingsRef.current.find(x => x.id === id);
-            if (b) onSelectRef.current(b);
+            if (b) {
+              setIsPhoto360Open(false);
+              onSelectRef.current(b);
+            }
           }
         });
 
         mapInstance.on("click", (e) => {
           const features = mapInstance.queryRenderedFeatures(e.point, { layers: ["campus-buildings-fill"] });
           if (features.length === 0) {
+            setIsPhoto360Open(false);
+            setSelectedPhoto360Location(null);
             onSelectRef.current(null);
           }
         });
@@ -718,6 +752,51 @@ export default function MapView({
       }
     };
 
+    const clearPhoto360Markers = () => {
+      photo360MarkersRef.current.forEach((marker) => marker.remove());
+      photo360MarkersRef.current = [];
+    };
+
+    const addPhoto360Marker = () => {
+      if (photo360MarkersRef.current.length > 0) return;
+
+      clearPhoto360Markers();
+
+      photo360MarkersRef.current = photo360Locations.map((location) => {
+        const markerEl = document.createElement("button");
+        markerEl.type = "button";
+        markerEl.className = "group flex items-center justify-center rounded-full cursor-pointer transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-[#22B8CF]/60";
+        markerEl.style.width = `${PHOTO_360_MARKER_SIZE_PX}px`;
+        markerEl.style.height = `${PHOTO_360_MARKER_SIZE_PX}px`;
+        markerEl.style.padding = "0";
+        markerEl.setAttribute("aria-label", `Open 360 view for ${location.name}`);
+        markerEl.innerHTML = `
+          <img
+            src="/360image.svg"
+            alt=""
+            aria-hidden="true"
+            class="block pointer-events-none select-none"
+            style="width: ${PHOTO_360_MARKER_SIZE_PX}px; height: ${PHOTO_360_MARKER_SIZE_PX}px; min-width: ${PHOTO_360_MARKER_SIZE_PX}px; min-height: ${PHOTO_360_MARKER_SIZE_PX}px;"
+          />
+        `;
+
+        markerEl.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setSelectedPhoto360Location(location);
+          setIsPhoto360Open(true);
+          setIsPhoto360ViewerOpen(false);
+          onSelectRef.current(null);
+        });
+
+        const marker = new maplibregl.Marker({ element: markerEl, anchor: "center" })
+          .setLngLat([location.longitude, location.latitude])
+          .addTo(mapInstance);
+
+        return marker;
+      });
+    };
+
     const applyBuildingVisibility = () => {
       const visibility = isSatelliteRef.current ? "none" : "visible";
       ["campus-buildings-fill", "campus-buildings-line", "campus-buildings-label", "campus-buildings-highlight", "campus-boundary-wall"].forEach((layerId) => {
@@ -729,6 +808,7 @@ export default function MapView({
 
     mapInstance.on("load", () => {
       addBuildingLayers();
+      addPhoto360Marker();
       applyBuildingVisibility();
       if (!mapInstance.getSource("campus-roads")) {
         fetchRoads();
@@ -759,6 +839,7 @@ export default function MapView({
 
     mapInstance.on("style.load", () => {
       addBuildingLayers();
+      addPhoto360Marker();
       applyBuildingVisibility();
       fetchRoadsRef.current?.();
     });
@@ -838,6 +919,72 @@ export default function MapView({
   }, [selectedBuilding, map]);
 
   useEffect(() => {
+    if (selectedBuilding) {
+      setIsPhoto360Open(false);
+      setIsPhoto360ViewerOpen(false);
+      setSelectedPhoto360Location(null);
+    }
+  }, [selectedBuilding]);
+
+  useEffect(() => {
+    const dialog = photo360DialogRef.current;
+    if (!dialog) return;
+
+    let cancelled = false;
+
+    const cleanupViewer = () => {
+      if (photo360ViewerRef.current) {
+        photo360ViewerRef.current.stopAutoRotate?.();
+        photo360ViewerRef.current.destroy?.();
+        photo360ViewerRef.current = null;
+      }
+    };
+
+    if (!isPhoto360ViewerOpen) {
+      cleanupViewer();
+      if (dialog.open) dialog.close();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (!dialog.open) dialog.showModal();
+
+    void loadPannellum()
+      .then(() => {
+        if (cancelled || !photo360ViewerContainerRef.current || !dialog.open || !selectedPhoto360Location) return;
+
+        // Reuse an existing instance if one is already mounted; otherwise create on demand.
+        if (photo360ViewerRef.current) {
+          photo360ViewerRef.current.resize?.();
+          photo360ViewerRef.current.startAutoRotate?.(PHOTO_360_AUTO_ROTATE);
+          return;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pannellum = (window as any).pannellum;
+        photo360ViewerRef.current = pannellum.viewer(photo360ViewerContainerRef.current, {
+          type: "equirectangular",
+          panorama: `/images/360-images/${selectedPhoto360Location.imageFile}`,
+          autoLoad: true,
+          showControls: true,
+          autoRotate: PHOTO_360_AUTO_ROTATE,
+          draggable: true,
+          mouseZoom: true,
+          doubleClickZoom: true,
+          compass: false,
+        });
+      })
+      .catch((error) => {
+        console.error("[360-view] Failed to initialize Pannellum:", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isPhoto360ViewerOpen, selectedPhoto360Location]);
+
+  useEffect(() => {
     if (!map) return;
     const source = map.getSource("campus-buildings") as maplibregl.GeoJSONSource;
     if (source) {
@@ -905,25 +1052,61 @@ export default function MapView({
       map.flyTo({
         center: [userLoc.lng, userLoc.lat],
         zoom: 17,
-        duration: 1200,
+        duration: 1500,
       });
-      setToastMessage("Centered on your location");
-      setTimeout(() => setToastMessage(null), 2500);
+      return;
     }
 
     setToastMessage("Acquiring GPS signal...");
 
-    startWatchingLocation((lat, lng) => {
-      setToastMessage("Located your position");
-      setTimeout(() => setToastMessage(null), 2500);
-      if (map) {
-        map.flyTo({
-          center: [lng, lat],
-          zoom: 17,
-          duration: 1500,
-        });
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+    }
+
+    let firstLock = true;
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        if (!isWithinBangalore(lat, lng)) {
+          setToastMessage("You must be in Bangalore to use this feature.");
+          setTimeout(() => setToastMessage(null), 4000);
+          if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+          }
+          return;
+        }
+
+        setUserLoc({ lat, lng });
+        updateHeadingFromPosition(position, lat, lng);
+        
+        if (firstLock && map) {
+          setToastMessage(null);
+          map.flyTo({
+            center: [lng, lat],
+            zoom: 17,
+            duration: 1500,
+          });
+          firstLock = false;
+        }
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setToastMessage("Location access denied. Please enable it in browser settings.");
+        } else {
+          setToastMessage("Unable to retrieve your location.");
+        }
+        setTimeout(() => setToastMessage(null), 4000);
+      },
+      { 
+        enableHighAccuracy: true, 
+        timeout: 10000, 
+        maximumAge: 10000
       }
-    });
+    );
   };
 
   const handleShowToast = (featureName: string, version: string = "2") => {
@@ -931,98 +1114,54 @@ export default function MapView({
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const drawDirectionLine = async (lat: number, lng: number, building: Building, follow: boolean = false) => {
+  const drawDirectionLine = async (lat: number, lng: number, building: typeof selectedBuilding, follow: boolean = false) => {
     if (!map || !building) return;
-
-    // Direct distance calculation
-    const distM = distanceMeters(lat, lng, building.latitude, building.longitude);
-    const durS = Math.round(distM / 1.2); // ~1.2 m/s walking speed
-    setRouteInfo({ distanceM: distM, durationS: durS });
+    const source = map.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
 
     let routeCoords: [number, number][] = [
       [lng, lat],
       [building.longitude, building.latitude]
     ];
 
-    const last = lastRouteCalcRef.current;
-    const shouldFetchOSRM = !last || last.bId !== building.id || distanceMeters(last.lat, last.lng, lat, lng) > 15;
+    try {
+      if (!follow) setToastMessage("Finding route...");
+      const url = `https://router.project-osrm.org/route/v1/foot/${lng},${lat};${building.longitude},${building.latitude}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const route = data?.routes?.[0];
+        const coords = route?.geometry?.coordinates;
+        if (Array.isArray(coords) && coords.length > 1) {
+          routeCoords = coords;
+        }
+        if (route) {
+          setRouteInfo({ distanceM: route.distance, durationS: route.duration });
+        }
+      }
+    } catch (err) {
+      console.error("[directions] OSRM fetch failed, using straight line:", err);
+    } finally {
+      if (!follow) setToastMessage(null);
+    }
 
-    if (shouldFetchOSRM) {
-      try {
-        lastRouteCalcRef.current = { lat, lng, bId: building.id };
-        const url = `https://router.project-osrm.org/route/v1/foot/${lng},${lat};${building.longitude},${building.latitude}?overview=full&geometries=geojson&steps=true`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          const route = data?.routes?.[0];
-          const coords = route?.geometry?.coordinates;
-          if (Array.isArray(coords) && coords.length > 1) {
-            routeCoords = coords;
-          }
-          if (route) {
-            setRouteInfo({ distanceM: route.distance, durationS: route.duration });
-          }
-
-          // Parse Turn-by-Turn Steps
-          const rawSteps = route?.legs?.[0]?.steps;
-          if (Array.isArray(rawSteps) && rawSteps.length > 0) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const steps = rawSteps.map((s: any) => {
-              const type = s.maneuver?.type || "";
-              const modifier = s.maneuver?.modifier || "";
-              const name = s.name ? ` onto ${s.name}` : "";
-              let icon = "navigation";
-              let text = `Walk towards ${building.name}`;
-
-              if (type === "arrive") {
-                icon = "location_on";
-                text = `Arrive at ${building.name}`;
-              } else if (type === "depart") {
-                icon = "navigation";
-                text = `Head towards ${building.name}`;
-              } else if (modifier.includes("left")) {
-                icon = modifier.includes("slight") ? "turn_slight_left" : "turn_left";
-                text = `Turn ${modifier}${name}`;
-              } else if (modifier.includes("right")) {
-                icon = modifier.includes("slight") ? "turn_slight_right" : "turn_right";
-                text = `Turn ${modifier}${name}`;
-              } else if (modifier.includes("straight")) {
-                icon = "straight";
-                text = `Continue straight${name}`;
-              }
-              return { instruction: text, distanceM: Math.round(s.distance || 0), icon };
-            });
-            setRouteSteps(steps);
-          } else {
-            setRouteSteps([
-              { instruction: `Walk directly to ${building.name}`, distanceM: Math.round(distM), icon: "directions_walk" },
-              { instruction: `Arrive at ${building.name}`, distanceM: 0, icon: "location_on" }
-            ]);
+    source.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates: routeCoords
           }
         }
-      } catch (err) {
-        console.warn("[directions] OSRM fetch failed, using direct line:", err);
-      }
-    }
+      ]
+    });
 
-    const source = map.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
-    if (source) {
-      source.setData({
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            properties: {},
-            geometry: {
-              type: "LineString",
-              coordinates: routeCoords
-            }
-          }
-        ]
-      });
-    }
-
-    if (!follow) {
+    if (follow) {
+      map.easeTo({ center: [lng, lat], duration: 600 });
+    } else {
       const bounds = routeCoords.reduce(
         (acc, coord) => acc.extend(coord as [number, number]),
         new maplibregl.LngLatBounds(routeCoords[0], routeCoords[0])
@@ -1038,97 +1177,75 @@ export default function MapView({
     let firstFix = true;
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
-        const rawLat = position.coords.latitude;
-        const rawLng = position.coords.longitude;
-        const acc = position.coords.accuracy;
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        if (!isWithinBangalore(lat, lng)) {
+          setToastMessage("Navigation unavailable outside Bangalore.");
+          setTimeout(() => setToastMessage(null), 4000);
+          if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+          }
+          setIsNavigating(false);
+          return;
+        }
 
-        setUserAccuracy(acc);
-
-        setUserLoc((prevLoc) => {
-          if (!prevLoc) return { lat: rawLat, lng: rawLng };
-          const d = distanceMeters(prevLoc.lat, prevLoc.lng, rawLat, rawLng);
-          if (d < 0.3) return prevLoc; // Suppress stationary jitter
-          const alpha = d > 8 ? 0.85 : 0.45;
-          return {
-            lat: prevLoc.lat + alpha * (rawLat - prevLoc.lat),
-            lng: prevLoc.lng + alpha * (rawLng - prevLoc.lng)
-          };
-        });
-
-        updateHeadingFromPosition(position, rawLat, rawLng);
-
+        setUserLoc({ lat, lng });
+        updateHeadingFromPosition(position, lat, lng);
         if (firstFix) {
           firstFix = false;
-          onFirstFix?.(rawLat, rawLng);
+          onFirstFix?.(lat, lng);
         }
       },
       (error) => {
         if (error.code === error.PERMISSION_DENIED) {
-          setToastMessage("Location permission denied. Enable GPS in browser settings.");
+          setToastMessage("Location access denied. Please enable it in browser settings.");
         } else {
-          setToastMessage("Acquiring high-accuracy GPS fix...");
+          setToastMessage("Unable to retrieve your location.");
         }
         setTimeout(() => setToastMessage(null), 4000);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
     );
   };
 
   const handleShowDirections = () => {
     if (!selectedBuilding) return;
-    const target = selectedBuilding;
-    setNavigatingBuilding(target);
-    navigatingBuildingRef.current = target;
+    navigatingBuildingRef.current = selectedBuilding;
     setIsNavigating(true);
-    setIsAutoFollow(true);
     setupHeadingListener();
 
     if (userLoc) {
-      drawDirectionLine(userLoc.lat, userLoc.lng, target, false);
+      drawDirectionLine(userLoc.lat, userLoc.lng, selectedBuilding);
       startWatchingLocation();
       return;
     }
 
-    setToastMessage("Acquiring GPS for directions...");
+    setToastMessage("Getting your location...");
     startWatchingLocation((lat, lng) => {
       setToastMessage(null);
-      drawDirectionLine(lat, lng, target, false);
+      drawDirectionLine(lat, lng, selectedBuilding);
     });
   };
 
   const handleStopNavigation = () => {
     setIsNavigating(false);
-    setNavigatingBuilding(null);
     setRouteInfo(null);
-    setRouteSteps([]);
-    setShowAllSteps(false);
     navigatingBuildingRef.current = null;
-    lastRouteCalcRef.current = null;
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
     const source = map?.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
     source?.setData({ type: "FeatureCollection", features: [] });
   };
 
   useEffect(() => {
-    if (!map) return;
-    const onDragStart = () => {
-      if (isNavigating) {
-        setIsAutoFollow(false);
-      }
-    };
-    map.on("dragstart", onDragStart);
-    return () => {
-      map.off("dragstart", onDragStart);
-    };
-  }, [map, isNavigating]);
-
-  useEffect(() => {
     if (!isNavigating || !userLoc || !navigatingBuildingRef.current) return;
     drawDirectionLine(userLoc.lat, userLoc.lng, navigatingBuildingRef.current, true);
-    if (isAutoFollow && map) {
-      map.easeTo({ center: [userLoc.lng, userLoc.lat], duration: 500 });
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userLoc, isNavigating, isAutoFollow]);
+  }, [userLoc, isNavigating]);
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
@@ -1137,14 +1254,7 @@ export default function MapView({
       {map && (
         <>
           {userLoc && (
-            <UserLocation
-              map={map}
-              latitude={userLoc.lat}
-              longitude={userLoc.lng}
-              accuracy={userAccuracy}
-              heading={heading}
-              bearing={bearing}
-            />
+            <UserLocation map={map} latitude={userLoc.lat} longitude={userLoc.lng} heading={heading} />
           )}
 
           {selectedBuilding && (
@@ -1153,72 +1263,52 @@ export default function MapView({
               building={selectedBuilding}
             />
           )}
+
+          {isPhoto360Open && selectedPhoto360Location && (
+            <Photo360Popup
+              map={map}
+              name={selectedPhoto360Location.name}
+              latitude={selectedPhoto360Location.latitude}
+              longitude={selectedPhoto360Location.longitude}
+              imageFile={selectedPhoto360Location.imageFile}
+              onView={() => setIsPhoto360ViewerOpen(true)}
+            />
+          )}
         </>
       )}
 
-      {/* Floating Live Turn-by-Turn Navigation Banner */}
-      {isNavigating && (
-        <div className="fixed top-[76px] left-1/2 transform -translate-x-1/2 w-[calc(100%-32px)] max-w-[420px] bg-slate-900/90 dark:bg-surface-bright/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-2xl z-[130] flex flex-col gap-2 border border-white/10 animate-fade-in">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#22B8CF] text-slate-900 flex items-center justify-center flex-shrink-0 shadow-md">
-              <span className="material-symbols-outlined text-[24px]">
-                {routeSteps[0]?.icon || "navigation"}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-semibold text-sm truncate leading-tight">
-                {routeSteps[0]?.instruction || `Head towards ${navigatingBuilding?.name || "Destination"}`}
-              </div>
-              <div className="text-xs text-cyan-300 font-medium mt-0.5">
-                {routeInfo ? `${routeInfo.distanceM >= 1000 ? `${(routeInfo.distanceM / 1000).toFixed(1)} km` : `${Math.round(routeInfo.distanceM)} m`} • ${Math.max(1, Math.round(routeInfo.durationS / 60))} min walk` : "Calculating path..."}
-              </div>
-            </div>
-            {routeSteps.length > 0 && (
-              <button
-                onClick={() => setShowAllSteps(!showAllSteps)}
-                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-                title="View Turn Steps"
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {showAllSteps ? "expand_less" : "list"}
-                </span>
-              </button>
-            )}
-          </div>
-
-          {showAllSteps && routeSteps.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-white/10 max-h-48 overflow-y-auto space-y-2 pr-1">
-              {routeSteps.map((step, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 text-xs">
-                  <span className="material-symbols-outlined text-[16px] text-cyan-400 mt-0.5 flex-shrink-0">
-                    {step.icon}
-                  </span>
-                  <div className="flex-1 text-slate-200">
-                    <span>{step.instruction}</span>
-                    {step.distanceM > 0 && (
-                      <span className="text-slate-400 ml-1.5">({step.distanceM} m)</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+      <dialog
+        ref={photo360DialogRef}
+        className="fixed top-1/2 left-1/2 z-[140] w-[min(1100px,94vw)] max-h-[90vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 dark:border-outline-variant/30 bg-white dark:bg-surface-container-high shadow-2xl p-0 overflow-hidden backdrop:bg-black/65 backdrop:backdrop-blur-sm m-0"
+        aria-label="360 photo viewer"
+        onCancel={(event) => {
+          event.preventDefault();
+          setIsPhoto360ViewerOpen(false);
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            setIsPhoto360ViewerOpen(false);
+          }
+        }}
+      >
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-200 dark:border-outline-variant/30 bg-white/95 dark:bg-surface-container-high/95">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-on-surface">
+            {selectedPhoto360Location?.name || PHOTO_360_NAME}
+          </h3>
+          <button
+            onClick={() => setIsPhoto360ViewerOpen(false)}
+            className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-slate-700 hover:bg-slate-100 dark:text-on-surface dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant/30"
+            aria-label="Close 360 viewer"
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[20px]">close</span>
+          </button>
         </div>
-      )}
 
-      {/* Floating Recenter GPS Navigation Button */}
-      {isNavigating && !isAutoFollow && userLoc && (
-        <button
-          onClick={() => {
-            setIsAutoFollow(true);
-            map?.easeTo({ center: [userLoc.lng, userLoc.lat], zoom: 17, duration: 600 });
-          }}
-          className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-[#22B8CF] hover:bg-[#1A94A6] text-white px-4 py-2 rounded-full shadow-2xl z-[120] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer border border-white/20 animate-fade-in"
-        >
-          <span className="material-symbols-outlined text-[18px]">my_location</span>
-          Recenter GPS
-        </button>
-      )}
+        <div className="h-[min(76vh,720px)] bg-slate-100 dark:bg-slate-900/40">
+          <div ref={photo360ViewerContainerRef} id="panoViewer" className="w-full h-full" />
+        </div>
+      </dialog>
 
       <MapControls
         onZoomIn={handleZoomIn}
@@ -1313,7 +1403,7 @@ export default function MapView({
           <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-outline-variant/20">
             <button
               onClick={handleStopNavigation}
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-surface-container-high/60 transition-colors cursor-pointer"
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-surface-container-high/60 transition-colors"
               aria-label="Close directions"
             >
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -1328,8 +1418,8 @@ export default function MapView({
             </div>
             <div className="flex items-center gap-3 bg-slate-50 dark:bg-surface-container-high rounded-lg px-3 py-2.5">
               <span className="material-symbols-outlined text-[18px] text-[#EA4335] flex-shrink-0">location_on</span>
-              <span className="text-sm truncate font-medium">
-                {navigatingBuilding?.name || navigatingBuildingRef.current?.name || "Destination"}
+              <span className="text-sm truncate">
+                {navigatingBuildingRef.current?.name || "Destination"}
               </span>
             </div>
           </div>
@@ -1344,7 +1434,7 @@ export default function MapView({
               <button
                 key={mode.icon}
                 onClick={() => !mode.active && handleShowToast(`${mode.label} directions`)}
-                className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors cursor-pointer ${
+                className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors ${
                   mode.active
                     ? "bg-[#22B8CF]/15 text-[#22B8CF]"
                     : "text-slate-400 dark:text-on-surface-variant/50 hover:bg-slate-100 dark:hover:bg-surface-container-high/60"
@@ -1356,7 +1446,7 @@ export default function MapView({
             ))}
           </div>
 
-          <div className="px-4 py-3 space-y-2">
+          <div className="px-4 py-3">
             <div className="rounded-xl border-2 border-[#22B8CF] bg-[#22B8CF]/5 px-4 py-3 flex items-center gap-3">
               <span className="material-symbols-outlined text-[#22B8CF] text-[24px]">directions_walk</span>
               <div className="flex-1 min-w-0">
@@ -1365,53 +1455,19 @@ export default function MapView({
                 </div>
                 <div className="text-xs text-slate-500 dark:text-on-surface-variant">
                   {routeInfo
-                    ? `${routeInfo.distanceM >= 1000 ? `${(routeInfo.distanceM / 1000).toFixed(1)} km` : `${Math.round(routeInfo.distanceM)} m`} • Walking route`
+                    ? `${Math.round(routeInfo.distanceM)} m • Fastest route on foot`
                     : "Finding the best path"}
                 </div>
               </div>
             </div>
-
-            <button
-              onClick={() => {
-                if (userLoc && (navigatingBuilding || navigatingBuildingRef.current)) {
-                  drawDirectionLine(userLoc.lat, userLoc.lng, (navigatingBuilding || navigatingBuildingRef.current)!, false);
-                }
-              }}
-              className="w-full py-2 rounded-lg bg-slate-100 dark:bg-surface-container-high text-slate-700 dark:text-on-surface font-medium text-xs hover:bg-slate-200 dark:hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[16px]">center_focus_strong</span>
-              Recenter Route
-            </button>
           </div>
 
-          {/* Turn-by-Turn Steps List in Side Panel */}
-          {routeSteps.length > 0 && (
-            <div className="px-4 py-2 border-t border-slate-200 dark:border-outline-variant/20 flex-1 overflow-y-auto">
-              <div className="text-xs font-semibold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
-                Route Instructions
-              </div>
-              <div className="space-y-3">
-                {routeSteps.map((step, idx) => (
-                  <div key={idx} className="flex items-start gap-3 text-xs">
-                    <div className="w-6 h-6 rounded-full bg-[#22B8CF]/15 text-[#22B8CF] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="material-symbols-outlined text-[14px]">{step.icon}</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-800 dark:text-on-surface">{step.instruction}</div>
-                      {step.distanceM > 0 && (
-                        <div className="text-[11px] text-slate-500 dark:text-on-surface-variant">{step.distanceM} meters</div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="flex-1" />
 
-          <div className="px-4 py-3 border-t border-slate-200 dark:border-outline-variant/20 mt-auto">
+          <div className="px-4 py-3 border-t border-slate-200 dark:border-outline-variant/20">
             <button
               onClick={handleStopNavigation}
-              className="w-full py-2.5 rounded-full bg-[#E8574F]/10 text-[#E8574F] font-medium text-sm hover:bg-[#E8574F]/20 transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-full bg-[#E8574F]/10 text-[#E8574F] font-medium text-sm hover:bg-[#E8574F]/20 transition-colors"
             >
               Stop navigation
             </button>

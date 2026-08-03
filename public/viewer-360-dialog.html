@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campus 360 Viewer</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
+    />
+
+    <style>
+      :root {
+        --surface: #ffffff;
+        --surface-dark: #1e293b;
+        --text: #0f172a;
+        --text-dark: #f8fafc;
+        --muted: #64748b;
+        --accent: #22b8cf;
+        --accent-hover: #1a94a6;
+        --border: #e2e8f0;
+        --shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
+        --radius-xl: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 14% 18%, rgba(34, 184, 207, 0.12), transparent 36%),
+          radial-gradient(circle at 86% 82%, rgba(125, 211, 252, 0.12), transparent 36%),
+          #f8fafc;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .card {
+        width: min(680px, 100%);
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        padding: 28px;
+        backdrop-filter: blur(10px);
+      }
+
+      .title {
+        margin: 0 0 8px;
+        font-size: clamp(1.3rem, 1rem + 1vw, 2rem);
+        line-height: 1.1;
+      }
+
+      .desc {
+        margin: 0 0 20px;
+        color: var(--muted);
+      }
+
+      .open-btn {
+        border: 0;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: background-color 160ms ease;
+      }
+
+      .open-btn:hover {
+        background: var(--accent-hover);
+      }
+
+      dialog.viewer-dialog {
+        width: min(1100px, 94vw);
+        max-height: 90vh;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: var(--radius-xl);
+        padding: 0;
+        overflow: hidden;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      dialog.viewer-dialog::backdrop {
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(2px);
+      }
+
+      .dialog-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(248, 250, 252, 0.92);
+      }
+
+      .dialog-title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .close-btn {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        width: 34px;
+        height: 34px;
+        background: #fff;
+        color: var(--text);
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .viewer-wrap {
+        height: min(76vh, 720px);
+        background: #0f172a;
+      }
+
+      /* Target container for Pannellum WebGL canvas */
+      #panoViewer {
+        width: 100%;
+        height: 100%;
+      }
+
+      @media (max-width: 640px) {
+        .viewer-wrap {
+          height: min(68vh, 520px);
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          color: var(--text-dark);
+          background:
+            radial-gradient(circle at 14% 18%, rgba(34, 184, 207, 0.12), transparent 36%),
+            radial-gradient(circle at 86% 82%, rgba(125, 211, 252, 0.1), transparent 36%),
+            #0f172a;
+        }
+
+        .card {
+          background: rgba(15, 23, 42, 0.8);
+          border-color: rgba(148, 163, 184, 0.25);
+        }
+
+        .desc {
+          color: #cbd5e1;
+        }
+
+        dialog.viewer-dialog {
+          background: var(--surface-dark);
+          border-color: rgba(148, 163, 184, 0.3);
+        }
+
+        .dialog-head {
+          border-color: rgba(148, 163, 184, 0.25);
+          background: rgba(15, 23, 42, 0.94);
+        }
+
+        .close-btn {
+          background: rgba(15, 23, 42, 0.9);
+          border-color: rgba(148, 163, 184, 0.35);
+          color: #f8fafc;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1 class="title">Campus 360 Photo</h1>
+      <p class="desc">
+        Open an interactive equirectangular scene with drag-to-rotate and zoom gestures.
+      </p>
+      <button id="openViewerBtn" class="open-btn" type="button">Open 360 Viewer</button>
+    </main>
+
+    <dialog id="viewerDialog" class="viewer-dialog" aria-label="360 photo viewer">
+      <div class="dialog-head">
+        <h2 id="viewerTitle" class="dialog-title">Amphitheatre • 360°</h2>
+        <button id="closeViewerBtn" class="close-btn" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="viewer-wrap">
+        <div id="panoViewer"></div>
+      </div>
+    </dialog>
+
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <script>
+      const IMAGE_URL = "/images/360-images/PXL_20251123_180043692.PHOTOSPHERE.jpg";
+      const AUTO_ROTATE_SPEED = -4;
+      const DESTROY_ON_CLOSE = true;
+
+      const dialog = document.getElementById("viewerDialog");
+      const openBtn = document.getElementById("openViewerBtn");
+      const closeBtn = document.getElementById("closeViewerBtn");
+
+      let viewer = null;
+
+      // Lazy WebGL init: create Pannellum only when dialog opens.
+      function openViewerDialog() {
+        dialog.showModal();
+
+        if (!viewer) {
+          viewer = pannellum.viewer("panoViewer", {
+            type: "equirectangular",
+            panorama: IMAGE_URL,
+            autoLoad: true,
+            showControls: true,
+            autoRotate: AUTO_ROTATE_SPEED,
+            compass: false,
+            draggable: true,
+            mouseZoom: true,
+            touchPanSpeedCoeffFactor: 1,
+          });
+          return;
+        }
+
+        // Reopen path: fix canvas sizing/layout after modal was hidden.
+        viewer.resize();
+        viewer.startAutoRotate(AUTO_ROTATE_SPEED);
+      }
+
+      function closeViewerDialog() {
+        if (viewer) {
+          viewer.stopAutoRotate();
+
+          // Cleanup path: fully release WebGL/GPU resources when requested.
+          if (DESTROY_ON_CLOSE) {
+            viewer.destroy();
+            viewer = null;
+          }
+        }
+
+        dialog.close();
+      }
+
+      openBtn.addEventListener("click", openViewerDialog);
+      closeBtn.addEventListener("click", closeViewerDialog);
+
+      dialog.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeViewerDialog();
+      });
+
+      dialog.addEventListener("click", (event) => {
+        const rect = dialog.getBoundingClientRect();
+        const outside =
+          event.clientX < rect.left ||
+          event.clientX > rect.right ||
+          event.clientY < rect.top ||
+          event.clientY > rect.bottom;
+
+        if (outside) {
+          closeViewerDialog();
+        }
+      });
+    </script>
+  </body>
+</html>
