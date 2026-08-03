@@ -2,12 +2,64 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Building } from "../../data/buildings";
+import { photo360Locations, type Photo360Location } from "../../data/photo360Locations";
 import MapControls from "./MapControls";
 import UserLocation from "./UserLocation";
 import FeedbackButton from "./FeedbackButton";
 import BuildingPopup from "./BuildingPopup";
+import Photo360Popup from "./360PhotoPopUp";
 import ReportIssueForm from "./ReportIssueForm";
 import WeatherWidget from "./WeatherWidget";
+
+const PHOTO_360_NAME = "Campus 360 Spot";
+const PHOTO_360_AUTO_ROTATE = -4;
+const PHOTO_360_MARKER_SIZE_PX = 22;
+
+let pannellumLoaderPromise: Promise<void> | null = null;
+
+const loadPannellum = () => {
+  if (typeof window === "undefined") return Promise.resolve();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((window as any).pannellum) return Promise.resolve();
+
+  if (!pannellumLoaderPromise) {
+    pannellumLoaderPromise = new Promise((resolve, reject) => {
+      if (!document.querySelector('link[data-pannellum="true"]')) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css";
+        link.setAttribute("data-pannellum", "true");
+        document.head.appendChild(link);
+      }
+
+      const existingScript = document.querySelector('script[data-pannellum="true"]') as HTMLScriptElement | null;
+      const finish = () => resolve();
+
+      if (existingScript) {
+        if (existingScript.getAttribute("data-loaded") === "true") {
+          finish();
+          return;
+        }
+        existingScript.addEventListener("load", finish, { once: true });
+        existingScript.addEventListener("error", () => reject(new Error("Failed to load Pannellum")), { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js";
+      script.async = true;
+      script.setAttribute("data-pannellum", "true");
+      script.addEventListener("load", () => {
+        script.setAttribute("data-loaded", "true");
+        finish();
+      }, { once: true });
+      script.addEventListener("error", () => reject(new Error("Failed to load Pannellum")), { once: true });
+      document.head.appendChild(script);
+    });
+  }
+
+  return pannellumLoaderPromise;
+};
 
 // Cache state variables outside the component to survive React unmounts (tab switches)
 let cachedMapState: { center: [number, number]; zoom: number; pitch: number; bearing: number } | null = null;
@@ -82,6 +134,13 @@ export default function MapView({
   const navigatingBuildingRef = useRef<typeof selectedBuilding>(null);
   const [showReportIssue, setShowReportIssue] = useState(false);
   const [isWeatherVisible, setIsWeatherVisible] = useState(true);
+  const [isPhoto360Open, setIsPhoto360Open] = useState(false);
+  const [isPhoto360ViewerOpen, setIsPhoto360ViewerOpen] = useState(false);
+  const [selectedPhoto360Location, setSelectedPhoto360Location] = useState<Photo360Location | null>(null);
+  const photo360MarkersRef = useRef<maplibregl.Marker[]>([]);
+  const photo360DialogRef = useRef<HTMLDialogElement | null>(null);
+  const photo360ViewerContainerRef = useRef<HTMLDivElement | null>(null);
+  const photo360ViewerRef = useRef<{ resize?: () => void; startAutoRotate?: (speed?: number) => void; stopAutoRotate?: () => void; destroy?: () => void } | null>(null);
   
   const watchIdRef = useRef<number | null>(null);
   const weatherTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -325,7 +384,6 @@ export default function MapView({
       pitch: cachedMapState ? cachedMapState.pitch : (is3D ? 55 : 0),
       bearing: cachedMapState ? cachedMapState.bearing : (is3D ? -17 : 0),
       dragRotate: true,
-      antialias: true,
       attributionControl: false,
     });
 
@@ -646,13 +704,18 @@ export default function MapView({
           if (e.features && e.features[0]) {
             const id = e.features[0].properties.id;
             const b = buildingsRef.current.find(x => x.id === id);
-            if (b) onSelectRef.current(b);
+            if (b) {
+              setIsPhoto360Open(false);
+              onSelectRef.current(b);
+            }
           }
         });
 
         mapInstance.on("click", (e) => {
           const features = mapInstance.queryRenderedFeatures(e.point, { layers: ["campus-buildings-fill"] });
           if (features.length === 0) {
+            setIsPhoto360Open(false);
+            setSelectedPhoto360Location(null);
             onSelectRef.current(null);
           }
         });
@@ -689,6 +752,51 @@ export default function MapView({
       }
     };
 
+    const clearPhoto360Markers = () => {
+      photo360MarkersRef.current.forEach((marker) => marker.remove());
+      photo360MarkersRef.current = [];
+    };
+
+    const addPhoto360Marker = () => {
+      if (photo360MarkersRef.current.length > 0) return;
+
+      clearPhoto360Markers();
+
+      photo360MarkersRef.current = photo360Locations.map((location) => {
+        const markerEl = document.createElement("button");
+        markerEl.type = "button";
+        markerEl.className = "group flex items-center justify-center rounded-full cursor-pointer transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-[#22B8CF]/60";
+        markerEl.style.width = `${PHOTO_360_MARKER_SIZE_PX}px`;
+        markerEl.style.height = `${PHOTO_360_MARKER_SIZE_PX}px`;
+        markerEl.style.padding = "0";
+        markerEl.setAttribute("aria-label", `Open 360 view for ${location.name}`);
+        markerEl.innerHTML = `
+          <img
+            src="/360image.svg"
+            alt=""
+            aria-hidden="true"
+            class="block pointer-events-none select-none"
+            style="width: ${PHOTO_360_MARKER_SIZE_PX}px; height: ${PHOTO_360_MARKER_SIZE_PX}px; min-width: ${PHOTO_360_MARKER_SIZE_PX}px; min-height: ${PHOTO_360_MARKER_SIZE_PX}px;"
+          />
+        `;
+
+        markerEl.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setSelectedPhoto360Location(location);
+          setIsPhoto360Open(true);
+          setIsPhoto360ViewerOpen(false);
+          onSelectRef.current(null);
+        });
+
+        const marker = new maplibregl.Marker({ element: markerEl, anchor: "center" })
+          .setLngLat([location.longitude, location.latitude])
+          .addTo(mapInstance);
+
+        return marker;
+      });
+    };
+
     const applyBuildingVisibility = () => {
       const visibility = isSatelliteRef.current ? "none" : "visible";
       ["campus-buildings-fill", "campus-buildings-line", "campus-buildings-label", "campus-buildings-highlight", "campus-boundary-wall"].forEach((layerId) => {
@@ -700,6 +808,7 @@ export default function MapView({
 
     mapInstance.on("load", () => {
       addBuildingLayers();
+      addPhoto360Marker();
       applyBuildingVisibility();
       if (!mapInstance.getSource("campus-roads")) {
         fetchRoads();
@@ -730,6 +839,7 @@ export default function MapView({
 
     mapInstance.on("style.load", () => {
       addBuildingLayers();
+      addPhoto360Marker();
       applyBuildingVisibility();
       fetchRoadsRef.current?.();
     });
@@ -807,6 +917,72 @@ export default function MapView({
       map.setFilter("campus-buildings-highlight", ["==", "id", selectedBuilding?.id || ""]);
     }
   }, [selectedBuilding, map]);
+
+  useEffect(() => {
+    if (selectedBuilding) {
+      setIsPhoto360Open(false);
+      setIsPhoto360ViewerOpen(false);
+      setSelectedPhoto360Location(null);
+    }
+  }, [selectedBuilding]);
+
+  useEffect(() => {
+    const dialog = photo360DialogRef.current;
+    if (!dialog) return;
+
+    let cancelled = false;
+
+    const cleanupViewer = () => {
+      if (photo360ViewerRef.current) {
+        photo360ViewerRef.current.stopAutoRotate?.();
+        photo360ViewerRef.current.destroy?.();
+        photo360ViewerRef.current = null;
+      }
+    };
+
+    if (!isPhoto360ViewerOpen) {
+      cleanupViewer();
+      if (dialog.open) dialog.close();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (!dialog.open) dialog.showModal();
+
+    void loadPannellum()
+      .then(() => {
+        if (cancelled || !photo360ViewerContainerRef.current || !dialog.open || !selectedPhoto360Location) return;
+
+        // Reuse an existing instance if one is already mounted; otherwise create on demand.
+        if (photo360ViewerRef.current) {
+          photo360ViewerRef.current.resize?.();
+          photo360ViewerRef.current.startAutoRotate?.(PHOTO_360_AUTO_ROTATE);
+          return;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pannellum = (window as any).pannellum;
+        photo360ViewerRef.current = pannellum.viewer(photo360ViewerContainerRef.current, {
+          type: "equirectangular",
+          panorama: `/images/360-images/${selectedPhoto360Location.imageFile}`,
+          autoLoad: true,
+          showControls: true,
+          autoRotate: PHOTO_360_AUTO_ROTATE,
+          draggable: true,
+          mouseZoom: true,
+          doubleClickZoom: true,
+          compass: false,
+        });
+      })
+      .catch((error) => {
+        console.error("[360-view] Failed to initialize Pannellum:", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isPhoto360ViewerOpen, selectedPhoto360Location]);
 
   useEffect(() => {
     if (!map) return;
@@ -1087,8 +1263,52 @@ export default function MapView({
               building={selectedBuilding}
             />
           )}
+
+          {isPhoto360Open && selectedPhoto360Location && (
+            <Photo360Popup
+              map={map}
+              name={selectedPhoto360Location.name}
+              latitude={selectedPhoto360Location.latitude}
+              longitude={selectedPhoto360Location.longitude}
+              imageFile={selectedPhoto360Location.imageFile}
+              onView={() => setIsPhoto360ViewerOpen(true)}
+            />
+          )}
         </>
       )}
+
+      <dialog
+        ref={photo360DialogRef}
+        className="fixed top-1/2 left-1/2 z-[140] w-[min(1100px,94vw)] max-h-[90vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 dark:border-outline-variant/30 bg-white dark:bg-surface-container-high shadow-2xl p-0 overflow-hidden backdrop:bg-black/65 backdrop:backdrop-blur-sm m-0"
+        aria-label="360 photo viewer"
+        onCancel={(event) => {
+          event.preventDefault();
+          setIsPhoto360ViewerOpen(false);
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            setIsPhoto360ViewerOpen(false);
+          }
+        }}
+      >
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-200 dark:border-outline-variant/30 bg-white/95 dark:bg-surface-container-high/95">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-on-surface">
+            {selectedPhoto360Location?.name || PHOTO_360_NAME}
+          </h3>
+          <button
+            onClick={() => setIsPhoto360ViewerOpen(false)}
+            className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-slate-700 hover:bg-slate-100 dark:text-on-surface dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant/30"
+            aria-label="Close 360 viewer"
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <div className="h-[min(76vh,720px)] bg-slate-100 dark:bg-slate-900/40">
+          <div ref={photo360ViewerContainerRef} id="panoViewer" className="w-full h-full" />
+        </div>
+      </dialog>
 
       <MapControls
         onZoomIn={handleZoomIn}
