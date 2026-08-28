@@ -15,7 +15,7 @@ These rules enforce strict AGPL-3.0 open-source licensing compliance, backend se
 - **Project License**: Campus Compass is strictly licensed under AGPL-3.0.
 - **Dependency Compatibility**: Any new npm package or third-party dependency introduced MUST be compatible with AGPL-3.0 (e.g., MIT, ISC, Apache 2.0, BSD-2/3-Clause).
 - **Prohibited Licenses**: Do NOT introduce proprietary, commercial, non-commercial-only, or copyleft-incompatible libraries.
-- **Attribution Preservation**: Maintain full, visible map provider attributions (OpenStreetMap, CARTO, Esri) in the user interface.
+- **Attribution Preservation**: Maintain full, visible map provider attributions (OpenStreetMap, OpenFreeMap, Esri) in the user interface.
 
 ---
 

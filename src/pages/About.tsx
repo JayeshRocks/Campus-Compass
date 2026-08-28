@@ -148,7 +148,7 @@ export default function About() {
               </p>
               <p className="text-body-sm text-slate-600 dark:text-slate-400 leading-relaxed text-sm italic">
                 Map data &copy; <a href="https://www.openstreetmap.org/copyright" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors. 
-                Basemap rendering by <a href="https://carto.com/" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">CARTO</a>. 
+                Vector basemap rendering by <a href="https://openfreemap.org/" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">OpenFreeMap</a>. 
                 Satellite imagery provided by <a href="https://www.esri.com/" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">Esri</a>.
               </p>
             </div>

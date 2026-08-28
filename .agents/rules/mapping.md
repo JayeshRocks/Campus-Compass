@@ -42,7 +42,7 @@ When updating or executing `fetch_roads.cjs`:
 
 ## 4. Map Attribution Compliance
 
-Strictly display legible map attributions in compliance with open-source map providers (OpenStreetMap, CARTO, Esri):
+Strictly display legible map attributions in compliance with open-source map providers (OpenStreetMap, OpenFreeMap, Esri):
 
 - **No CSS Truncation**: NEVER truncate or hide map attribution text using CSS rules such as `text-overflow: ellipsis`, `overflow: hidden`, or fixed height cutoffs.
 - **Text Wrapping**: Attributions MUST be fully visible, legible, and wrap dynamically across multiple lines on smaller viewports.

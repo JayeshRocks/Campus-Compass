@@ -12,6 +12,114 @@ import WeatherWidget from "./WeatherWidget";
 // Cache state variables outside the component to survive React unmounts (tab switches)
 let cachedMapState: { center: [number, number]; zoom: number; pitch: number; bearing: number } | null = null;
 let lastFlewToBuildingId: string | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let cachedLibertyRawStyle: any = null;
+
+const getLibertyStyleForTheme = async (isDark: boolean) => {
+  if (!cachedLibertyRawStyle) {
+    try {
+      const res = await fetch("https://tiles.openfreemap.org/styles/liberty");
+      cachedLibertyRawStyle = await res.json();
+    } catch {
+      return isDark ? "https://tiles.openfreemap.org/styles/dark" : "https://tiles.openfreemap.org/styles/liberty";
+    }
+  }
+  if (!isDark) return cachedLibertyRawStyle;
+
+  const darkStyle = JSON.parse(JSON.stringify(cachedLibertyRawStyle));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  darkStyle.layers = darkStyle.layers.map((layer: any) => {
+    const l = { ...layer };
+    if (l.type === "background") {
+      l.paint = { ...l.paint, "background-color": "#0b1220" };
+    } else if (l.id.includes("park") || l.id.includes("grass") || l.id.includes("pitch")) {
+      if (l.type === "fill") l.paint = { ...l.paint, "fill-color": "#122e22" };
+    } else if (l.id.includes("water")) {
+      if (l.type === "fill") l.paint = { ...l.paint, "fill-color": "#172554" };
+      else if (l.type === "line") l.paint = { ...l.paint, "line-color": "#1e3a8a" };
+    } else if (l.type === "fill" && (l.id.includes("landuse") || l.id.includes("landcover"))) {
+      l.paint = { ...l.paint, "fill-color": "#0f172a" };
+    } else if (l.type === "line" && (l.id.includes("road") || l.id.includes("tunnel") || l.id.includes("bridge"))) {
+      if (l.id.includes("casing")) {
+        l.paint = { ...l.paint, "line-color": "#0b1220" };
+      } else {
+        l.paint = { ...l.paint, "line-color": "#334155" };
+      }
+    } else if (l.type === "symbol") {
+      l.paint = {
+        ...l.paint,
+        "text-color": "#94a3b8",
+        "text-halo-color": "#0b1220"
+      };
+    }
+    return l;
+  });
+  return darkStyle;
+};
+
+const getHybridSatelliteStyle = async () => {
+  if (!cachedLibertyRawStyle) {
+    try {
+      const res = await fetch("https://tiles.openfreemap.org/styles/liberty");
+      cachedLibertyRawStyle = await res.json();
+    } catch {
+      return {
+        version: 8,
+        glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+        sources: {
+          "esri-satellite": {
+            type: "raster",
+            tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?blankTile=false"],
+            tileSize: 256,
+            maxzoom: 19,
+            attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+          }
+        },
+        layers: [
+          { id: "satellite-layer", type: "raster", source: "esri-satellite", minzoom: 0, maxzoom: 22 }
+        ]
+      };
+    }
+  }
+
+  const raw = JSON.parse(JSON.stringify(cachedLibertyRawStyle));
+  const hybridStyle = {
+    ...raw,
+    sources: {
+      ...raw.sources,
+      "esri-satellite": {
+        type: "raster",
+        tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?blankTile=false"],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+      }
+    },
+    layers: [
+      { id: "satellite-layer", type: "raster", source: "esri-satellite", minzoom: 0, maxzoom: 22 },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...raw.layers.filter((l: any) => l.type !== "background" && !l.id.includes("landcover") && !l.id.includes("landuse") && !l.id.includes("natural_earth") && !l.id.includes("park") && l.id !== "building-3d").map((l: any) => {
+        const layer = { ...l };
+        if (layer.type === "symbol") {
+          layer.paint = {
+            ...layer.paint,
+            "text-color": "#ffffff",
+            "text-halo-color": "rgba(0, 0, 0, 0.9)",
+            "text-halo-width": 2
+          };
+        } else if (layer.type === "line" && layer.id.includes("road")) {
+          layer.paint = {
+            ...layer.paint,
+            "line-opacity": 0.8
+          };
+        }
+        return layer;
+      })
+    ]
+  };
+
+  return hybridStyle;
+};
 
 interface MapViewProps {
   buildings: Building[];
@@ -305,32 +413,7 @@ export default function MapView({
       layers: [
         { id: "satellite-layer", type: "raster", source: "esri-satellite", minzoom: 0, maxzoom: 22 }
       ]
-    } : {
-      version: 8,
-      glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
-      sources: {
-        "carto-basemap": {
-          type: "raster",
-          tiles: [
-            isDarkMode 
-              ? "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
-              : "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-          ],
-          tileSize: 256,
-          maxzoom: 19,
-          attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/attributions'>CARTO</a>"
-        }
-      },
-      layers: [
-        {
-          id: "carto-layer",
-          type: "raster",
-          source: "carto-basemap",
-          minzoom: 0,
-          maxzoom: 22
-        }
-      ]
-    };
+    } : "https://tiles.openfreemap.org/styles/liberty";
 
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -347,7 +430,38 @@ export default function MapView({
       attributionControl: false,
     } as maplibregl.MapOptions);
 
+    if (isSatellite) {
+      getHybridSatelliteStyle().then((styleObj) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mapInstance.setStyle(styleObj as any, { diff: false });
+      });
+    } else if (isDarkMode) {
+      getLibertyStyleForTheme(true).then((styleObj) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mapInstance.setStyle(styleObj as any, { diff: false });
+      });
+    }
+
+    const hideBaseBuildingLayers = (m: maplibregl.Map) => {
+      try {
+        const style = m.getStyle();
+        if (!style || !style.layers) return;
+        style.layers.forEach((l) => {
+          if ((l.type === "fill-extrusion" || l.id.includes("building-3d")) && l.id !== "campus-buildings-fill") {
+            try {
+              m.setLayoutProperty(l.id, "visibility", "none");
+            } catch {}
+          }
+        });
+      } catch {}
+    };
+
+    mapInstance.on("styledata", () => {
+      hideBaseBuildingLayers(mapInstance);
+    });
+
     mapInstance.on("style.load", () => {
+      hideBaseBuildingLayers(mapInstance);
       try {
         mapInstance.setLight({
           anchor: "viewport",
@@ -777,60 +891,17 @@ export default function MapView({
     if (prevDarkRef.current === isDarkMode && prevSatRef.current === isSatellite) return;
     prevDarkRef.current = isDarkMode;
     prevSatRef.current = isSatellite;
-    const targetStyle = isSatellite
-      ? {
-          version: 8,
-          glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
-          sources: {
-            "esri-satellite": {
-              type: "raster",
-              tiles: [
-                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?blankTile=false"
-              ],
-              tileSize: 256,
-              maxzoom: 19,
-              attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-            }
-          },
-          layers: [
-            {
-              id: "satellite-layer",
-              type: "raster",
-              source: "esri-satellite",
-              minzoom: 0,
-              maxzoom: 22
-            }
-          ]
-        }
-      : {
-          version: 8,
-          glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
-          sources: {
-            "carto-basemap": {
-              type: "raster",
-              tiles: [
-                isDarkMode 
-                  ? "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
-                  : "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-              ],
-              tileSize: 256,
-              maxzoom: 19,
-              attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/attributions'>CARTO</a>"
-            }
-          },
-          layers: [
-            {
-              id: "carto-layer",
-              type: "raster",
-              source: "carto-basemap",
-              minzoom: 0,
-              maxzoom: 22
-            }
-          ]
-        };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    map.setStyle(targetStyle as any, { diff: false });
+    if (isSatellite) {
+      getHybridSatelliteStyle().then((styleObj) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map.setStyle(styleObj as any, { diff: false });
+      });
+    } else {
+      getLibertyStyleForTheme(isDarkMode).then((styleObj) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map.setStyle(styleObj as any, { diff: false });
+      });
+    }
   }, [isDarkMode, isSatellite, map]);
 
   useEffect(() => {
