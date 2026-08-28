@@ -1115,6 +1115,9 @@ export default function MapView({
     setIsNavigating(true);
     setIsAutoFollow(true);
 
+    // Automatically request user location & center camera (like clicking Locate Me)
+    handleLocateUser();
+
     if (effectiveOrigin) {
       drawDirectionLine(effectiveOrigin.lat, effectiveOrigin.lng, target, false);
     }
