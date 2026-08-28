@@ -796,9 +796,9 @@ export default function MapView({
             source: "direction-line",
             layout: { "line-join": "round", "line-cap": "round" },
             paint: {
-              "line-color": isDarkMode ? "#0284c7" : "#0284c7",
+              "line-color": "#0F172A",
               "line-width": 8,
-              "line-opacity": 0.45
+              "line-opacity": 0.85
             }
           });
           mapInstance.addLayer({
@@ -807,9 +807,9 @@ export default function MapView({
             source: "direction-line",
             layout: { "line-join": "round", "line-cap": "round" },
             paint: {
-              "line-color": "#22b8cf",
-              "line-width": 4.5,
-              "line-opacity": 0.95
+              "line-color": "#FF9100",
+              "line-width": 5,
+              "line-opacity": 1.0
             }
           });
         }

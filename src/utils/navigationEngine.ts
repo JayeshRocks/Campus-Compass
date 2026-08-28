@@ -105,10 +105,32 @@ export async function calculateFootRoute(
       );
     }
 
+    const finalCoords: [number, number][] = [...coords];
+    if (distanceMeters(origin[1], origin[0], finalCoords[0][1], finalCoords[0][0]) > 2) {
+      finalCoords.unshift(origin);
+    } else {
+      finalCoords[0] = origin;
+    }
+
+    const lastIdx = finalCoords.length - 1;
+    if (distanceMeters(destination[1], destination[0], finalCoords[lastIdx][1], finalCoords[lastIdx][0]) > 2) {
+      finalCoords.push(destination);
+    } else {
+      finalCoords[lastIdx] = destination;
+    }
+
+    let calculatedDist = 0;
+    for (let i = 0; i < finalCoords.length - 1; i++) {
+      calculatedDist += distanceMeters(finalCoords[i][1], finalCoords[i][0], finalCoords[i + 1][1], finalCoords[i + 1][0]);
+    }
+
+    const finalDist = Math.max(Math.round(calculatedDist), Math.round(directDist));
+    const finalDur = Math.max(1, Math.round(finalDist / 1.2));
+
     return {
-      coordinates: coords,
-      distanceM: route.distance || 0,
-      durationS: route.duration || 0,
+      coordinates: finalCoords,
+      distanceM: finalDist,
+      durationS: finalDur,
       steps,
       isFallback: false
     };

@@ -43,8 +43,9 @@ export const TurnByTurnHUD: React.FC<TurnByTurnHUDProps> = ({
   const currentStep = steps[currentStepIndex] || steps[0];
 
   const formatDistance = (distM: number) => {
-    if (distM >= 1000) return `${(distM / 1000).toFixed(1)} km`;
-    return `${Math.round(distM)} m`;
+    const val = Math.max(10, Math.round(distM));
+    if (val >= 1000) return `${(val / 1000).toFixed(1)} km`;
+    return `${val} m`;
   };
 
   const formatDuration = (durS: number) => {
@@ -53,78 +54,61 @@ export const TurnByTurnHUD: React.FC<TurnByTurnHUDProps> = ({
   };
 
   return (
-    <div className="fixed top-16 md:top-20 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-lg transition-all duration-300">
-      {/* Primary Banner */}
-      <div className="bg-slate-950/90 dark:bg-surface-container-highest/95 backdrop-blur-2xl border border-white/15 dark:border-white/10 text-white rounded-3xl p-4 shadow-2xl overflow-hidden">
-        {/* Top Header Row */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Step Icon */}
-            <div className="w-11 h-11 rounded-2xl bg-primary text-white flex items-center justify-center shrink-0 shadow-lg shadow-primary/25">
-              <span className="material-symbols-outlined text-2xl">{currentStep.icon || "navigation"}</span>
-            </div>
+    <div className="fixed top-16 md:top-20 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md transition-all duration-300">
+      {/* Sleek Single Banner */}
+      <div className="bg-slate-950/95 dark:bg-surface-container-highest/95 backdrop-blur-2xl border border-white/20 dark:border-white/15 text-white rounded-2xl p-3 shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between gap-2.5">
+          {/* Left Step Icon */}
+          <div className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center shrink-0 shadow-md shadow-primary/30">
+            <span className="material-symbols-outlined text-xl">{currentStep.icon || "navigation"}</span>
+          </div>
 
-            {/* Instruction */}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-base md:text-lg leading-tight truncate text-white">
-                {currentStep.instruction}
-              </h3>
-              <p className="text-xs text-slate-300 dark:text-slate-400 truncate mt-0.5">
-                To <strong className="text-primary-light dark:text-primary">{destinationBuilding.name}</strong>
-                {originLabel ? ` (from ${originLabel})` : ""}
-              </p>
+          {/* Main Info */}
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-xs md:text-sm text-white truncate leading-snug">
+              {currentStep.instruction}
+            </h3>
+            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-300">
+              <span className="text-primary-light font-semibold">{formatDistance(routeResult.distanceM)}</span>
+              <span>•</span>
+              <span className="text-slate-300 font-medium">{formatDuration(routeResult.durationS)}{originLabel ? ` • from ${originLabel}` : ""}</span>
             </div>
           </div>
 
-          {/* End Navigation Button */}
-          <button
-            onClick={onEndNavigation}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 flex items-center justify-center transition-colors shrink-0"
-            title="End Navigation"
-            aria-label="End Navigation"
-          >
-            <span className="material-symbols-outlined text-lg">close</span>
-          </button>
-        </div>
-
-        {/* Stats Row & Actions */}
-        <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
-          <div className="flex items-center gap-3">
-            <span className="bg-primary/20 text-primary-light font-semibold px-2.5 py-1 rounded-full border border-primary/30 flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-sm">directions_walk</span>
-              {formatDistance(routeResult.distanceM)}
-            </span>
-            <span className="bg-white/10 text-slate-200 font-medium px-2.5 py-1 rounded-full flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-sm">schedule</span>
-              {formatDuration(routeResult.durationS)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Recenter / Follow Button */}
+          {/* Right Action Buttons */}
+          <div className="flex items-center gap-1.5 shrink-0">
             {onToggleFollow && (
               <button
                 onClick={onToggleFollow}
-                className={`p-1.5 rounded-xl transition-colors flex items-center gap-1 text-xs ${
+                className={`w-7 h-7 rounded-lg transition-colors flex items-center justify-center text-xs ${
                   isFollowingUser
-                    ? "bg-primary text-white font-medium"
+                    ? "bg-primary text-white"
                     : "bg-white/10 hover:bg-white/20 text-slate-300"
                 }`}
                 title={isFollowingUser ? "Following Location" : "Center Location"}
+                aria-label="Toggle follow location"
               >
                 <span className="material-symbols-outlined text-base">my_location</span>
               </button>
             )}
 
-            {/* Toggle Steps Drawer */}
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 font-medium flex items-center gap-1 transition-colors"
+              className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-medium flex items-center gap-0.5 transition-colors"
             >
-              <span>{isExpanded ? "Hide Steps" : "Steps"}</span>
-              <span className="material-symbols-outlined text-sm">
+              <span>Steps</span>
+              <span className="material-symbols-outlined text-xs">
                 {isExpanded ? "expand_less" : "expand_more"}
               </span>
+            </button>
+
+            <button
+              onClick={onEndNavigation}
+              className="w-7 h-7 rounded-lg bg-white/10 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 flex items-center justify-center transition-colors"
+              title="End Navigation"
+              aria-label="End Navigation"
+            >
+              <span className="material-symbols-outlined text-base">close</span>
             </button>
           </div>
         </div>
