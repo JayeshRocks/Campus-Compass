@@ -8,6 +8,11 @@ import FeedbackButton from "./FeedbackButton";
 import BuildingPopup from "./BuildingPopup";
 import ReportIssueForm from "./ReportIssueForm";
 import WeatherWidget from "./WeatherWidget";
+import { useUserLocation } from "../../hooks/useUserLocation";
+import { calculateFootRoute } from "../../utils/navigationEngine";
+import type { RouteResult } from "../../utils/navigationEngine";
+import { TurnByTurnHUD } from "../navigation/TurnByTurnHUD";
+import { NavigationPanel } from "../navigation/NavigationPanel";
 
 // Cache state variables outside the component to survive React unmounts (tab switches)
 let cachedMapState: { center: [number, number]; zoom: number; pitch: number; bearing: number } | null = null;
@@ -146,8 +151,22 @@ export default function MapView({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const locationState = useUserLocation(buildings);
+  const {
+    userAccuracy,
+    isLiveGpsActive,
+    selectedOriginBuilding,
+    effectiveOrigin,
+    startGpsTracking,
+    stopGpsTracking,
+    setSelectedOriginBuilding
+  } = locationState;
+
+  const [activeRouteResult, setActiveRouteResult] = useState<RouteResult | null>(null);
+  const [isFollowingUser, setIsFollowingUser] = useState<boolean>(false);
+  const [showNavPanel, setShowNavPanel] = useState<boolean>(false);
+
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
-  const [userAccuracy, setUserAccuracy] = useState<number | null>(null);
   const [heading, setHeading] = useState<number | null>(null);
   const headingListenerRef = useRef<((e: DeviceOrientationEvent) => void) | null>(null);
   const hasOrientationRef = useRef(false);
@@ -450,9 +469,11 @@ export default function MapView({
           if ((l.type === "fill-extrusion" || l.id.includes("building-3d")) && l.id !== "campus-buildings-fill") {
             try {
               m.setLayoutProperty(l.id, "visibility", "none");
+            // eslint-disable-next-line no-empty
             } catch {}
           }
         });
+      // eslint-disable-next-line no-empty
       } catch {}
     };
 
@@ -1008,76 +1029,10 @@ export default function MapView({
   const drawDirectionLine = async (lat: number, lng: number, building: Building, follow: boolean = false) => {
     if (!map || !building) return;
 
-    // Direct distance calculation
-    const distM = distanceMeters(lat, lng, building.latitude, building.longitude);
-    const durS = Math.round(distM / 1.2); // ~1.2 m/s walking speed
-    setRouteInfo({ distanceM: distM, durationS: durS });
-
-    let routeCoords: [number, number][] = [
-      [lng, lat],
-      [building.longitude, building.latitude]
-    ];
-
-    const last = lastRouteCalcRef.current;
-    const shouldFetchOSRM = !last || last.bId !== building.id || distanceMeters(last.lat, last.lng, lat, lng) > 15;
-
-    if (shouldFetchOSRM) {
-      try {
-        lastRouteCalcRef.current = { lat, lng, bId: building.id };
-        const url = `https://router.project-osrm.org/route/v1/foot/${lng},${lat};${building.longitude},${building.latitude}?overview=full&geometries=geojson&steps=true`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          const route = data?.routes?.[0];
-          const coords = route?.geometry?.coordinates;
-          if (Array.isArray(coords) && coords.length > 1) {
-            routeCoords = coords;
-          }
-          if (route) {
-            setRouteInfo({ distanceM: route.distance, durationS: route.duration });
-          }
-
-          // Parse Turn-by-Turn Steps
-          const rawSteps = route?.legs?.[0]?.steps;
-          if (Array.isArray(rawSteps) && rawSteps.length > 0) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const steps = rawSteps.map((s: any) => {
-              const type = s.maneuver?.type || "";
-              const modifier = s.maneuver?.modifier || "";
-              const name = s.name ? ` onto ${s.name}` : "";
-              let icon = "navigation";
-              let text = `Walk towards ${building.name}`;
-
-              if (type === "arrive") {
-                icon = "location_on";
-                text = `Arrive at ${building.name}`;
-              } else if (type === "depart") {
-                icon = "navigation";
-                text = `Head towards ${building.name}`;
-              } else if (modifier.includes("left")) {
-                icon = modifier.includes("slight") ? "turn_slight_left" : "turn_left";
-                text = `Turn ${modifier}${name}`;
-              } else if (modifier.includes("right")) {
-                icon = modifier.includes("slight") ? "turn_slight_right" : "turn_right";
-                text = `Turn ${modifier}${name}`;
-              } else if (modifier.includes("straight")) {
-                icon = "straight";
-                text = `Continue straight${name}`;
-              }
-              return { instruction: text, distanceM: Math.round(s.distance || 0), icon };
-            });
-            setRouteSteps(steps);
-          } else {
-            setRouteSteps([
-              { instruction: `Walk directly to ${building.name}`, distanceM: Math.round(distM), icon: "directions_walk" },
-              { instruction: `Arrive at ${building.name}`, distanceM: 0, icon: "location_on" }
-            ]);
-          }
-        }
-      } catch (err) {
-        console.warn("[directions] OSRM fetch failed, using direct line:", err);
-      }
-    }
+    const res = await calculateFootRoute([lng, lat], [building.longitude, building.latitude], building.name);
+    setActiveRouteResult(res);
+    setRouteInfo({ distanceM: res.distanceM, durationS: res.durationS });
+    setRouteSteps(res.steps);
 
     const source = map.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
     if (source) {
@@ -1089,17 +1044,17 @@ export default function MapView({
             properties: {},
             geometry: {
               type: "LineString",
-              coordinates: routeCoords
+              coordinates: res.coordinates
             }
           }
         ]
       });
     }
 
-    if (!follow) {
-      const bounds = routeCoords.reduce(
+    if (!follow && res.coordinates.length > 0) {
+      const bounds = res.coordinates.reduce(
         (acc, coord) => acc.extend(coord as [number, number]),
-        new maplibregl.LngLatBounds(routeCoords[0], routeCoords[0])
+        new maplibregl.LngLatBounds(res.coordinates[0], res.coordinates[0])
       );
       map.fitBounds(bounds, { padding: 120, pitch: is3D ? 55 : 0, bearing: is3D ? -17 : 0, duration: 800 });
     }
@@ -1114,9 +1069,6 @@ export default function MapView({
       (position) => {
         const rawLat = position.coords.latitude;
         const rawLng = position.coords.longitude;
-        const acc = position.coords.accuracy;
-
-        setUserAccuracy(acc);
 
         setUserLoc((prevLoc) => {
           if (!prevLoc) return { lat: rawLat, lng: rawLng };
@@ -1280,18 +1232,59 @@ export default function MapView({
         </div>
       )}
 
-      {/* Floating Recenter GPS Navigation Button */}
-      {isNavigating && !isAutoFollow && userLoc && (
-        <button
-          onClick={() => {
-            setIsAutoFollow(true);
-            map?.easeTo({ center: [userLoc.lng, userLoc.lat], zoom: 17, duration: 600 });
+      {/* Floating Live Turn-by-Turn Navigation HUD */}
+      {isNavigating && navigatingBuilding && (
+        <TurnByTurnHUD
+          destinationBuilding={navigatingBuilding}
+          originLabel={effectiveOrigin?.label}
+          routeResult={activeRouteResult}
+          isFollowingUser={isFollowingUser}
+          onToggleFollow={() => {
+            setIsFollowingUser(!isFollowingUser);
+            if (map && effectiveOrigin) {
+              map.flyTo({ center: [effectiveOrigin.lng, effectiveOrigin.lat], zoom: 18, duration: 800 });
+            }
           }}
-          className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-[#22B8CF] hover:bg-[#1A94A6] text-white px-4 py-2 rounded-full shadow-2xl z-[120] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer border border-white/20 animate-fade-in"
-        >
-          <span className="material-symbols-outlined text-[18px]">my_location</span>
-          Recenter GPS
-        </button>
+          onEndNavigation={() => {
+            setIsNavigating(false);
+            setNavigatingBuilding(null);
+            setActiveRouteResult(null);
+            if (map) {
+              const source = map.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
+              if (source) source.setData({ type: "FeatureCollection", features: [] });
+            }
+          }}
+        />
+      )}
+
+      {/* Floating Navigation & Origin Selection Panel */}
+      {showNavPanel && (
+        <div className="fixed top-20 left-4 z-40 w-[92%] max-w-sm">
+          <NavigationPanel
+            buildings={buildings}
+            originBuilding={selectedOriginBuilding}
+            destinationBuilding={navigatingBuilding}
+            onSelectOrigin={setSelectedOriginBuilding}
+            onSelectDestination={(b) => setNavigatingBuilding(b)}
+            onStartNavigation={() => {
+              if (navigatingBuilding && effectiveOrigin) {
+                drawDirectionLine(effectiveOrigin.lat, effectiveOrigin.lng, navigatingBuilding, false);
+                setIsNavigating(true);
+                setShowNavPanel(false);
+              }
+            }}
+            onClear={() => {
+              setShowNavPanel(false);
+              setIsNavigating(false);
+              setNavigatingBuilding(null);
+            }}
+            isGpsActive={isLiveGpsActive}
+            onToggleGps={() => {
+              if (isLiveGpsActive) stopGpsTracking();
+              else startGpsTracking();
+            }}
+          />
+        </div>
       )}
 
       <MapControls
