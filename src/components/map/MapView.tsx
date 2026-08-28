@@ -345,16 +345,17 @@ export default function MapView({
       dragRotate: true,
       antialias: true,
       attributionControl: false,
-    } as any);
+    } as maplibregl.MapOptions);
 
     mapInstance.on("style.load", () => {
       try {
         mapInstance.setLight({
           anchor: "viewport",
-          color: "#fff7ec",
+          color: isDarkMode ? "#ffffff" : "#ffffff",
           intensity: 0.55,
           position: [1.8, 120, 25]
         });
+      // eslint-disable-next-line no-empty
       } catch {}
 
       try {
@@ -367,6 +368,7 @@ export default function MapView({
           "fog-color": isDarkMode ? "#0b1220" : "#e6f1ff",
           "fog-ground-blend": 0.5
         });
+      // eslint-disable-next-line no-empty
       } catch {}
     });
 
@@ -403,6 +405,7 @@ export default function MapView({
           } else {
             (mapInstance.getSource("campus-roads") as maplibregl.GeoJSONSource).setData({
               type: "FeatureCollection",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               features: features as any,
             });
           }
@@ -1329,7 +1332,7 @@ export default function MapView({
             <div className="flex items-center gap-3 bg-slate-50 dark:bg-surface-container-high rounded-lg px-3 py-2.5">
               <span className="material-symbols-outlined text-[18px] text-[#EA4335] flex-shrink-0">location_on</span>
               <span className="text-sm truncate font-medium">
-                {navigatingBuilding?.name || navigatingBuildingRef.current?.name || "Destination"}
+                {navigatingBuilding?.name || "Destination"}
               </span>
             </div>
           </div>
