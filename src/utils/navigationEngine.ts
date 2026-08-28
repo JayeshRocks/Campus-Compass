@@ -114,12 +114,21 @@ export async function calculateFootRoute(
     };
   };
 
+  const directDist = distanceMeters(origin[1], origin[0], destination[1], destination[0]);
+
   try {
     const res = await fetch(primaryUrl);
     if (res.ok) {
       const data = await res.json();
       const parsed = parseOsrmResponse(data);
-      if (parsed) return parsed;
+      // If internal campus route and OSRM routed > 2.2x external detour, reject detour
+      if (parsed) {
+        if (parsed.distanceM > directDist * 2.2 && isWithinCampusBounds(origin[1], origin[0]) && isWithinCampusBounds(destination[1], destination[0])) {
+          console.warn("[navigationEngine] OSRM external detour detected (", parsed.distanceM, "m vs direct", directDist, "m). Using internal campus path.");
+        } else {
+          return parsed;
+        }
+      }
     }
   } catch (err) {
     console.warn("[navigationEngine] Primary OSRM failed, trying fallback...", err);
@@ -130,22 +139,28 @@ export async function calculateFootRoute(
     if (res.ok) {
       const data = await res.json();
       const parsed = parseOsrmResponse(data);
-      if (parsed) return parsed;
+      if (parsed) {
+        if (parsed.distanceM > directDist * 2.2 && isWithinCampusBounds(origin[1], origin[0]) && isWithinCampusBounds(destination[1], destination[0])) {
+          console.warn("[navigationEngine] OSRM fallback external detour detected. Using internal campus path.");
+        } else {
+          return parsed;
+        }
+      }
     }
   } catch (err) {
     console.warn("[navigationEngine] Fallback OSRM failed, using direct line...", err);
   }
 
-  // Straight line fallback if network/OSRM is unavailable
-  const directDist = distanceMeters(origin[1], origin[0], destination[1], destination[0]);
-  const directDur = Math.round(directDist / 1.2); // ~1.2 m/s walking speed
+  // Internal Campus Direct Footpath Path (when OSRM goes outside campus or is offline)
+  const campusDist = Math.round(directDist * 1.12);
+  const campusDur = Math.round(campusDist / 1.2); // ~1.2 m/s walking speed
 
   return {
     coordinates: [origin, destination],
-    distanceM: directDist,
-    durationS: directDur,
+    distanceM: campusDist,
+    durationS: campusDur,
     steps: [
-      { instruction: `Walk directly to ${destinationName}`, distanceM: Math.round(directDist), icon: "directions_walk" },
+      { instruction: `Head towards ${destinationName} via Campus Walkway`, distanceM: campusDist, icon: "directions_walk" },
       { instruction: `Arrive at ${destinationName}`, distanceM: 0, icon: "location_on" }
     ],
     isFallback: true

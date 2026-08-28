@@ -103,19 +103,25 @@ const getHybridSatelliteStyle = async () => {
     layers: [
       { id: "satellite-layer", type: "raster", source: "esri-satellite", minzoom: 0, maxzoom: 22 },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...raw.layers.filter((l: any) => l.type !== "background" && !l.id.includes("landcover") && !l.id.includes("landuse") && !l.id.includes("natural_earth") && !l.id.includes("park") && l.id !== "building-3d").map((l: any) => {
+      ...raw.layers.filter((l: any) => {
+        if (l.type === "background" || l.type === "raster") return false;
+        if (l.id.includes("landcover") || l.id.includes("landuse") || l.id.includes("park")) return false;
+        if (l.id === "water" || l.id.startsWith("waterway_")) return false;
+        if (l.id === "building" || l.id === "building-3d" || l.id === "aeroway_fill" || l.id === "road_area_pattern") return false;
+        return true;
+      }).map((l: any) => {
         const layer = { ...l };
         if (layer.type === "symbol") {
           layer.paint = {
             ...layer.paint,
             "text-color": "#ffffff",
-            "text-halo-color": "rgba(0, 0, 0, 0.9)",
-            "text-halo-width": 2
+            "text-halo-color": "rgba(0, 0, 0, 0.95)",
+            "text-halo-width": 2.2
           };
-        } else if (layer.type === "line" && layer.id.includes("road")) {
+        } else if (layer.type === "line" && (layer.id.includes("road") || layer.id.includes("tunnel") || layer.id.includes("bridge"))) {
           layer.paint = {
             ...layer.paint,
-            "line-opacity": 0.8
+            "line-opacity": 0.75
           };
         }
         return layer;
@@ -1103,23 +1109,15 @@ export default function MapView({
   const handleShowDirections = () => {
     if (!selectedBuilding) return;
     const target = selectedBuilding;
+    onSelectBuilding(null); // Auto-close building details panel to unclutter UI
     setNavigatingBuilding(target);
     navigatingBuildingRef.current = target;
     setIsNavigating(true);
     setIsAutoFollow(true);
-    setupHeadingListener();
 
-    if (userLoc) {
-      drawDirectionLine(userLoc.lat, userLoc.lng, target, false);
-      startWatchingLocation();
-      return;
+    if (effectiveOrigin) {
+      drawDirectionLine(effectiveOrigin.lat, effectiveOrigin.lng, target, false);
     }
-
-    setToastMessage("Acquiring GPS for directions...");
-    startWatchingLocation((lat, lng) => {
-      setToastMessage(null);
-      drawDirectionLine(lat, lng, target, false);
-    });
   };
 
   const handleStopNavigation = () => {
@@ -1245,15 +1243,7 @@ export default function MapView({
               map.flyTo({ center: [effectiveOrigin.lng, effectiveOrigin.lat], zoom: 18, duration: 800 });
             }
           }}
-          onEndNavigation={() => {
-            setIsNavigating(false);
-            setNavigatingBuilding(null);
-            setActiveRouteResult(null);
-            if (map) {
-              const source = map.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
-              if (source) source.setData({ type: "FeatureCollection", features: [] });
-            }
-          }}
+          onEndNavigation={handleStopNavigation}
         />
       )}
 
@@ -1375,116 +1365,7 @@ export default function MapView({
         </div>
       )}
 
-      {isNavigating && (
-        <div className="fixed top-[72px] left-0 h-[calc(100%-72px)] w-full sm:w-[380px] bg-white dark:bg-surface-bright text-slate-900 dark:text-on-surface z-[125] shadow-2xl flex flex-col border-r border-slate-200 dark:border-outline-variant/20 animate-fade-in">
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-outline-variant/20">
-            <button
-              onClick={handleStopNavigation}
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-surface-container-high/60 transition-colors cursor-pointer"
-              aria-label="Close directions"
-            >
-              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-            </button>
-            <span className="font-medium text-base">Directions</span>
-          </div>
 
-          <div className="px-4 py-3 space-y-2 border-b border-slate-200 dark:border-outline-variant/20">
-            <div className="flex items-center gap-3 bg-slate-50 dark:bg-surface-container-high rounded-lg px-3 py-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#22B8CF] flex-shrink-0" />
-              <span className="text-sm truncate">Your location</span>
-            </div>
-            <div className="flex items-center gap-3 bg-slate-50 dark:bg-surface-container-high rounded-lg px-3 py-2.5">
-              <span className="material-symbols-outlined text-[18px] text-[#EA4335] flex-shrink-0">location_on</span>
-              <span className="text-sm truncate font-medium">
-                {navigatingBuilding?.name || "Destination"}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 px-3 py-2 border-b border-slate-200 dark:border-outline-variant/20">
-            {[
-              { icon: "directions_car", label: "Drive" },
-              { icon: "directions_walk", label: "Walk", active: true },
-              { icon: "directions_bike", label: "Cycle" },
-              { icon: "directions_transit", label: "Transit" }
-            ].map((mode) => (
-              <button
-                key={mode.icon}
-                onClick={() => !mode.active && handleShowToast(`${mode.label} directions`)}
-                className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors cursor-pointer ${
-                  mode.active
-                    ? "bg-[#22B8CF]/15 text-[#22B8CF]"
-                    : "text-slate-400 dark:text-on-surface-variant/50 hover:bg-slate-100 dark:hover:bg-surface-container-high/60"
-                }`}
-                aria-label={mode.label}
-              >
-                <span className="material-symbols-outlined text-[20px]">{mode.icon}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="px-4 py-3 space-y-2">
-            <div className="rounded-xl border-2 border-[#22B8CF] bg-[#22B8CF]/5 px-4 py-3 flex items-center gap-3">
-              <span className="material-symbols-outlined text-[#22B8CF] text-[24px]">directions_walk</span>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm">
-                  {routeInfo ? `${Math.max(1, Math.round(routeInfo.durationS / 60))} min` : "Calculating..."}
-                </div>
-                <div className="text-xs text-slate-500 dark:text-on-surface-variant">
-                  {routeInfo
-                    ? `${routeInfo.distanceM >= 1000 ? `${(routeInfo.distanceM / 1000).toFixed(1)} km` : `${Math.round(routeInfo.distanceM)} m`} • Walking route`
-                    : "Finding the best path"}
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                if (userLoc && (navigatingBuilding || navigatingBuildingRef.current)) {
-                  drawDirectionLine(userLoc.lat, userLoc.lng, (navigatingBuilding || navigatingBuildingRef.current)!, false);
-                }
-              }}
-              className="w-full py-2 rounded-lg bg-slate-100 dark:bg-surface-container-high text-slate-700 dark:text-on-surface font-medium text-xs hover:bg-slate-200 dark:hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[16px]">center_focus_strong</span>
-              Recenter Route
-            </button>
-          </div>
-
-          {/* Turn-by-Turn Steps List in Side Panel */}
-          {routeSteps.length > 0 && (
-            <div className="px-4 py-2 border-t border-slate-200 dark:border-outline-variant/20 flex-1 overflow-y-auto">
-              <div className="text-xs font-semibold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
-                Route Instructions
-              </div>
-              <div className="space-y-3">
-                {routeSteps.map((step, idx) => (
-                  <div key={idx} className="flex items-start gap-3 text-xs">
-                    <div className="w-6 h-6 rounded-full bg-[#22B8CF]/15 text-[#22B8CF] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="material-symbols-outlined text-[14px]">{step.icon}</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-800 dark:text-on-surface">{step.instruction}</div>
-                      {step.distanceM > 0 && (
-                        <div className="text-[11px] text-slate-500 dark:text-on-surface-variant">{step.distanceM} meters</div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="px-4 py-3 border-t border-slate-200 dark:border-outline-variant/20 mt-auto">
-            <button
-              onClick={handleStopNavigation}
-              className="w-full py-2.5 rounded-full bg-[#E8574F]/10 text-[#E8574F] font-medium text-sm hover:bg-[#E8574F]/20 transition-colors cursor-pointer"
-            >
-              Stop navigation
-            </button>
-          </div>
-        </div>
-      )}
 
       {showReportIssue && (
         <ReportIssueForm onClose={() => setShowReportIssue(false)} />
