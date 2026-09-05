@@ -5,7 +5,6 @@ interface MapControlsProps {
   onLocateUser: () => void;
   onToggle3D: () => void;
   is3D: boolean;
-  isSatellite: boolean;
   bearing?: number;
   hasBottomNav?: boolean;
 }
@@ -17,7 +16,6 @@ export default function MapControls({
   onLocateUser,
   onToggle3D,
   is3D,
-  isSatellite,
   bearing = -17,
   hasBottomNav = false,
 }: MapControlsProps) {
@@ -52,21 +50,19 @@ export default function MapControls({
         </button>
       </div>
       {/* 3D View Toggle */}
-      {!isSatellite && (
-        <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl rounded-full shadow-lg ghost-border w-12 h-12 flex mx-auto animate-fade-in">
-          <button
-            onClick={onToggle3D}
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer active:scale-95 group font-bold text-[13px] tracking-tight ${
-              is3D
-                ? "text-white bg-[#22B8CF] dark:bg-primary hover:brightness-110"
-                : "text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-surface-container-high/50"
-            }`}
-            title={is3D ? "Switch to flat 2D view" : "Switch to 3D perspective view"}
-          >
-            {is3D ? "3D" : "2D"}
-          </button>
-        </div>
-      )}
+      <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl rounded-full shadow-lg ghost-border w-12 h-12 flex mx-auto animate-fade-in">
+        <button
+          onClick={onToggle3D}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer active:scale-95 group font-bold text-[13px] tracking-tight ${
+            is3D
+              ? "text-white bg-[#22B8CF] dark:bg-primary hover:brightness-110"
+              : "text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-surface-container-high/50"
+          }`}
+          title={is3D ? "Switch to flat 2D view" : "Switch to 3D perspective view"}
+        >
+          {is3D ? "3D" : "2D"}
+        </button>
+      </div>
 
       {/* Zoom Controls */}
       <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl rounded-full shadow-lg ghost-border flex flex-col overflow-hidden w-12 mx-auto">

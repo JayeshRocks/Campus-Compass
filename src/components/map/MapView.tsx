@@ -194,27 +194,36 @@ export default function MapView({
     localStorage.setItem("campusCompass_is3D", JSON.stringify(is3D));
   }, [is3D]);
 
-  const prevIs3DRef = useRef(is3D);
+  const is3DRef = useRef(is3D);
+  useEffect(() => { is3DRef.current = is3D; }, [is3D]);
+
+  const activeRouteResultRef = useRef<RouteResult | null>(null);
+  useEffect(() => { activeRouteResultRef.current = activeRouteResult; }, [activeRouteResult]);
+
   const prevDarkRef = useRef(isDarkMode);
   const prevSatRef = useRef(isSatellite);
 
   useEffect(() => {
-    if (!map) return;
-    if (isSatellite) {
-      prevIs3DRef.current = is3D;
-      if (is3D) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setIs3D(false);
-        map.easeTo({ pitch: 0, bearing: 0, duration: 800 });
-      }
-    } else {
-      if (prevIs3DRef.current && !is3D) {
-        setIs3D(true);
-        map.easeTo({ pitch: 55, bearing: -17, duration: 800 });
-      }
+    if (!map || !map.getStyle()) return;
+    if (map.getLayer("campus-buildings-fill")) {
+      const targetOpacity = isSatellite ? (is3D ? 0.35 : 0.05) : 0.92;
+      map.setPaintProperty("campus-buildings-fill", "fill-extrusion-opacity", targetOpacity);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSatellite, map]);
+    if (map.getLayer("campus-buildings-line")) {
+      const lineColor = isSatellite
+        ? "rgba(255, 255, 255, 0.75)"
+        : (isDarkMode ? "rgba(148, 163, 184, 0.25)" : "rgba(15, 23, 42, 0.15)");
+      const lineWidth = isSatellite ? 1.5 : 1;
+      map.setPaintProperty("campus-buildings-line", "line-color", lineColor);
+      map.setPaintProperty("campus-buildings-line", "line-width", lineWidth);
+    }
+    if (map.getLayer("campus-buildings-label")) {
+      map.setPaintProperty("campus-buildings-label", "text-color", isSatellite ? "#ffffff" : (isDarkMode ? "#f8fafc" : "rgba(15, 23, 42, 0.75)"));
+      map.setPaintProperty("campus-buildings-label", "text-halo-color", isSatellite ? "#000000" : (isDarkMode ? "#0f172a" : "rgba(255, 255, 255, 0.35)"));
+      map.setPaintProperty("campus-buildings-label", "text-halo-width", isSatellite ? 2.5 : (isDarkMode ? 1.6 : 1));
+      map.setPaintProperty("campus-buildings-label", "text-halo-blur", isSatellite ? 1 : (isDarkMode ? 1.2 : 0.5));
+    }
+  }, [is3D, isSatellite, isDarkMode, map]);
   const fetchRoadsRef = useRef<(() => Promise<void>) | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distanceM: number; durationS: number } | null>(null);
   const [navigatingBuilding, setNavigatingBuilding] = useState<Building | null>(null);
@@ -708,7 +717,7 @@ export default function MapView({
               ]
             ],
             "fill-extrusion-base": 0,
-            "fill-extrusion-opacity": 0.92,
+            "fill-extrusion-opacity": isSatelliteRef.current ? (is3DRef.current ? 0.35 : 0.05) : 0.92,
             "fill-extrusion-vertical-gradient": true
           }
         });
@@ -720,13 +729,15 @@ export default function MapView({
           source: "campus-buildings",
           filter: ["!=", ["get", "id"], "campus_boundary"],
           paint: {
-            "line-color": [
-              "case",
-              ["==", ["get", "isActive"], false],
-              isDarkMode ? "#475569" : "#cbd5e1",
-              isDarkMode ? "rgba(148, 163, 184, 0.25)" : "rgba(15, 23, 42, 0.15)"
-            ],
-            "line-width": 1,
+            "line-color": isSatelliteRef.current
+              ? "rgba(255, 255, 255, 0.75)"
+              : [
+                  "case",
+                  ["==", ["get", "isActive"], false],
+                  isDarkMode ? "#475569" : "#cbd5e1",
+                  isDarkMode ? "rgba(148, 163, 184, 0.25)" : "rgba(15, 23, 42, 0.15)"
+                ],
+            "line-width": isSatelliteRef.current ? 1.5 : 1,
             "line-opacity": 1
           }
         });
@@ -759,15 +770,19 @@ export default function MapView({
             "text-max-width": 6
           },
           paint: {
-            "text-color": [
-              "case",
-              ["==", ["get", "isActive"], false],
-              isDarkMode ? "#94a3b8" : "#94a3b8",
-              isDarkMode ? "#f8fafc" : "rgba(15, 23, 42, 0.75)"
-            ],
-            "text-halo-color": isDarkMode ? "#0f172a" : "rgba(255, 255, 255, 0.35)",
-            "text-halo-width": isDarkMode ? 1.6 : 1,
-            "text-halo-blur": isDarkMode ? 1.2 : 0.5,
+            "text-color": isSatelliteRef.current
+              ? "#ffffff"
+              : [
+                  "case",
+                  ["==", ["get", "isActive"], false],
+                  isDarkMode ? "#94a3b8" : "#94a3b8",
+                  isDarkMode ? "#f8fafc" : "rgba(15, 23, 42, 0.75)"
+                ],
+            "text-halo-color": isSatelliteRef.current
+              ? "#000000"
+              : (isDarkMode ? "#0f172a" : "rgba(255, 255, 255, 0.35)"),
+            "text-halo-width": isSatelliteRef.current ? 2.5 : (isDarkMode ? 1.6 : 1),
+            "text-halo-blur": isSatelliteRef.current ? 1 : (isDarkMode ? 1.2 : 0.5),
             "text-opacity": [
               "case",
               ["==", ["get", "isActive"], false],
@@ -867,10 +882,10 @@ export default function MapView({
     };
 
     const applyBuildingVisibility = () => {
-      const visibility = isSatelliteRef.current ? "none" : "visible";
+      // Keep building layers visible in both vector and satellite modes for full parity
       ["campus-buildings-fill", "campus-buildings-line", "campus-buildings-label", "campus-buildings-highlight", "campus-boundary-wall"].forEach((layerId) => {
         if (mapInstance.getLayer(layerId)) {
-          mapInstance.setLayoutProperty(layerId, "visibility", visibility);
+          mapInstance.setLayoutProperty(layerId, "visibility", "visible");
         }
       });
     };
@@ -909,6 +924,22 @@ export default function MapView({
       addBuildingLayers();
       applyBuildingVisibility();
       fetchRoadsRef.current?.();
+      if (activeRouteResultRef.current && activeRouteResultRef.current.coordinates.length > 0) {
+        const dirSource = mapInstance.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
+        dirSource?.setData({
+          type: "FeatureCollection",
+          features: [
+            {
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "LineString",
+                coordinates: activeRouteResultRef.current.coordinates
+              }
+            }
+          ]
+        });
+      }
     });
 
     return () => {
@@ -1135,6 +1166,8 @@ export default function MapView({
     setShowAllSteps(false);
     navigatingBuildingRef.current = null;
     lastRouteCalcRef.current = null;
+    activeRouteResultRef.current = null;
+    setActiveRouteResult(null);
     const source = map?.getSource("direction-line") as maplibregl.GeoJSONSource | undefined;
     source?.setData({ type: "FeatureCollection", features: [] });
   };
@@ -1291,7 +1324,6 @@ export default function MapView({
         onLocateUser={handleLocateUser}
         onToggle3D={handleToggle3D}
         is3D={is3D}
-        isSatellite={isSatellite}
         hasBottomNav={!showTabsInHeader}
         bearing={bearing}
       />

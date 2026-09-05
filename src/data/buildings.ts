@@ -1589,7 +1589,7 @@ export const buildings: Building[] = [
         "Beverages"
       ]
     },
-    "image": "/images/buildings/mahead1.avif",
+    "image": "/images/buildings/yippee-point.jpg",
     "geometry": {
       "type": "Polygon",
       "coordinates": [
