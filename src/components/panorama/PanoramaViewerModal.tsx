@@ -7,11 +7,78 @@ interface PanoramaViewerModalProps {
   onClose: () => void;
 }
 
-// Pre-allocated math objects for DeviceOrientation quaternion conversion (zero GC, zero gimbal lock)
-const zee = new THREE.Vector3(0, 0, 1);
-const euler = new THREE.Euler();
-const q0 = new THREE.Quaternion();
-const q1 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)); // -PI/2 rotation around X axis
+// Mathematical Tait-Bryan orientation decomposition for DeviceOrientation (Pannellum / W3C standard)
+// Eliminates gimbal lock at beta=90, prevents 180-degree Android angle flips, and provides rock-solid orientation tracking
+class DeviceQuat {
+  w: number;
+  x: number;
+  y: number;
+  z: number;
+
+  constructor(w = 1, x = 0, y = 0, z = 0) {
+    this.w = w;
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
+
+  multiply(q: DeviceQuat): DeviceQuat {
+    return new DeviceQuat(
+      this.w * q.w - this.x * q.x - this.y * q.y - this.z * q.z,
+      this.x * q.w + this.w * q.x + this.y * q.z - this.z * q.y,
+      this.y * q.w + this.w * q.y + this.z * q.x - this.x * q.z,
+      this.z * q.w + this.w * q.z + this.x * q.y - this.y * q.x
+    );
+  }
+
+  toEulerAngles(): [number, number, number] {
+    const phi = Math.atan2(
+      2 * (this.w * this.x + this.y * this.z),
+      1 - 2 * (this.x * this.x + this.y * this.y)
+    );
+    const theta = Math.asin(
+      Math.max(-1, Math.min(1, 2 * (this.w * this.y - this.z * this.x)))
+    );
+    const psi = Math.atan2(
+      2 * (this.w * this.z + this.x * this.y),
+      1 - 2 * (this.y * this.y + this.z * this.z)
+    );
+    return [phi, theta, psi];
+  }
+}
+
+function computeDeviceAngles(alpha: number, beta: number, gamma: number, orient = 0) {
+  const r = [
+    beta ? (beta * Math.PI) / 360 : 0,
+    gamma ? (gamma * Math.PI) / 360 : 0,
+    alpha ? (alpha * Math.PI) / 360 : 0,
+  ];
+  const c = [Math.cos(r[0]), Math.cos(r[1]), Math.cos(r[2])];
+  const s = [Math.sin(r[0]), Math.sin(r[1]), Math.sin(r[2])];
+
+  let quat = new DeviceQuat(
+    c[0] * c[1] * c[2] - s[0] * s[1] * s[2],
+    s[0] * c[1] * c[2] - c[0] * s[1] * s[2],
+    c[0] * s[1] * c[2] + s[0] * c[1] * s[2],
+    c[0] * c[1] * s[2] + s[0] * s[1] * c[2]
+  );
+
+  // World transform to align device frame with panorama coordinate space
+  quat = quat.multiply(new DeviceQuat(Math.SQRT1_2, -Math.SQRT1_2, 0, 0));
+
+  // Screen orientation compensation (portrait vs landscape)
+  if (orient) {
+    const angle = (-orient * Math.PI) / 360;
+    quat = quat.multiply(new DeviceQuat(Math.cos(angle), 0, -Math.sin(angle), 0));
+  }
+
+  const angles = quat.toEulerAngles();
+  return {
+    pitch: (angles[0] * 180) / Math.PI,
+    roll: (-angles[1] * 180) / Math.PI,
+    yaw: (-angles[2] * 180) / Math.PI,
+  };
+}
 
 export default function PanoramaViewerModal({
   initialLocation,
@@ -62,10 +129,13 @@ export default function PanoramaViewerModal({
   const onPointerDownLonRef = useRef(0);
   const onPointerDownLatRef = useRef(0);
 
-  // Gyroscope tracking refs (quaternions eliminate gimbal lock & angle flips)
-  const gyroTargetQuatRef = useRef<THREE.Quaternion>(new THREE.Quaternion());
-  const gyroCurrentQuatRef = useRef<THREE.Quaternion>(new THREE.Quaternion());
-  const hasGyroReadingRef = useRef(false);
+  // Gyroscope tracking refs (seamless relative yaw offset & smooth angle targets)
+  const gyroYawOffsetRef = useRef(0);
+  const targetYawRef = useRef(initialLocation.initialYaw || 0);
+  const targetPitchRef = useRef(initialLocation.initialPitch || 0);
+  const targetRollRef = useRef(0);
+  const currentRollRef = useRef(0);
+  const gyroEventCountRef = useRef(0);
 
   // Touch pinch-zoom refs
   const initialTouchDistanceRef = useRef<number | null>(null);
@@ -175,40 +245,45 @@ export default function PanoramaViewerModal({
         lonRef.current += 0.08;
       }
 
-      if (isGyroActiveRef.current && hasGyroReadingRef.current) {
-        // SLERP quaternion with 0.15 factor for smooth, jitter-free orientation without lag
-        gyroCurrentQuatRef.current.slerp(gyroTargetQuatRef.current, 0.15);
-        camera.quaternion.copy(gyroCurrentQuatRef.current);
+      if (isGyroActiveRef.current && gyroEventCountRef.current > 5 && !isPointerDownRef.current) {
+        // Calculate shortest angular path around 360 degrees for horizontal yaw
+        let diffYaw = (targetYawRef.current - lonRef.current) % 360;
+        if (diffYaw < -180) diffYaw += 360;
+        if (diffYaw > 180) diffYaw -= 360;
+        lonRef.current += diffYaw * 0.22;
 
-        // Update compass heading from camera forward vector
-        if (time - lastHeadingUpdate > 100) {
-          const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-          const heading = ((THREE.MathUtils.radToDeg(Math.atan2(forward.x, forward.z)) % 360) + 360) % 360;
-          setHeadingDegrees(Math.round(heading));
-          lastHeadingUpdate = time;
-        }
-      } else {
-        // Clamp latitude to avoid pole gimbal flipping in touch/mouse mode
-        latRef.current = Math.max(-85, Math.min(85, latRef.current));
+        // Smooth vertical pitch towards target
+        latRef.current += (targetPitchRef.current - latRef.current) * 0.22;
 
-        // Calculate camera target vector from spherical coordinates
-        const phi = THREE.MathUtils.degToRad(90 - latRef.current);
-        const theta = THREE.MathUtils.degToRad(lonRef.current);
+        // Smooth subtle device roll
+        currentRollRef.current += (targetRollRef.current - currentRollRef.current) * 0.15;
+      }
 
-        const target = new THREE.Vector3(
-          500 * Math.sin(phi) * Math.cos(theta),
-          500 * Math.cos(phi),
-          500 * Math.sin(phi) * Math.sin(theta)
-        );
+      // Clamp latitude to avoid pole gimbal singularity
+      latRef.current = Math.max(-85, Math.min(85, latRef.current));
 
-        camera.lookAt(target);
+      // Calculate camera target vector from spherical coordinates
+      const phi = THREE.MathUtils.degToRad(90 - latRef.current);
+      const theta = THREE.MathUtils.degToRad(lonRef.current);
 
-        // Update heading compass throttled (every 100ms)
-        if (time - lastHeadingUpdate > 100) {
-          const normalizedHeading = ((lonRef.current % 360) + 360) % 360;
-          setHeadingDegrees(Math.round(normalizedHeading));
-          lastHeadingUpdate = time;
-        }
+      const target = new THREE.Vector3(
+        500 * Math.sin(phi) * Math.cos(theta),
+        500 * Math.cos(phi),
+        500 * Math.sin(phi) * Math.sin(theta)
+      );
+
+      camera.lookAt(target);
+
+      // Subtle roll tilt alignment with device
+      if (isGyroActiveRef.current && Math.abs(currentRollRef.current) > 0.1) {
+        camera.rotateZ(THREE.MathUtils.degToRad(-currentRollRef.current));
+      }
+
+      // Update heading compass throttled (every 100ms)
+      if (time - lastHeadingUpdate > 100) {
+        const normalizedHeading = ((lonRef.current % 360) + 360) % 360;
+        setHeadingDegrees(Math.round(normalizedHeading));
+        lastHeadingUpdate = time;
       }
 
       renderer.render(scene, camera);
@@ -303,6 +378,10 @@ export default function PanoramaViewerModal({
     lonRef.current -= deltaX;
     latRef.current += deltaY;
 
+    if (isGyroActiveRef.current) {
+      gyroYawOffsetRef.current += deltaX;
+    }
+
     // Record instantaneous velocity for momentum gliding
     velocityLonRef.current = -deltaX;
     velocityLatRef.current = deltaY;
@@ -383,15 +462,7 @@ export default function PanoramaViewerModal({
   const handleToggleGyro = async () => {
     if (isGyroActive) {
       setIsGyroActive(false);
-      hasGyroReadingRef.current = false;
       window.removeEventListener("deviceorientation", handleDeviceOrientation);
-
-      // Seamless transition: restore spherical lon/lat from current camera quaternion
-      if (cameraRef.current) {
-        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(cameraRef.current.quaternion);
-        latRef.current = THREE.MathUtils.radToDeg(Math.asin(THREE.MathUtils.clamp(forward.y, -1, 1)));
-        lonRef.current = THREE.MathUtils.radToDeg(Math.atan2(forward.x, forward.z));
-      }
       return;
     }
 
@@ -424,7 +495,7 @@ export default function PanoramaViewerModal({
       return;
     }
 
-    hasGyroReadingRef.current = false;
+    gyroEventCountRef.current = 0;
     setIsGyroActive(true);
     setIsAutoRotating(false);
     // Listen strictly to single deviceorientation stream to prevent conflicting frame jitter
@@ -434,34 +505,32 @@ export default function PanoramaViewerModal({
   const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
     if (event.alpha === null || event.beta === null || event.gamma === null) return;
 
-    // Convert degrees to radians
-    const alpha = THREE.MathUtils.degToRad(event.alpha);
-    const beta = THREE.MathUtils.degToRad(event.beta);
-    const gamma = THREE.MathUtils.degToRad(event.gamma);
-
-    // Screen orientation compensation (portrait = 0, landscape = 90 or 270)
+    // Screen orientation angle (portrait = 0, landscape = 90 / -90 / 270)
     let orient = 0;
     if (typeof window.orientation !== "undefined") {
-      orient = THREE.MathUtils.degToRad(Number(window.orientation));
+      orient = Number(window.orientation);
     } else if (screen.orientation && typeof screen.orientation.angle === "number") {
-      orient = THREE.MathUtils.degToRad(screen.orientation.angle);
+      orient = screen.orientation.angle;
     }
 
-    // Convert W3C DeviceOrientation intrinsic angles to Three.js camera quaternion.
-    // Intrinsic Z-X'-Y'' rotation maps to camera space via 'YXZ'
-    euler.set(beta, alpha, -gamma, "YXZ");
-    const target = new THREE.Quaternion();
-    target.setFromEuler(euler);
-    target.multiply(q1); // Camera faces outward through back of phone
-    target.multiply(q0.setFromAxisAngle(zee, -orient)); // Screen rotation compensation
+    const { pitch, roll, yaw } = computeDeviceAngles(event.alpha, event.beta, event.gamma, orient);
 
-    gyroTargetQuatRef.current.copy(target);
-
-    // Initial instant sync on first valid sensor packet
-    if (!hasGyroReadingRef.current) {
-      gyroCurrentQuatRef.current.copy(target);
-      hasGyroReadingRef.current = true;
+    // Skip first 5 events to discard stale/transient hardware sensor buffer
+    if (gyroEventCountRef.current < 5) {
+      gyroEventCountRef.current += 1;
+      return;
     }
+
+    // On 5th event, calibrate initial yaw offset seamlessly from current view
+    if (gyroEventCountRef.current === 5) {
+      gyroYawOffsetRef.current = yaw - lonRef.current;
+      gyroEventCountRef.current += 1;
+    }
+
+    // Set target angles
+    targetYawRef.current = yaw - gyroYawOffsetRef.current;
+    targetPitchRef.current = Math.max(-85, Math.min(85, pitch));
+    targetRollRef.current = THREE.MathUtils.clamp(roll, -45, 45);
   };
 
   useEffect(() => {
