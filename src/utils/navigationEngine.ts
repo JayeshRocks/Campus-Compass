@@ -217,8 +217,8 @@ export async function calculateCampusRoadGraphRoute(
     if (diff > 180) diff -= 360;
     if (diff < -180) diff += 360;
 
-    let icon = "straight";
-    let text = "Continue along Campus Road";
+    let icon: string;
+    let text: string;
 
     if (diff < -45) {
       icon = "turn_left";

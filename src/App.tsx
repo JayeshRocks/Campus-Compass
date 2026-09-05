@@ -129,6 +129,7 @@ export default function App() {
       selectedBuilding &&
       !filteredBuildings.some((b) => b.id === selectedBuilding.id)
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedBuilding(null);
     }
   }, [filteredBuildings, selectedBuilding]);

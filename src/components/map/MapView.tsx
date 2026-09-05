@@ -111,6 +111,7 @@ const getHybridSatelliteStyle = async () => {
         if (l.id === "water" || l.id.startsWith("waterway_")) return false;
         if (l.id === "building" || l.id === "building-3d" || l.id === "aeroway_fill" || l.id === "road_area_pattern") return false;
         return true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       }).map((l: any) => {
         const layer = { ...l };
         if (layer.type === "symbol") {
@@ -202,6 +203,7 @@ export default function MapView({
     if (isSatellite) {
       prevIs3DRef.current = is3D;
       if (is3D) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIs3D(false);
         map.easeTo({ pitch: 0, bearing: 0, duration: 800 });
       }
@@ -260,7 +262,6 @@ export default function MapView({
       }
       if (rawHeading !== null) {
         // Compensate for screen orientation angle (0 portrait, 90/270 landscape)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const screenAngle = typeof window.orientation !== "undefined"
           ? Number(window.orientation)
           : (screen.orientation?.angle || 0);

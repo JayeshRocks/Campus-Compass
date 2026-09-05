@@ -91,6 +91,7 @@ export default function Header({
   // If search query is typed, automatically open the search bar
   useEffect(() => {
     if (searchQuery) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsSearchOpen(true);
     }
   }, [searchQuery]);
