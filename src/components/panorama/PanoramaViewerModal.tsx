@@ -834,6 +834,22 @@ export default function PanoramaViewerModal({
                 );
               })}
             </div>
+
+            {/* Attribution & control guide footer */}
+            <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400 px-1">
+              <span>Campus Imagery &copy; MAHE Bengaluru</span>
+              <span className="flex items-center gap-1.5">
+                <span className="hidden sm:inline">Drag to pan &bull; Pinch/scroll to zoom &bull;</span>
+                <a
+                  href="https://threejs.org"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-white transition-colors text-slate-300 hover:underline"
+                >
+                  Three.js
+                </a>
+              </span>
+            </div>
           </div>
         </div>
       )}

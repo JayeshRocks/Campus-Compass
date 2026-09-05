@@ -144,12 +144,13 @@ export default function About() {
                 Campus Compass is licensed under the <strong className="text-slate-900 dark:text-white">GNU Affero General Public License v3.0</strong>.
               </p>
               <p className="text-body-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-                Built with open-source technologies including React, TypeScript, Vite, Tailwind CSS, MapLibre GL JS, and Supabase.
+                Built with open-source technologies including React, TypeScript, Vite, Tailwind CSS, MapLibre GL JS, Three.js, and Supabase.
               </p>
               <p className="text-body-sm text-slate-600 dark:text-slate-400 leading-relaxed text-sm italic">
                 Map data &copy; <a href="https://www.openstreetmap.org/copyright" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors. 
                 Vector basemap rendering by <a href="https://openfreemap.org/" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">OpenFreeMap</a>. 
-                Satellite imagery provided by <a href="https://www.esri.com/" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">Esri</a>.
+                Satellite imagery provided by <a href="https://www.esri.com/" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">Esri</a>. 
+                360&deg; virtual tour rendering powered by <a href="https://threejs.org/" className="hover:underline text-slate-900 dark:text-white" target="_blank" rel="noreferrer">Three.js</a>.
               </p>
             </div>
           </div>
