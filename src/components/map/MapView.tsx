@@ -13,6 +13,8 @@ import { calculateFootRoute } from "../../utils/navigationEngine";
 import type { RouteResult } from "../../utils/navigationEngine";
 import { TurnByTurnHUD } from "../navigation/TurnByTurnHUD";
 import { NavigationPanel } from "../navigation/NavigationPanel";
+import PanoramaViewerModal from "../panorama/PanoramaViewerModal";
+import { getPanoramaForBuilding, type PanoramaLocation } from "../../data/panoramas";
 
 // Cache state variables outside the component to survive React unmounts (tab switches)
 let cachedMapState: { center: [number, number]; zoom: number; pitch: number; bearing: number } | null = null;
@@ -218,6 +220,7 @@ export default function MapView({
   const lastRouteCalcRef = useRef<{ lat: number; lng: number; bId: string } | null>(null);
   const [showReportIssue, setShowReportIssue] = useState(false);
   const [isWeatherVisible, setIsWeatherVisible] = useState(true);
+  const [activePanorama, setActivePanorama] = useState<PanoramaLocation | null>(null);
   
   const watchIdRef = useRef<number | null>(null);
   const weatherTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1348,6 +1351,40 @@ export default function MapView({
                   <span className="material-symbols-outlined text-[20px]">directions</span>
                   Directions
                 </button>
+                {(() => {
+                  const panorama = getPanoramaForBuilding(selectedBuilding.id);
+                  return (
+                    <button
+                      onClick={() => {
+                        if (panorama) {
+                          setActivePanorama(panorama);
+                        }
+                      }}
+                      disabled={!panorama}
+                      className={`w-12 py-2.5 rounded-lg border transition-all flex items-center justify-center shadow-sm ${
+                        panorama
+                          ? "glass-panel text-slate-700 hover:bg-slate-100 border-slate-200 dark:text-on-surface dark:hover:bg-surface-container-high dark:border-outline-variant/30 cursor-pointer active:scale-95"
+                          : "opacity-40 grayscale cursor-not-allowed border-slate-200 dark:border-outline-variant/20 bg-slate-100/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500"
+                      }`}
+                      title={
+                        panorama
+                          ? `View 360° Virtual Tour of ${selectedBuilding.name}`
+                          : "360° view not available for this building"
+                      }
+                      aria-label={
+                        panorama
+                          ? `View 360° Virtual Tour of ${selectedBuilding.name}`
+                          : "360° view not available for this building"
+                      }
+                    >
+                      <img
+                        src="/icons/360image.svg"
+                        alt=""
+                        className={`w-6 h-6 object-contain ${!panorama ? "grayscale opacity-50" : ""}`}
+                      />
+                    </button>
+                  );
+                })()}
                 <button
                   onClick={() => handleShowToast("Sharing", "2")}
                   className="w-12 py-2.5 glass-panel text-slate-700 hover:bg-slate-100 border border-slate-200 dark:text-on-surface dark:hover:bg-surface-container-high dark:border-outline-variant/30 rounded-lg transition-colors flex items-center justify-center cursor-pointer shadow-sm"
@@ -1368,7 +1405,12 @@ export default function MapView({
         </div>
       )}
 
-
+      {activePanorama && (
+        <PanoramaViewerModal
+          initialLocation={activePanorama}
+          onClose={() => setActivePanorama(null)}
+        />
+      )}
 
       {showReportIssue && (
         <ReportIssueForm onClose={() => setShowReportIssue(false)} />

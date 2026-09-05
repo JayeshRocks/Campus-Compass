@@ -32,6 +32,8 @@ export interface Building {
     features: string[];
   };
   image: string;
+  has360View?: boolean;
+  panoramaId?: string;
   geometry: BuildingGeometry;
 }
 
