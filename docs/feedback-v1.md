@@ -1,11 +1,11 @@
 # Private feedback inbox v1
 
-The map popup and the Report an Issue page keep their original visual design. Both submit to `POST /api/feedback` with a category and description, plus an optional email for private follow-up. No name, account, or location is collected. Use the Pin Drop / Map Marker category for comments about map pins or marking; choosing it never captures a location. A receipt means the report was written to Supabase, not that a public issue was created.
+The map popup and the Report an Issue page keep their original visual design. Both submit to `POST /api/feedback` with a category and description, plus an optional email for private follow-up. No name, account, or automatic location is collected. For a location-related report, a visitor can optionally pick an existing campus place or manually attach a map pin. The selection describes the issue, not the visitor’s live location, and stays in the private inbox. A receipt means the report was written to Supabase, not that a public issue was created.
 
 ## Review and staging
 
 - Do not merge or apply the migration to the production project as part of this draft. Use a separate Supabase staging project and a Vercel Preview deployment. Leave the existing feedback table, records, and old publisher untouched.
-- Apply both feedback v1 migrations in order to staging, or only the category migration if the first migration is already applied. If using a preview deployment, configure the feedback environment variables for **Preview** and the intended branch only. Never prefix the server key or rate-limit secret with `VITE_`, and never put production Supabase credentials into the staging feedback settings.
+- Apply the private inbox migration to staging. If using a preview deployment, configure the feedback environment variables for **Preview** and the intended branch only. Never prefix the server key or rate-limit secret with `VITE_`, and never put production Supabase credentials into the staging feedback settings.
 | Preview setting | Purpose |
 | --- | --- |
 | `FEEDBACK_STAGING_ENABLED` | Set to `true` only for the reviewed preview branch. |
@@ -15,10 +15,10 @@ The map popup and the Report an Issue page keep their original visual design. Bo
 | `VERCEL_ENV` | Must be the platform-provided `preview` value. |
 
 - The API is disabled by default, including on production and an unconfigured preview. Plain `npm run dev` does not serve Vercel functions. For functional browser testing, use the configured protected preview or a local mock API with synthetic data.
-- In the preview, try both entry points. Submit from both entry points using synthetic descriptions, one with no email and one with a synthetic reply email. Check that the private inbox records only those fields and the selected category. With preview intake disabled, check that the inline notice appears by the unchanged submit button and that the form retains its contents. Repeat an identical request ID to confirm it is saved once. Test an invalid request, a temporary failure and a retry, and verify limits on a controlled test connection. Verify unauthenticated and ordinary signed-in clients cannot read reports or directly invoke the write RPC. No GitHub issue should be created.
+- In the preview, try both entry points. Submit from both entry points using synthetic descriptions, one with no email and one with a synthetic reply email. Try a map-related report with a campus place or a manually selected pin, then another report without any location. Check that the private inbox records only fields explicitly provided. With preview intake disabled, check that the inline notice appears by the unchanged submit button and that the form retains its contents. Repeat an identical request ID to confirm it is saved once. Test an invalid request, a temporary failure and a retry, and verify limits on a controlled test connection. Verify unauthenticated and ordinary signed-in clients cannot read reports or directly invoke the write RPC. No GitHub issue should be created.
 - Separately smoke-test map controls, normal navigation, and theme switching; the feedback backend change does not change the main map's location or navigation behavior.
 
-The endpoint allows up to eight new reports per client and 120 overall per UTC hour. Shared school networks may share a client allowance; monitor this limit in staging. Request retries for an already-saved, identical report do not count again. Run `node --test tests/feedback.test.mjs` for endpoint checks, and run `tests/feedback-v1-db.sql` against an empty disposable database with Supabase roles after both migrations.
+The endpoint allows up to eight new reports per client and 120 overall per UTC hour. Shared school networks may share a client allowance; monitor this limit in staging. Request retries for an already-saved, identical report do not count again. Run `node --test tests/feedback.test.mjs` for endpoint checks, and run `tests/feedback-v1-db.sql` against an empty disposable database with Supabase roles after the migration.
 
 ## Maintainer workflow
 

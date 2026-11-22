@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
-type FeedbackInput = { category: string; message: string; email: string };
+type FeedbackInput = {
+  category: string;
+  message: string;
+  email: string;
+  buildingId?: string;
+  pin?: { lat: number; lng: number };
+};
 type SubmissionStatus = "idle" | "submitting" | "success" | "error";
 
 const transientError =
@@ -50,7 +56,13 @@ export function useFeedbackSubmission() {
 
     try {
       // List allowed fields explicitly. Leave an empty follow-up email out.
-      const draft = { category: input.category, message, ...(email ? { email } : {}) };
+      const draft = {
+        category: input.category,
+        message,
+        ...(email ? { email } : {}),
+        ...(input.buildingId ? { buildingId: input.buildingId } : {}),
+        ...(input.pin ? { pin: input.pin } : {}),
+      };
       const signature = JSON.stringify(draft);
       if (lastRequest.current?.signature !== signature) {
         lastRequest.current = { signature, id: crypto.randomUUID() };

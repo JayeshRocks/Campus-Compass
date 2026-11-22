@@ -1,9 +1,16 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import FeedbackLocationPicker from "../feedback/FeedbackLocationPicker";
+import type { FeedbackLocation } from "../feedback/FeedbackLocationPicker";
 import { useFeedbackSubmission } from "../../lib/useFeedbackSubmission";
+
+const locationCategories = new Set(["missing_place", "incorrect_location", "incorrect_info", "routing_error", "accessibility"]);
 
 export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
   const { status, errorMessage, submit } = useFeedbackSubmission();
   const formId = useId();
+  const [category, setCategory] = useState("");
+  const [location, setLocation] = useState<FeedbackLocation>({});
+  const showLocation = locationCategories.has(category);
   const closeTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
@@ -13,7 +20,8 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
     const formData = new FormData(e.currentTarget);
     if (await submit({
       email: String(formData.get("email") ?? ""),
-      category: String(formData.get("category") ?? ""),
+      category,
+      ...(showLocation ? location : {}),
       message: String(formData.get("message") ?? ""),
     })) {
       closeTimer.current = window.setTimeout(onClose, 2000);
@@ -54,11 +62,10 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
 
             <div className="space-y-1.5">
               <label htmlFor={formId + "-category"} className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Category</label>
-              <select id={formId + "-category"} name="category" required defaultValue="" className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface outline-none appearance-none">
+              <select id={formId + "-category"} name="category" required value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface outline-none appearance-none">
                 <option value="" disabled>Choose a category</option>
                 <option value="missing_place">Missing Place / Room</option>
                 <option value="incorrect_location">Incorrect Location</option>
-                <option value="pin_marker">Pin Drop / Map Marker</option>
                 <option value="incorrect_info">Incorrect Building Info / Timings</option>
                 <option value="routing_error">Navigation / Routing Issue</option>
                 <option value="accessibility">Accessibility Issue / Missing Ramps</option>
@@ -67,6 +74,12 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
                 <option value="feedback">General Feedback</option>
               </select>
             </div>
+
+            {showLocation && (
+              <FeedbackLocationPicker location={location} onChange={setLocation}
+                labelClassName="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block"
+                fieldClassName="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface outline-none" />
+            )}
 
             <div className="space-y-1.5">
               <label htmlFor={formId + "-message"} className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Your Message</label>

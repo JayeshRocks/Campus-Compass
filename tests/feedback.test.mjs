@@ -28,12 +28,18 @@ test('validates and normalizes all allowed fields', () => {
   }
 });
 
-test('preserves the pin/marker report category', async () => {
+test('saves an explicitly selected issue location and omits missing coordinates', async () => {
+  const payloads = [];
   const handle = makeFeedbackHandler({ env, fetcher: async (_target, options) => {
-    assert.equal(JSON.parse(options.body).p_category, 'pin_marker');
+    const { p_building_id, p_lat, p_lng } = JSON.parse(options.body);
+    payloads.push([p_building_id, p_lat, p_lng]);
     return Response.json('saved');
   }});
-  assert.equal((await handle(request({ ...input, category: 'pin_marker' }))).status, 200);
+  assert.equal((await handle(request({ ...input, category: 'incorrect_location',
+    buildingId: 'academic-block', pin: { lat: 13.1, lng: 77.5 } }))).status, 200);
+  assert.equal((await handle(request(input))).status, 200);
+  assert.deepEqual(payloads, [['academic-block', 13.1, 77.5], [null, null, null]]);
+  assert.equal(validateFeedback({ ...input, category: 'pin_marker' }), null);
 });
 
 test('preview-only endpoint gates before any persistence', async () => {

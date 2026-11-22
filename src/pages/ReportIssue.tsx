@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
+import FeedbackLocationPicker from "../components/feedback/FeedbackLocationPicker";
+import type { FeedbackLocation } from "../components/feedback/FeedbackLocationPicker";
 import { useFeedbackSubmission } from "../lib/useFeedbackSubmission";
 
 export default function ReportIssue() {
@@ -6,6 +8,8 @@ export default function ReportIssue() {
   const [email, setEmail] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [location, setLocation] = useState<FeedbackLocation>({});
+  const showLocation = category === "map";
   const { status, errorMessage, submit, reset } = useFeedbackSubmission();
   const resetTimer = useRef<number | undefined>(undefined);
   const submitted = status === "success";
@@ -15,13 +19,13 @@ export default function ReportIssue() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Preserve the existing labels/options while sending the supported backend category.
-    const backendCategory = category === "pin_marker" ? category :
-      category === "other" ? "feedback" : category ? "bug" : "";
-    if (!await submit({ category: backendCategory, message: description, email })) return;
+    const backendCategory = category === "other" ? "feedback" : category ? "bug" : "";
+    if (!await submit({ category: backendCategory, message: description, email, ...(showLocation ? location : {}) })) return;
     resetTimer.current = window.setTimeout(() => {
       setEmail("");
       setCategory("");
       setDescription("");
+      setLocation({});
       reset();
     }, 4000);
   };
@@ -83,12 +87,17 @@ export default function ReportIssue() {
                 >
                   <option value="" disabled>Choose a category</option>
                   <option value="map">Map rendering glitch</option>
-                  <option value="pin_marker">Pin Drop / Map Marker</option>
                   <option value="ui">Layout or spacing alignment issue</option>
                   <option value="search">Search input or filter bug</option>
                   <option value="other">Other feedback</option>
                 </select>
               </div>
+
+              {showLocation && (
+                <FeedbackLocationPicker location={location} onChange={setLocation}
+                  labelClassName="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2"
+                  fieldClassName="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-[#22B8CF] focus:border-[#22B8CF] transition-all shadow-sm" />
+              )}
 
               <div>
                 <label htmlFor={formId + "-message"} className="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
