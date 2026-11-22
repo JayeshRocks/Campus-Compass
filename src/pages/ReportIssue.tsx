@@ -31,7 +31,7 @@ export default function ReportIssue() {
   };
 
   return (
-    <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
+    <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="max-w-2xl mx-auto pb-8 animate-fade-in">
         <div className="text-center mb-8">
           <span className="text-[#22B8CF] dark:text-primary font-label-md text-label-md bg-[#EAFBFC] dark:bg-primary/10 px-3 py-1 rounded-full border border-[#B7E9ED] dark:border-primary/20">
@@ -111,7 +111,7 @@ export default function ReportIssue() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the bug in detail..."
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface placeholder-slate-400 dark:placeholder-on-surface-variant text-sm focus:outline-none focus:ring-1 focus:ring-[#22B8CF] focus:border-[#22B8CF] transition-all shadow-sm resize-none"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface placeholder-slate-400 dark:placeholder-on-surface-variant text-sm focus:outline-none focus:ring-1 focus:ring-[#22B8CF] focus:border-[#22B8CF] transition-all shadow-sm resize-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 />
               </div>
 

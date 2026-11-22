@@ -30,7 +30,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
 
   return (
     <div onClick={onClose} className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm">
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-4xl max-h-full overflow-x-hidden overflow-y-auto liquid-glass rounded-3xl relative animate-fade-in flex flex-col md:flex-row">
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-4xl max-h-full overflow-x-hidden overflow-y-auto liquid-glass [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-3xl relative animate-fade-in flex flex-col md:flex-row">
 
         {/* Decorative Background for light/dark */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#22B8CF]/10 blur-[100px] rounded-full -mr-48 -mt-48 pointer-events-none" />
@@ -83,7 +83,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
 
             <div className="space-y-1.5">
               <label htmlFor={formId + "-message"} className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Your Message</label>
-              <textarea id={formId + "-message"} name="message" required maxLength={2000} className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 resize-none outline-none" placeholder="Tell us what's on your mind..." rows={4}></textarea>
+              <textarea id={formId + "-message"} name="message" required maxLength={2000} className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 resize-none outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" placeholder="Tell us what's on your mind..." rows={4}></textarea>
             </div>
 
             <div className="space-y-2">
