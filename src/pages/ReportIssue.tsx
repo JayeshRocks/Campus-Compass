@@ -2,21 +2,20 @@ import FeedbackForm from "../components/feedback/FeedbackForm";
 
 export default function ReportIssue() {
   return (
-    <div className="h-full w-full page-blobs text-slate-900 dark:text-on-surface p-6 md:p-12 overflow-y-auto">
-      <div className="max-w-2xl mx-auto pb-8 animate-fade-in">
-        <div className="text-center mb-8">
-          <span className="text-[#22B8CF] dark:text-primary font-label-md text-label-md bg-[#EAFBFC] dark:bg-primary/10 px-3 py-1 rounded-full border border-[#B7E9ED] dark:border-primary/20">
+    <div className="page-blobs h-full w-full overflow-y-auto overscroll-contain scroll-pb-28 scroll-pt-20 [background-attachment:scroll]! px-4 pt-20 text-slate-900 dark:text-on-surface sm:px-6 md:px-12 md:pt-24">
+      <div className="mx-auto max-w-2xl pb-[calc(6.5rem_+_env(safe-area-inset-bottom))]">
+        <div className="mb-5 text-center md:mb-8">
+          <span className="rounded-full border border-[#B7E9ED] bg-[#EAFBFC] px-3 py-1 font-label-md text-label-md text-[#087B8E] dark:border-primary/20 dark:bg-primary/10 dark:text-primary">
             Support Desk
           </span>
-          <h2 className="font-headline-lg text-headline-lg font-bold text-slate-900 dark:text-on-surface mt-4 tracking-tight">
+          <h2 className="mt-3 font-headline-lg text-2xl font-bold tracking-tight md:mt-4 md:text-headline-lg">
             Report an Issue
           </h2>
-          <p className="font-body-md text-sm text-slate-600 dark:text-on-surface-variant mt-2">
+          <p className="mt-2 font-body-md text-sm text-slate-600 dark:text-on-surface-variant">
             Found a bug or encountered a map glitch? Let us know so we can fix it.
           </p>
         </div>
-
-        <div className="bg-white dark:bg-surface-container-lowest/80 backdrop-blur-md border border-slate-200 dark:border-outline-variant/30 rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-lg dark:border-outline-variant/30 dark:bg-surface-container-lowest md:p-8">
           <FeedbackForm />
         </div>
       </div>

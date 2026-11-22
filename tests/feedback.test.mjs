@@ -33,7 +33,9 @@ test('preview-only endpoint gates before any persistence', async () => {
     { FEEDBACK_STAGING_SUPABASE_URL: 'http://disposable.supabase.co' },
     { FEEDBACK_STAGING_SUPABASE_URL: 'https://other.example.com' }, { FEEDBACK_STAGING_SUPABASE_KEY: 'sb_publishable_invalid' }]) {
     const handle = makeFeedbackHandler({ env: { ...env, ...disabled }, fetcher: rejectFetch });
-    assert.equal((await handle(request())).status, 503);
+    const result = await handle(request());
+    assert.equal(result.status, 503);
+    assert.deepEqual(await result.json(), { ok: false, error: 'feedback_disabled' });
   }
 });
 

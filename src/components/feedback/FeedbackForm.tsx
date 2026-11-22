@@ -16,7 +16,7 @@ const categories = [
 ] as const;
 const mapCategories = new Set<string>(categories.slice(0, 5).map(([value]) => value));
 const places = [...buildings].sort((a, b) => a.name.localeCompare(b.name));
-const field = "w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 focus-visible:outline-2 focus-visible:outline-[#22B8CF] disabled:opacity-70 dark:border-outline-variant dark:bg-surface-container-high dark:text-on-surface";
+const field = "w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-base text-slate-900 focus-visible:outline-2 focus-visible:outline-[#22B8CF] disabled:opacity-70 sm:text-sm dark:border-outline-variant dark:bg-surface-container-high dark:text-on-surface";
 const label = "block text-sm font-semibold text-slate-700 dark:text-on-surface";
 
 export default function FeedbackForm({ onDone }: { onDone?: () => void }) {
@@ -66,10 +66,15 @@ export default function FeedbackForm({ onDone }: { onDone?: () => void }) {
         signal: controller.signal,
       });
       if (response.status === 429) {
-        setError("Too many reports were sent recently. Wait a bit and try again.");
+        setError("Too many reports from this connection. Your draft is still here. Wait a little before trying again.");
         return;
       }
-      const result: unknown = await response.json();
+      const result: unknown = await response.json().catch(() => null);
+      if (response.status === 503 && result && typeof result === "object" &&
+          "error" in result && result.error === "feedback_disabled") {
+        setError("Feedback is turned off in this preview. Nothing was sent, and your draft is still here.");
+        return;
+      }
       if (!response.ok || !result || typeof result !== "object" || !("ok" in result) || result.ok !== true) {
         throw new Error("Report was not accepted");
       }
@@ -82,7 +87,7 @@ export default function FeedbackForm({ onDone }: { onDone?: () => void }) {
       setPin(null);
       setShowPin(false);
     } catch {
-      setError("We couldn’t confirm that your report was received. Your text is still here. Please try again.");
+      setError("We couldn’t confirm your feedback was sent. Your draft is still here. Try again in a moment.");
     } finally {
       window.clearTimeout(timeout);
       inFlight.current = false;
@@ -153,11 +158,11 @@ export default function FeedbackForm({ onDone }: { onDone?: () => void }) {
             Your report and email go to the Campus Compass team, not to public GitHub.
           </p>
         </div>
+        {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/60 dark:text-red-200">{error}</p>}
         <button type="submit" className="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-wait disabled:opacity-70 dark:bg-primary dark:text-on-primary dark:enabled:hover:bg-primary/80">
           {sending ? "Sending…" : "Send report"}
         </button>
       </fieldset>
-      {error && <p role="alert" className="text-sm font-medium text-red-700 dark:text-red-300">{error}</p>}
     </form>
   );
 }

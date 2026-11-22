@@ -67,7 +67,7 @@ export function makeFeedbackHandler({ env = process.env, fetcher = fetch } = {})
   return async function feedback(request) {
     if (request.method !== 'POST') return reply(405, 'method_not_allowed', { Allow: 'POST' });
     const config = stagingConfig(env);
-    if (!config) return reply(503, 'unavailable');
+    if (!config) return reply(503, 'feedback_disabled');
     if (request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json')
       return reply(415, 'unsupported_content_type');
     const origin = request.headers.get('origin');
