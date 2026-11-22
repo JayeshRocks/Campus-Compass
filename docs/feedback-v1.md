@@ -1,6 +1,6 @@
 # Private feedback inbox v1
 
-The map modal and the Report an Issue page share one form and submit to `POST /api/feedback`. The receipt means the report was written to Supabase, not that a public issue was created. Reports can include an optional building or manually selected map pin and an optional reply email. There is no account, name field, automatic location collection, or GitHub publisher in this flow.
+The map popup and the Report an Issue page keep their existing layout, styling, labels and fields. Their submissions both use `POST /api/feedback`. A receipt means the report was written to Supabase, not that a public issue was created. The endpoint receives the category, description and existing email field. The original name field is kept for visual parity but its value is not transmitted or stored. There is no location collection or GitHub publisher in this flow.
 
 ## Review and staging
 
@@ -15,8 +15,8 @@ The map modal and the Report an Issue page share one form and submit to `POST /a
 | `VERCEL_ENV` | Must be the platform-provided `preview` value. |
 
 - The API is disabled by default, including on production and an unconfigured preview. Plain `npm run dev` does not serve Vercel functions. For functional browser testing, use the configured protected preview or a local mock API with synthetic data.
-- In the preview, try both entry points. Submit one report with no email and one with a synthetic reply email and an explicitly selected location. Check that both arrive in the private staging inbox. Repeat an identical request ID to confirm it is saved once. Test an invalid request, a temporary failure and a retry, and verify limits on a controlled test connection. Verify unauthenticated and ordinary signed-in clients cannot read reports or directly invoke the write RPC. No GitHub issue should be created.
-- Separately smoke-test map controls, normal navigation, and theme switching; the feedback redesign does not change the main map's location or navigation behavior.
+- In the preview, try both entry points. Submit from each entry point using synthetic names, email addresses and descriptions. Check that only the category, description and email reach the private staging inbox, not the name. Repeat an identical request ID to confirm it is saved once. Test an invalid request, a temporary failure and a retry, and verify limits on a controlled test connection. Verify unauthenticated and ordinary signed-in clients cannot read reports or directly invoke the write RPC. No GitHub issue should be created.
+- Separately smoke-test map controls, normal navigation, and theme switching; the feedback backend change does not change the main map's location or navigation behavior.
 
 The endpoint allows up to eight new reports per client and 120 overall per UTC hour. Shared school networks may share a client allowance; monitor this limit in staging. Request retries for an already-saved, identical report do not count again. Run `node --test tests/feedback.test.mjs` for endpoint checks, and run `tests/feedback-v1-db.sql` against an empty disposable database with Supabase roles after the migration.
 

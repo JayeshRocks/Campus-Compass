@@ -1,57 +1,120 @@
-import { useEffect, useId, useRef } from "react";
-import FeedbackForm from "../feedback/FeedbackForm";
+import { useEffect, useRef } from "react";
+import { useFeedbackSubmission } from "../../lib/useFeedbackSubmission";
 
 export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  const title = useId();
+  const { status, errorMessage, submit } = useFeedbackSubmission();
+  const closeTimer = useRef<number | undefined>(undefined);
 
-  useEffect(() => {
-    const el = dialog.current;
-    if (!el) return;
-    if (!el.open) el.showModal();
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
-    // Android may resize only the visual viewport when the soft keyboard opens.
-    // Size the mobile dialog to that visible area so its contents remain scrollable.
-    const viewport = window.visualViewport;
-    const syncViewport = () => {
-      if (!viewport) return;
-      el.style.setProperty("--feedback-visible-height", `${viewport.height}px`);
-      el.style.setProperty("--feedback-visible-top", `${viewport.offsetTop}px`);
-    };
-    syncViewport();
-    viewport?.addEventListener("resize", syncViewport);
-    viewport?.addEventListener("scroll", syncViewport);
-    return () => {
-      viewport?.removeEventListener("resize", syncViewport);
-      viewport?.removeEventListener("scroll", syncViewport);
-      if (el.open) el.close();
-    };
-  }, []);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (await submit({
+      email: String(formData.get("email") ?? ""),
+      category: String(formData.get("category") ?? ""),
+      message: String(formData.get("message") ?? ""),
+    })) {
+      closeTimer.current = window.setTimeout(onClose, 2000);
+    }
+  };
 
   return (
-    <dialog ref={dialog} aria-labelledby={title}
-      onCancel={e => { e.preventDefault(); onClose(); }}
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      className="fixed inset-x-0 top-[var(--feedback-visible-top,0px)] m-0 h-[var(--feedback-visible-height,100dvh)] max-h-none w-full max-w-none overflow-hidden border-0 bg-transparent p-0 backdrop:bg-slate-900/60 md:inset-0 md:m-auto md:h-auto md:max-h-[calc(100dvh_-_2rem)] md:w-[calc(100%_-_2rem)] md:max-w-4xl md:overflow-y-auto md:rounded-3xl">
-      <div className="flex h-full min-h-0 flex-col bg-white text-slate-900 dark:bg-surface-container-lowest dark:text-on-surface md:relative md:h-auto md:flex-row md:rounded-3xl">
-        <div className="relative shrink-0 border-b border-slate-200 bg-white py-3 pl-4 pr-16 pt-[max(0.75rem,env(safe-area-inset-top))] dark:border-outline-variant/20 dark:bg-surface-container-lowest md:flex md:w-2/5 md:flex-col md:justify-center md:rounded-l-3xl md:border-b-0 md:bg-slate-50 md:p-8 md:dark:bg-surface-container-high">
-          <h2 id={title} className="font-headline-lg text-xl font-bold md:text-2xl">Help Us Improve</h2>
-          <p className="mt-3 hidden text-sm leading-relaxed text-slate-600 dark:text-on-surface-variant md:block">
-            Found a missing shortcut or a map error? Send it privately to the Campus Compass team.
-          </p>
-          <a href="https://github.com/JayeshRocks/Campus-Compass" target="_blank" rel="noopener noreferrer"
-            className="mt-4 hidden w-fit rounded-lg text-sm font-semibold text-slate-700 underline focus-visible:outline-2 dark:text-on-surface md:block">
-            GitHub repository
-          </a>
-        </div>
-        <button type="button" onClick={onClose} aria-label="Close feedback dialog"
-          className="absolute right-2 top-[max(0.25rem,env(safe-area-inset-top))] z-10 flex size-11 items-center justify-center rounded-full bg-white text-slate-700 focus-visible:outline-2 enabled:hover:bg-slate-100 dark:bg-surface-container-high dark:text-on-surface dark:enabled:hover:bg-surface-container-highest md:right-4 md:top-4">
-          <span className="material-symbols-outlined text-[22px]" aria-hidden="true">close</span>
+    <div onClick={onClose} className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm">
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-4xl max-h-full overflow-x-hidden overflow-y-auto liquid-glass rounded-3xl relative animate-fade-in flex flex-col md:flex-row">
+
+        {/* Decorative Background for light/dark */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#22B8CF]/10 blur-[100px] rounded-full -mr-48 -mt-48 pointer-events-none" />
+
+        {/* Global Close Button */}
+        <button onClick={onClose} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-slate-700 hover:text-slate-900 dark:text-on-surface-variant dark:hover:text-white bg-slate-200/40 dark:bg-surface-container-high/30 rounded-full hover:bg-slate-200/80 dark:hover:bg-surface-container-high/70 transition-all z-50 shadow-sm backdrop-blur-sm">
+          <span className="material-symbols-outlined text-[22px]">close</span>
         </button>
-        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:w-3/5 md:overflow-visible md:border-l md:border-slate-200 md:p-8 md:pt-16 md:dark:border-outline-variant/20">
-          <FeedbackForm onDone={onClose} />
+
+        <div className="p-8 md:p-12 md:w-1/2 flex flex-col justify-center relative z-10 bg-slate-50/50 dark:bg-transparent">
+          <h2 className="font-headline-lg text-3xl font-bold text-slate-900 dark:text-on-surface mb-4">Help Us Improve</h2>
+          <p className="text-body-md text-slate-600 dark:text-on-surface-variant mb-8 leading-relaxed">
+            Found a missing shortcut? Noticed a floor plan error? Campus Compass is a community-driven project that thrives on your input. Together, we can build the most accurate map of MIT Bengaluru.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <a href="https://github.com/JayeshRocks/Campus-Compass" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-3 bg-white text-slate-900 border border-slate-200 dark:border-transparent rounded-xl font-label-md font-bold hover:bg-slate-50 transition-all group shadow-sm">
+              <span className="material-symbols-outlined text-[18px]">terminal</span>
+              GitHub Repository
+            </a>
+          </div>
+        </div>
+
+        <div className="p-8 md:p-12 md:w-1/2 bg-transparent dark:bg-transparent relative z-10 border-t md:border-t-0 md:border-l border-slate-200 dark:border-outline-variant/20">
+          <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Full Name</label>
+                <input name="name" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="e.g. Aryan K." type="text" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Email Address</label>
+                <input name="email" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="aryan@example.com" type="email" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Category</label>
+              <select name="category" className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface outline-none appearance-none">
+                <option value="missing_place">Missing Place / Room</option>
+                <option value="incorrect_location">Incorrect Location</option>
+                <option value="incorrect_info">Incorrect Building Info / Timings</option>
+                <option value="routing_error">Navigation / Routing Issue</option>
+                <option value="accessibility">Accessibility Issue / Missing Ramps</option>
+                <option value="bug">App Bug / Glitch</option>
+                <option value="feature_request">Feature Request</option>
+                <option value="feedback">General Feedback</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Your Message</label>
+              <textarea name="message" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 resize-none outline-none" placeholder="Tell us what's on your mind..." rows={4}></textarea>
+            </div>
+
+            <button
+              type="submit"
+              disabled={status === "submitting" || status === "success"}
+              aria-live="polite"
+              className={`w-full py-3.5 rounded-xl font-label-md font-bold transition-all flex items-center justify-center gap-2 ${
+                status === "success"
+                  ? "bg-green-600 text-white"
+                  : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-primary dark:text-on-primary dark:hover:brightness-110 shadow-md shadow-[#22B8CF]/10"
+              }`}
+            >
+              {status === "idle" && (
+                <>
+                  Submit Feedback
+                  <span className="material-symbols-outlined text-[20px]">send</span>
+                </>
+              )}
+              {status === "submitting" && (
+                <>
+                  <span className="material-symbols-outlined text-[20px] animate-spin">refresh</span>
+                  Sending...
+                </>
+              )}
+              {status === "success" && (
+                <>
+                  <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                  Sent Successfully
+                </>
+              )}
+              {status === "error" && (
+                <>
+                  <span className="material-symbols-outlined text-[20px]">error</span>
+                  Error: {errorMessage}
+                </>
+              )}
+            </button>
+            <p className="text-[11px] font-label-sm text-slate-500 dark:text-outline text-center mt-4">By submitting, you agree to our privacy policy and terms of service.</p>
+          </form>
         </div>
       </div>
-    </dialog>
+    </div>
   );
 }
