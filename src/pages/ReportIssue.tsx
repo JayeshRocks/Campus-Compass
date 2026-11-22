@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useFeedbackSubmission } from "../lib/useFeedbackSubmission";
 
 export default function ReportIssue() {
-  const [name, setName] = useState("");
+  const formId = useId();
   const [email, setEmail] = useState("");
-  const [category, setCategory] = useState("map");
+  const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const { status, errorMessage, submit, reset } = useFeedbackSubmission();
   const resetTimer = useRef<number | undefined>(undefined);
@@ -14,13 +14,12 @@ export default function ReportIssue() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !description) return;
     // Preserve the existing labels/options while sending the supported backend category.
-    if (!await submit({ category: category === "other" ? "feedback" : "bug", message: description, email })) return;
+    const backendCategory = category === "other" ? "feedback" : category ? "bug" : "";
+    if (!await submit({ category: backendCategory, message: description, email })) return;
     resetTimer.current = window.setTimeout(() => {
-      setName("");
       setEmail("");
-      setCategory("map");
+      setCategory("");
       setDescription("");
       reset();
     }, 4000);
@@ -55,26 +54,14 @@ export default function ReportIssue() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
-                  Full Name
+                <label htmlFor={formId + "-email"} className="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
+                  Email for private follow-up (optional)
                 </label>
                 <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your name"
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface placeholder-slate-400 dark:placeholder-on-surface-variant text-sm focus:outline-none focus:ring-1 focus:ring-[#22B8CF] focus:border-[#22B8CF] transition-all shadow-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
-                  Email Address
-                </label>
-                <input
+                  id={formId + "-email"}
                   type="email"
-                  required
+                  autoComplete="email"
+                  maxLength={254}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
@@ -83,14 +70,17 @@ export default function ReportIssue() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
+                <label htmlFor={formId + "-category"} className="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
                   Issue Category
                 </label>
                 <select
+                  id={formId + "-category"}
+                  required
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-container-high/50 border border-slate-200 dark:border-outline-variant/30 rounded-xl text-slate-900 dark:text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-[#22B8CF] focus:border-[#22B8CF] transition-all shadow-sm"
                 >
+                  <option value="" disabled>Choose a category</option>
                   <option value="map">Map rendering glitch</option>
                   <option value="ui">Layout or spacing alignment issue</option>
                   <option value="search">Search input or filter bug</option>
@@ -99,11 +89,13 @@ export default function ReportIssue() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
+                <label htmlFor={formId + "-message"} className="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
                   Description of Issue
                 </label>
                 <textarea
+                  id={formId + "-message"}
                   required
+                  maxLength={2000}
                   rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -115,11 +107,12 @@ export default function ReportIssue() {
               <button
                 type="submit"
                 disabled={status === "submitting"}
+                aria-describedby={errorMessage ? formId + "-error" : undefined}
                 className="w-full mt-4 py-2.5 bg-[#22B8CF] text-white font-semibold text-sm rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.2)] hover:bg-[#1A94A6] transition-all cursor-pointer text-center"
               >
                 {status === "submitting" ? "Sending..." : "Submit Bug Report"}
               </button>
-              {errorMessage && <p role="alert" className="text-sm text-red-700 dark:text-red-300">{errorMessage}</p>}
+              {errorMessage && <p id={formId + "-error"} role="alert" className="text-xs leading-relaxed text-red-700 dark:text-red-300">{errorMessage}</p>}
             </form>
           )}
         </div>

@@ -4,7 +4,7 @@ type FeedbackInput = { category: string; message: string; email: string };
 type SubmissionStatus = "idle" | "submitting" | "success" | "error";
 
 const transientError =
-  "We couldn’t confirm your feedback was sent. Your draft is still here. Try again in a moment.";
+  "Couldn’t confirm delivery. Your draft is still here. Try again.";
 
 export function useFeedbackSubmission() {
   const [status, setStatus] = useState<SubmissionStatus>("idle");
@@ -30,9 +30,10 @@ export function useFeedbackSubmission() {
     if (activeRequest.current || saved.current) return false;
     const message = input.message.trim();
     const email = input.email.trim();
-    if (!message || message.length > 2000) {
+    if (!input.category || !message || message.length > 2000) {
       setStatus("error");
-      setErrorMessage("Enter a message of up to 2,000 characters. Your draft is still here.");
+      setErrorMessage(!input.category ? "Choose a category." :
+        !message ? "Enter a message." : "Keep your message within 2,000 characters.");
       return false;
     }
 
@@ -48,7 +49,7 @@ export function useFeedbackSubmission() {
     };
 
     try {
-      // List allowed fields explicitly so the original Full Name field is never transmitted.
+      // List allowed fields explicitly. Leave an empty follow-up email out.
       const draft = { category: input.category, message, ...(email ? { email } : {}) };
       const signature = JSON.stringify(draft);
       if (lastRequest.current?.signature !== signature) {
@@ -63,11 +64,11 @@ export function useFeedbackSubmission() {
       const result: unknown = await response.json().catch(() => null);
       if (activeRequest.current !== controller) return false;
       if (response.status === 429) {
-        return fail("Too many reports from this connection. Your draft is still here. Wait a little before trying again.");
+        return fail("Too many reports. Wait a bit and try again. Your draft is still here.");
       }
       if (response.status === 503 && result && typeof result === "object" &&
           "error" in result && result.error === "feedback_disabled") {
-        return fail("Feedback is turned off in this preview. Nothing was sent, and your draft is still here.");
+        return fail("Feedback is off in this preview. Nothing was sent. Your draft is still here.");
       }
       if (!response.ok || !result || typeof result !== "object" || !("ok" in result) || result.ok !== true) {
         return fail(transientError);

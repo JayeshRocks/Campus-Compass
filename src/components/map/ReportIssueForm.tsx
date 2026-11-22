@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { useFeedbackSubmission } from "../../lib/useFeedbackSubmission";
 
 export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
   const { status, errorMessage, submit } = useFeedbackSubmission();
+  const formId = useId();
   const closeTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
@@ -46,20 +47,15 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
 
         <div className="p-8 md:p-12 md:w-1/2 bg-transparent dark:bg-transparent relative z-10 border-t md:border-t-0 md:border-l border-slate-200 dark:border-outline-variant/20">
           <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Full Name</label>
-                <input name="name" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="e.g. Aryan K." type="text" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Email Address</label>
-                <input name="email" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="aryan@example.com" type="email" />
-              </div>
+            <div className="space-y-1.5">
+              <label htmlFor={formId + "-email"} className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Email for private follow-up (optional)</label>
+              <input id={formId + "-email"} name="email" autoComplete="email" maxLength={254} className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="you@example.com" type="email" />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Category</label>
-              <select name="category" className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface outline-none appearance-none">
+              <label htmlFor={formId + "-category"} className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Category</label>
+              <select id={formId + "-category"} name="category" required defaultValue="" className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface outline-none appearance-none">
+                <option value="" disabled>Choose a category</option>
                 <option value="missing_place">Missing Place / Room</option>
                 <option value="incorrect_location">Incorrect Location</option>
                 <option value="incorrect_info">Incorrect Building Info / Timings</option>
@@ -72,45 +68,43 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Your Message</label>
-              <textarea name="message" required className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 resize-none outline-none" placeholder="Tell us what's on your mind..." rows={4}></textarea>
+              <label htmlFor={formId + "-message"} className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Your Message</label>
+              <textarea id={formId + "-message"} name="message" required maxLength={2000} className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 resize-none outline-none" placeholder="Tell us what's on your mind..." rows={4}></textarea>
             </div>
 
-            <button
-              type="submit"
-              disabled={status === "submitting" || status === "success"}
-              aria-live="polite"
-              className={`w-full py-3.5 rounded-xl font-label-md font-bold transition-all flex items-center justify-center gap-2 ${
-                status === "success"
-                  ? "bg-green-600 text-white"
-                  : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-primary dark:text-on-primary dark:hover:brightness-110 shadow-md shadow-[#22B8CF]/10"
-              }`}
-            >
-              {status === "idle" && (
-                <>
-                  Submit Feedback
-                  <span className="material-symbols-outlined text-[20px]">send</span>
-                </>
-              )}
-              {status === "submitting" && (
-                <>
-                  <span className="material-symbols-outlined text-[20px] animate-spin">refresh</span>
-                  Sending...
-                </>
-              )}
-              {status === "success" && (
-                <>
-                  <span className="material-symbols-outlined text-[20px]">check_circle</span>
-                  Sent Successfully
-                </>
-              )}
-              {status === "error" && (
-                <>
-                  <span className="material-symbols-outlined text-[20px]">error</span>
-                  Error: {errorMessage}
-                </>
-              )}
-            </button>
+            <div className="space-y-2">
+              <button
+                type="submit"
+                disabled={status === "submitting" || status === "success"}
+                aria-live="polite"
+                aria-describedby={errorMessage ? formId + "-error" : undefined}
+                className={`w-full py-3.5 rounded-xl font-label-md font-bold transition-all flex items-center justify-center gap-2 ${
+                  status === "success"
+                    ? "bg-green-600 text-white"
+                    : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-primary dark:text-on-primary dark:hover:brightness-110 shadow-md shadow-[#22B8CF]/10"
+                }`}
+              >
+                {(status === "idle" || status === "error") && (
+                  <>
+                    Submit Feedback
+                    <span className="material-symbols-outlined text-[20px]">send</span>
+                  </>
+                )}
+                {status === "submitting" && (
+                  <>
+                    <span className="material-symbols-outlined text-[20px] animate-spin">refresh</span>
+                    Sending...
+                  </>
+                )}
+                {status === "success" && (
+                  <>
+                    <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                    Sent Successfully
+                  </>
+                )}
+              </button>
+              {errorMessage && <p id={formId + "-error"} role="alert" className="px-1 text-xs leading-relaxed text-red-700 dark:text-red-300">{errorMessage}</p>}
+            </div>
             <p className="text-[11px] font-label-sm text-slate-500 dark:text-outline text-center mt-4">By submitting, you agree to our privacy policy and terms of service.</p>
           </form>
         </div>
