@@ -4,7 +4,7 @@ The map popup and the Report an Issue page keep their original visual design. Bo
 
 ## Review and staging
 
-- Do not merge or apply the migration to the production project as part of this draft. Use a separate Supabase staging project and a Vercel Preview deployment. Leave the existing feedback table, records, and old publisher untouched.
+- Keep the PR in draft until the hosted submission checks pass. Use a separate Supabase staging project and a Vercel Preview deployment. Leave the existing feedback table, records, and old publisher untouched.
 - Apply the private inbox migration to staging. If using a preview deployment, configure the feedback environment variables for **Preview** and the intended branch only. Never prefix the server key or rate-limit secret with `VITE_`, and never put production Supabase credentials into the staging feedback settings.
 | Preview setting | Purpose |
 | --- | --- |
@@ -14,7 +14,7 @@ The map popup and the Report an Issue page keep their original visual design. Bo
 | `FEEDBACK_STAGING_RATE_SECRET` | Separate random secret of at least 32 characters for hashing client addresses; raw addresses are not saved by this endpoint. |
 | `VERCEL_ENV` | Must be the platform-provided `preview` value. |
 
-- The API is disabled by default, including on production and an unconfigured preview. Plain `npm run dev` does not serve Vercel functions. For functional browser testing, use the configured protected preview or a local mock API with synthetic data.
+- The API stays disabled in any environment without explicit enablement and valid settings, and never falls back to another environment. Plain `npm run dev` does not serve Vercel functions. For functional browser testing, use the configured protected preview or a local mock API with synthetic data.
 - In the preview, try both entry points. Submit from both entry points using synthetic descriptions, one with no email and one with a synthetic reply email. Try a map-related report with a campus place or a manually selected pin, then another report without any location. Check that the private inbox records only fields explicitly provided. With preview intake disabled, check that the inline notice appears by the unchanged submit button and that the form retains its contents. Repeat an identical request ID to confirm it is saved once. Test an invalid request, a temporary failure and a retry, and verify limits on a controlled test connection. Verify unauthenticated and ordinary signed-in clients cannot read reports or directly invoke the write RPC. No GitHub issue should be created.
 - Separately smoke-test map controls, normal navigation, and theme switching; the feedback backend change does not change the main map's location or navigation behavior.
 
@@ -26,4 +26,17 @@ Use the Supabase Table Editor for `campus_feedback_v1_private.feedback_v1`, with
 
 ## Rollout and rollback
 
-Production enablement is a separate decision. Review the current triggers, webhooks, database grants, and secret scope first. Verify none can send the new reports to GitHub. Keep historical feedback out of the new pipeline. After staging review, decide how to enable production for the new endpoint and table, then roll out the app and API together. Roll back the application deployment if needed; do not drop the inbox or delete old reports as part of an app rollback.
+Do not merge yet if hosted staging is unverified or the production configuration is not ready. Leave the existing app database and legacy publisher untouched.
+
+1. After staging checks pass, select a dedicated feedback-only Supabase project for production, separate from the existing app database and staging. Confirm the project, plan, and permissions before changing anything. Apply the isolated migration there; check that no webhook or trigger can publish its data and that only authorized maintainers will have access.
+2. In Vercel, scope the settings below to **Production** only. Never commit or chat a secret, and never put it in a client-side `VITE_` variable. Set separate values for staging and production. Do not use an all-project account token.
+3. Verify those settings are present before merging. Then deploy and smoke-test the live form using a clearly labeled synthetic report with no personal information. Confirm the private row arrived and no GitHub issue was created. Do not migrate or republish historical feedback.
+4. If the production check fails, roll back the app deployment rather than dropping the inbox. Preserve original and new records.
+
+| Production setting | Purpose |
+| --- | --- |
+| `FEEDBACK_PRODUCTION_ENABLED` | Explicitly set `true` only after hosted staging is verified and the private inbox is ready. |
+| `FEEDBACK_PRODUCTION_SUPABASE_URL` | HTTPS URL of the dedicated production feedback project. |
+| `FEEDBACK_PRODUCTION_SUPABASE_KEY` | Server-only `sb_secret_` key scoped to that dedicated project. |
+| `FEEDBACK_PRODUCTION_RATE_SECRET` | Fresh random secret, at least 32 characters, different from staging. |
+| `VERCEL_ENV` | Must be the platform-provided `production` value. |

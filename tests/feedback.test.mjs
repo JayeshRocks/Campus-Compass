@@ -42,14 +42,14 @@ test('saves an explicitly selected issue location and omits missing coordinates'
   assert.equal(validateFeedback({ ...input, category: 'pin_marker' }), null);
 });
 
-test('preview-only endpoint gates before any persistence', async () => {
+test('disabled endpoints gate before any persistence', async () => {
   for (const disabled of [{ VERCEL_ENV: 'production' }, { FEEDBACK_STAGING_ENABLED: 'false' },
     { FEEDBACK_STAGING_SUPABASE_URL: 'http://disposable.supabase.co' },
     { FEEDBACK_STAGING_SUPABASE_URL: 'https://other.example.com' }, { FEEDBACK_STAGING_SUPABASE_KEY: 'sb_publishable_invalid' }]) {
     const handle = makeFeedbackHandler({ env: { ...env, ...disabled }, fetcher: rejectFetch });
     const result = await handle(request());
     assert.equal(result.status, 503);
-    assert.deepEqual(await result.json(), { ok: false, error: 'feedback_disabled' });
+    assert.deepEqual(await result.json(), { ok: false, error: disabled.VERCEL_ENV === 'production' ? 'unavailable' : 'feedback_disabled' });
   }
 });
 
@@ -93,4 +93,65 @@ test('maps duplicates, rate limits, conflict, and backend failures without leaki
   }
   const handle = makeFeedbackHandler({ env, fetcher: async () => new Response('private backend error', { status: 500 }) });
   assert.deepEqual(await (await handle(request())).json(), { ok: false, error: 'unavailable' });
+});
+
+const prodEnv = {
+  VERCEL_ENV: 'production', FEEDBACK_PRODUCTION_ENABLED: 'true',
+  FEEDBACK_PRODUCTION_SUPABASE_URL: 'https://feedbackonly.supabase.co',
+  FEEDBACK_PRODUCTION_SUPABASE_KEY: 'sb_secret_prod_synthetic_only',
+  FEEDBACK_PRODUCTION_RATE_SECRET: 'an independent production test secret',
+};
+
+test('production requires an explicit gate and complete valid production-only inputs', async () => {
+  for (const overrides of [
+    { FEEDBACK_PRODUCTION_ENABLED: undefined },
+    { FEEDBACK_PRODUCTION_ENABLED: 'false' },
+    { FEEDBACK_PRODUCTION_SUPABASE_URL: undefined },
+    { FEEDBACK_PRODUCTION_SUPABASE_URL: 'http://feedbackonly.supabase.co' },
+    { FEEDBACK_PRODUCTION_SUPABASE_URL: 'https://feedbackonly.supabase.co/something' },
+    { FEEDBACK_PRODUCTION_SUPABASE_KEY: undefined },
+    { FEEDBACK_PRODUCTION_SUPABASE_KEY: 'sb_publishable_synthetic_only' },
+    { FEEDBACK_PRODUCTION_RATE_SECRET: undefined },
+    { FEEDBACK_PRODUCTION_RATE_SECRET: 'short' },
+    { VERCEL_ENV: 'development' },
+  ]) {
+    const handle = makeFeedbackHandler({ env: { ...env, ...prodEnv, ...overrides }, fetcher: rejectFetch });
+    assert.equal((await handle(request())).status, 503);
+  }
+});
+
+test('production rejects a known shared project or reused preview credential', async () => {
+  for (const overrides of [
+    { VITE_SUPABASE_URL: prodEnv.FEEDBACK_PRODUCTION_SUPABASE_URL + '/' },
+    { FEEDBACK_STAGING_SUPABASE_URL: prodEnv.FEEDBACK_PRODUCTION_SUPABASE_URL },
+    { FEEDBACK_STAGING_SUPABASE_KEY: prodEnv.FEEDBACK_PRODUCTION_SUPABASE_KEY },
+    { FEEDBACK_STAGING_RATE_SECRET: prodEnv.FEEDBACK_PRODUCTION_RATE_SECRET },
+  ]) {
+    const handle = makeFeedbackHandler({ env: { ...env, ...prodEnv, ...overrides }, fetcher: rejectFetch });
+    assert.equal((await handle(request())).status, 503);
+  }
+});
+
+test('valid production and preview each use only their own configuration and rate keys', async () => {
+  const seen = [];
+  for (const [scope, project, key] of [
+    ['production', prodEnv.FEEDBACK_PRODUCTION_SUPABASE_URL, prodEnv.FEEDBACK_PRODUCTION_SUPABASE_KEY],
+    ['preview', env.FEEDBACK_STAGING_SUPABASE_URL, env.FEEDBACK_STAGING_SUPABASE_KEY],
+  ]) {
+    let called = false;
+    const handle = makeFeedbackHandler({
+      env: { ...env, ...prodEnv, VERCEL_ENV: scope },
+      fetcher: async (target, options) => {
+        called = true;
+        assert.equal(target.origin, project);
+        assert.equal(options.headers.apikey, key);
+        seen.push(JSON.parse(options.body).p_requester_key);
+        return Response.json('saved');
+      },
+    });
+    assert.equal((await handle(request())).status, 200);
+    assert.ok(called);
+  }
+  assert.equal(seen.length, 2);
+  assert.notEqual(seen[0], seen[1]);
 });

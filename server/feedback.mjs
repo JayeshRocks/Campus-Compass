@@ -25,12 +25,33 @@ export function validateFeedback(input) {
     buildingId: buildingId ?? null, lat: pin?.lat ?? null, lng: pin?.lng ?? null };
 }
 
-function stagingConfig(env) {
-  if (env.VERCEL_ENV !== 'preview' || env.FEEDBACK_STAGING_ENABLED !== 'true') return null;
-  const { FEEDBACK_STAGING_SUPABASE_URL: url, FEEDBACK_STAGING_SUPABASE_KEY: key,
-    FEEDBACK_STAGING_RATE_SECRET: secret } = env;
+function feedbackConfig(env) {
+  const preview = env.VERCEL_ENV === 'preview';
+  const production = env.VERCEL_ENV === 'production';
+  if (!preview && !production) return null;
+  const prefix = preview ? 'FEEDBACK_STAGING_' : 'FEEDBACK_PRODUCTION_';
+  if (env[prefix + 'ENABLED'] !== 'true') return null;
+  const url = env[prefix + 'SUPABASE_URL'];
+  const key = env[prefix + 'SUPABASE_KEY'];
+  const secret = env[prefix + 'RATE_SECRET'];
   if (!url || !/^https:\/\/[a-z0-9]+\.supabase\.co\/?$/.test(url) || !key?.startsWith('sb_secret_') ||
       !secret || secret.length < 32) return null;
+
+  // Refuse a known shared project or credential if the corresponding env is visible here.
+  // Deployment review must still verify the isolated project; build-time vars may be absent.
+  if (production) {
+    const projectHost = new URL(url).host;
+    for (const other of [env.VITE_SUPABASE_URL, env.FEEDBACK_STAGING_SUPABASE_URL]) {
+      if (!other) continue;
+      try {
+        if (new URL(other).host === projectHost) return null;
+      } catch {
+        return null;
+      }
+    }
+    if (key === env.FEEDBACK_STAGING_SUPABASE_KEY || secret === env.FEEDBACK_STAGING_RATE_SECRET)
+      return null;
+  }
   return { url, key, secret };
 }
 
@@ -66,8 +87,8 @@ function reply(status, error, headers = {}) {
 export function makeFeedbackHandler({ env = process.env, fetcher = fetch } = {}) {
   return async function feedback(request) {
     if (request.method !== 'POST') return reply(405, 'method_not_allowed', { Allow: 'POST' });
-    const config = stagingConfig(env);
-    if (!config) return reply(503, 'feedback_disabled');
+    const config = feedbackConfig(env);
+    if (!config) return reply(503, env.VERCEL_ENV === 'preview' ? 'feedback_disabled' : 'unavailable');
     if (request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json')
       return reply(415, 'unsupported_content_type');
     const origin = request.headers.get('origin');
