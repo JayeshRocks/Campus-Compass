@@ -48,7 +48,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
         <div className="p-8 md:p-12 md:w-1/2 bg-transparent dark:bg-transparent relative z-10 border-t md:border-t-0 md:border-l border-slate-200 dark:border-outline-variant/20">
           <form onSubmit={handleSubmit} className="space-y-6 mt-4">
             <div className="space-y-1.5">
-              <label htmlFor={formId + "-email"} className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Email for private follow-up (optional)</label>
+              <label htmlFor={formId + "-email"} className="text-label-sm font-label-sm text-slate-600 dark:text-on-surface-variant px-1 block">Email (Optional)</label>
               <input id={formId + "-email"} name="email" autoComplete="email" maxLength={254} className="w-full bg-slate-50 border border-slate-200 dark:bg-surface-container-high dark:border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#22B8CF] focus:border-transparent transition-all font-body-md text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-outline/50 outline-none" placeholder="you@example.com" type="email" />
             </div>
 
@@ -58,6 +58,7 @@ export default function ReportIssueForm({ onClose }: { onClose: () => void }) {
                 <option value="" disabled>Choose a category</option>
                 <option value="missing_place">Missing Place / Room</option>
                 <option value="incorrect_location">Incorrect Location</option>
+                <option value="pin_marker">Pin Drop / Map Marker</option>
                 <option value="incorrect_info">Incorrect Building Info / Timings</option>
                 <option value="routing_error">Navigation / Routing Issue</option>
                 <option value="accessibility">Accessibility Issue / Missing Ramps</option>

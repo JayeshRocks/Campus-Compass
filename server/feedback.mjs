@@ -3,7 +3,7 @@ import { isIP } from 'node:net';
 
 const CATEGORIES = new Set([
   'missing_place', 'incorrect_location', 'incorrect_info', 'routing_error',
-  'accessibility', 'bug', 'feature_request', 'feedback',
+  'accessibility', 'bug', 'feature_request', 'feedback', 'pin_marker',
 ]);
 const FIELDS = new Set(['requestId', 'category', 'message', 'email', 'buildingId', 'pin']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

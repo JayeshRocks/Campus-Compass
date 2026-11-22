@@ -15,7 +15,8 @@ export default function ReportIssue() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Preserve the existing labels/options while sending the supported backend category.
-    const backendCategory = category === "other" ? "feedback" : category ? "bug" : "";
+    const backendCategory = category === "pin_marker" ? category :
+      category === "other" ? "feedback" : category ? "bug" : "";
     if (!await submit({ category: backendCategory, message: description, email })) return;
     resetTimer.current = window.setTimeout(() => {
       setEmail("");
@@ -55,7 +56,7 @@ export default function ReportIssue() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor={formId + "-email"} className="block text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider mb-2">
-                  Email for private follow-up (optional)
+                  Email (Optional)
                 </label>
                 <input
                   id={formId + "-email"}
@@ -82,6 +83,7 @@ export default function ReportIssue() {
                 >
                   <option value="" disabled>Choose a category</option>
                   <option value="map">Map rendering glitch</option>
+                  <option value="pin_marker">Pin Drop / Map Marker</option>
                   <option value="ui">Layout or spacing alignment issue</option>
                   <option value="search">Search input or filter bug</option>
                   <option value="other">Other feedback</option>

@@ -28,6 +28,14 @@ test('validates and normalizes all allowed fields', () => {
   }
 });
 
+test('preserves the pin/marker report category', async () => {
+  const handle = makeFeedbackHandler({ env, fetcher: async (_target, options) => {
+    assert.equal(JSON.parse(options.body).p_category, 'pin_marker');
+    return Response.json('saved');
+  }});
+  assert.equal((await handle(request({ ...input, category: 'pin_marker' }))).status, 200);
+});
+
 test('preview-only endpoint gates before any persistence', async () => {
   for (const disabled of [{ VERCEL_ENV: 'production' }, { FEEDBACK_STAGING_ENABLED: 'false' },
     { FEEDBACK_STAGING_SUPABASE_URL: 'http://disposable.supabase.co' },

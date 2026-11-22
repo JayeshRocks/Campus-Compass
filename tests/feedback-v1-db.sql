@@ -22,15 +22,15 @@ begin
   then raise exception 'Service role is not limited to intake RPC'; end if;
 
   select count(*) into before_count from campus_feedback_v1_private.feedback_v1;
-  outcome := public.submit_feedback_v1(request, key, 'incorrect_location',
+  outcome := public.submit_feedback_v1(request, key, 'pin_marker',
     'Synthetic location report', null, 'academic-block', 13.1, 77.5);
   if outcome is distinct from 'saved' then raise exception 'Save failed: %', outcome; end if;
 
-  outcome := public.submit_feedback_v1(request, repeat('b', 64), 'incorrect_location',
+  outcome := public.submit_feedback_v1(request, repeat('b', 64), 'pin_marker',
     'Synthetic location report', null, 'academic-block', 13.1, 77.5);
   if outcome is distinct from 'duplicate' then raise exception 'Retry was not deduplicated'; end if;
 
-  outcome := public.submit_feedback_v1(request, key, 'incorrect_location',
+  outcome := public.submit_feedback_v1(request, key, 'pin_marker',
     'A different test message', null, 'academic-block', 13.1, 77.5);
   if outcome is distinct from 'conflict' then raise exception 'Mismatched retry was not rejected'; end if;
 
