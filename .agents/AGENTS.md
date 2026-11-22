@@ -23,8 +23,8 @@ These rules apply to any AI agent working on the Campus Compass codebase.
 - **Context**: The official German Overpass API servers actively block and rate-limit Node.js `fetch` requests based on internal browser headers. 
 
 ## 6. Supabase & Feedback System
-- **Rule**: Feedback forms submit directly to the Supabase `feedback` table. GitHub issues are generated via a Supabase Edge Function.
-- **Context**: Do not try to write GitHub API logic in the frontend React code. The GitHub Fine-grained PAT is securely stored in the Supabase Edge Function Secrets vault.
+- **Rule**: Keep the existing feedback UI and route both forms through the same private intake endpoint. Do not add automatic GitHub publishing or send full reports, email addresses, or precise pins to public issues.
+- **Context**: Maintainers triage privately in Supabase and write sanitized public issues manually. The legacy table and publisher are not part of the v1 intake. See [Feedback v1](../docs/feedback-v1.md) for staging and rollout.
 
 ## 7. Licensing & Compliance
 - **Rule**: The project is strictly licensed under AGPL-3.0. Any new dependencies must be compatible with AGPL-3.0 (e.g., MIT, ISC, BSD). 
